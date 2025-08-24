@@ -36,8 +36,8 @@ export const Header = () => {
     step = 0.01,
   }) => (
     <div className="flex flex-col space-y-1">
-      <label className="text-sm text-gray-600">{label}</label>
-      <div className="flex items-center justify-between w-[125px] border border-gray-300 rounded bg-white">
+      <label className="text-xs text-gray-600">{label}</label>
+      <div className="flex items-center justify-between w-[110px] border border-gray-300 rounded bg-white">
         <button
           onClick={onDecrement}
           className="px-3 py-2 text-gray-500 hover:text-gray-600 hover:bg-gray-50"
@@ -49,7 +49,7 @@ export const Header = () => {
           value={value}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           step={step}
-          className="w-full text-center border-none outline-none appearance-none"
+          className="w-full text-center border-none outline-none appearance-none text-xs"
         />
         <button
           onClick={onIncrement}
@@ -67,7 +67,7 @@ export const Header = () => {
         <button
           key={option}
           onClick={() => onChange(option)}
-          className={`px-4 py-2 text-sm transition-colors ${
+          className={`px-4 py-2 text-xs transition-colors ${
             selected === option
               ? "bg-teal-500 text-white"
               : "bg-white text-gray-600 hover:bg-gray-50"
@@ -83,12 +83,12 @@ export const Header = () => {
     <div className="bg-white border-gray-200 p-4">
       <div className="flex items-start justify-between w-full mx-auto">
         {/* Display Section */}
-        <div className="flex flex-col space-y-4">
-          <h3 className="text-lg font-medium text-gray-800">Display</h3>
+        <div className="flex flex-col space-y-2">
+          <h3 className="text-base font-medium text-gray-800">Display</h3>
 
           <div className="flex items-end space-x-6">
             <div className="flex flex-col space-y-1">
-              <label className="text-sm text-gray-600">Screen Size</label>
+              <label className="text-xs text-gray-600">Screen Size</label>
               <ToggleButton
                 options={["Area", "Column/Row"]}
                 selected={screenSize}
@@ -97,7 +97,7 @@ export const Header = () => {
             </div>
 
             <div className="flex flex-col space-y-1">
-              <label className="text-sm text-gray-600">Resolution</label>
+              <label className="text-xs text-gray-600">Resolution</label>
               <ToggleButton
                 options={["FHD", "UHD"]}
                 selected={resolution}
@@ -126,12 +126,12 @@ export const Header = () => {
         </div>
 
         {/* Wall Section */}
-        <div className="flex flex-col space-y-4">
-          <h3 className="text-lg font-medium text-gray-800">Wall</h3>
+        <div className="flex flex-col space-y-2">
+          <h3 className="text-base font-medium text-gray-800">Wall</h3>
 
           <div className="flex flex-col space-y-1">
-            <label className="text-sm text-gray-600">Unit</label>
-            <span className="px-4 py-2 text-sm rounded border bg-teal-500 text-white w-fit">
+            <label className="text-xs text-gray-600">Unit</label>
+            <span className="px-4 py-2 text-xs rounded border bg-teal-500 text-white w-fit">
               Meter
             </span>
           </div>
@@ -158,18 +158,18 @@ export const Header = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col space-y-3 my-auto">
-          <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors">
+        <div className="flex flex-col space-y-2 my-auto">
+          <button className="flex items-center justify-center space-x-2 w-[144px] px-4 py-2 bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors">
             <FileDown size={16} />
-            <span>Export to PDF</span>
+            <span className="text-xs">Export to PDF</span>
           </button>
 
-          <button className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors">
+          <button className="flex items-center justify-center space-x-2 w-[144px] px-4 py-2 bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors">
             <Eye size={16} />
-            <span>View Result</span>
+            <span className="text-xs">View Result</span>
           </button>
         </div>
       </div>
     </div>
   );
-};
+}

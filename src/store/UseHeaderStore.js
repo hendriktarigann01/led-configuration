@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export const UseHeaderStore = create((set) => ({
+export const UseHeaderStore = create((set, get) => ({
   // Display settings
   screenSize: "Area",
   resolution: "FHD",
@@ -18,7 +18,11 @@ export const UseHeaderStore = create((set) => ({
   setScreenHeight: (height) => set({ screenHeight: height }),
   setScreenWidth: (width) => set({ screenWidth: width }),
 
-  // Utility actions
+  // Actions for Wall
+  setWallHeight: (height) => set({ wallHeight: height }),
+  setWallWidth: (width) => set({ wallWidth: width }),
+
+  // Utility actions for Screen
   incrementScreenHeight: () =>
     set((state) => ({
       screenHeight: Number((state.screenHeight + 0.01).toFixed(2)),
@@ -35,6 +39,8 @@ export const UseHeaderStore = create((set) => ({
     set((state) => ({
       screenWidth: Math.max(0, Number((state.screenWidth - 0.01).toFixed(2))),
     })),
+
+  // Utility actions for Wall
   incrementWallHeight: () =>
     set((state) => ({
       wallHeight: Number((state.wallHeight + 0.1).toFixed(1)),
@@ -51,4 +57,11 @@ export const UseHeaderStore = create((set) => ({
     set((state) => ({
       wallWidth: Math.max(0, Number((state.wallWidth - 0.1).toFixed(1))),
     })),
+
+  // Sync methods for canvas controls
+  syncScreenDimensions: (width, height) =>
+    set({
+      screenWidth: width,
+      screenHeight: height,
+    }),
 }));

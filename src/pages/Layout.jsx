@@ -5,12 +5,14 @@ import { Canvas } from "../components/Canvas";
 import { ConfigurationModal } from "../components/ConfigurationModal";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
+import { UseNavbarStore } from "../store/UseNavbarStore";
 
 const Layout = () => {
   const { screenHeight, screenWidth, wallHeight, wallWidth, resolution } =
     UseHeaderStore();
 
-  const { setScreenSize, setWallSize } = UseCanvasStore();
+  const { setScreenSize, setWallSize, updateModelData } = UseCanvasStore();
+  const { selectedModel } = UseNavbarStore();
 
   // Sync header store values with canvas store
   useEffect(() => {
@@ -21,8 +23,15 @@ const Layout = () => {
     setWallSize(wallWidth, wallHeight);
   }, [wallHeight, wallWidth, setWallSize]);
 
+  // Update canvas when model changes
+  useEffect(() => {
+    if (selectedModel && selectedModel.modelData) {
+      updateModelData(selectedModel.modelData, selectedModel.name);
+    }
+  }, [selectedModel, updateModelData]);
+
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="max-h-screen bg-gray-100 flex">
       {/* Sidebar Navigation */}
       <div className="flex-shrink-0">
         <Navbar />

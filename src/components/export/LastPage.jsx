@@ -1,3 +1,5 @@
+import { BasePage } from "./BasePage";
+
 export const LastPage = () => {
   return (
     <BasePage>
@@ -10,7 +12,9 @@ export const LastPage = () => {
               <div className="w-8 h-12 bg-teal-300 mt-8"></div>
             </div>
           </div>
-          <h1 className="text-5xl font-light text-gray-700 mb-8">MJ Solution Indonesia</h1>
+          <h1 className="text-5xl font-light text-gray-700 mb-8">
+            MJ Solution Indonesia
+          </h1>
           <div className="flex items-center justify-center space-x-8 text-gray-600">
             <span className="flex items-center space-x-2">
               <div className="w-2 h-2 bg-teal-500 rounded-full"></div>

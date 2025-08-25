@@ -1,3 +1,5 @@
+import { BasePage } from "./BasePage";
+
 export const FirstPage = () => {
   return (
     <BasePage>

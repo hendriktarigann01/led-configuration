@@ -1,3 +1,5 @@
+import { BasePage } from "./BasePage";
+
 export const ModelPage = () => {
   return (
     <BasePage>
@@ -35,7 +37,9 @@ export const ModelPage = () => {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-lg text-gray-600 mb-2">Indoor Cabinet Fixed</div>
+            <div className="text-lg text-gray-600 mb-2">
+              Indoor Cabinet Fixed
+            </div>
             <div className="text-4xl font-light text-gray-700">P 1.8</div>
           </div>
         </div>
@@ -52,18 +56,31 @@ export const ModelPage = () => {
               <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
             </div>
           </h3>
-          
+
           <div className="relative">
-            <div className="border-2 border-dashed border-gray-300 relative" style={{ height: '400px' }}>
-              <div className="absolute top-0 left-4 text-xs text-gray-500">1.86 m</div>
-              <div className="absolute left-0 top-4 text-xs text-gray-500 transform -rotate-90 origin-left">1.18 m</div>
-              <div className="absolute bottom-0 left-4 text-xs text-gray-500">1.18 m</div>
-              <div className="absolute top-0 right-4 text-xs text-gray-500">1.86 m</div>
-              
+            <div
+              className="border-2 border-dashed border-gray-300 relative"
+              style={{ height: "400px" }}
+            >
+              <div className="absolute top-0 left-4 text-xs text-gray-500">
+                1.86 m
+              </div>
+              <div className="absolute left-0 top-4 text-xs text-gray-500 transform -rotate-90 origin-left">
+                1.18 m
+              </div>
+              <div className="absolute bottom-0 left-4 text-xs text-gray-500">
+                1.18 m
+              </div>
+              <div className="absolute top-0 right-4 text-xs text-gray-500">
+                1.86 m
+              </div>
+
               {/* Sample image placeholder */}
               <div className="absolute inset-16 bg-gradient-to-br from-blue-400 via-teal-400 to-green-400 rounded-lg flex items-center justify-center">
                 <div className="text-white text-center">
-                  <div className="text-sm opacity-75 mb-2">LED Display Content</div>
+                  <div className="text-sm opacity-75 mb-2">
+                    LED Display Content
+                  </div>
                   <div className="text-xs opacity-50">Sample Rendering</div>
                 </div>
               </div>

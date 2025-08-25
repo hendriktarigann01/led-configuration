@@ -95,7 +95,7 @@ export const Canvas = () => {
             <div className="w-[600px] h-[320px] z-10 rounded-lg flex items-center justify-center">
               <div className="w-4/5 h-4/5 bg-white p-5 flex items-center justify-center">
                 <img
-                  src="/canvas-bg.png"
+                  src="/canvas-bg.webp"
                   alt="Canvas Preview"
                   style={{
                     width: `${imageWidth}px`,
@@ -175,7 +175,7 @@ export const Canvas = () => {
                 style={{ bottom: "calc(50% - 128px)" }}
               >
                 <img
-                  src="/human.png"
+                  src="/human.webp"
                   alt="Human Scale"
                   className="w-full h-full"
                 />

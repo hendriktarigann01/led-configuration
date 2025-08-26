@@ -29,17 +29,28 @@ export const ProductSpecificationPage = () => {
 
   return (
     <BasePage>
+      {/* Logo */}
+      <div className="absolute top-6 right-8">
+        <img
+          src="/logo/mjs_logo_text.png"
+          alt="logo-mjs"
+          className="w-auto h-10"
+        />
+      </div>
+      {/* Main Content */}
       <div className="px-16 py-20">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <h2 className="text-2xl font-light text-gray-700 flex items-center justify-center space-x-4">
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-[#2A7A78] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#E0F2F0] rounded-full"></div>
             </div>
-            <span>Product Specification</span>
+            <span className="font-medium">Product Specification</span>
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-[#E0F2F0] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#2A7A78] rounded-full"></div>
             </div>
           </h2>
         </div>
@@ -49,13 +60,10 @@ export const ProductSpecificationPage = () => {
             <tbody>
               {specs.map((spec, index) => (
                 <tr key={index} className="border-b border-gray-200">
-                  <td className="py-4 px-6 bg-gray-50 font-medium text-gray-700 border-r border-gray-200 w-1/3">
+                  <td className="py-2.5 px-6 text-gray-700 border-r border-gray-200 w-1/3">
                     {spec.label}
                   </td>
-                  <td
-                    className="py-4 px-6 text-gray-800 font-medium"
-                    colSpan="2"
-                  >
+                  <td className="py-2.5 px-6 text-gray-700" colSpan="2">
                     {spec.value}
                   </td>
                 </tr>
@@ -63,40 +71,38 @@ export const ProductSpecificationPage = () => {
 
               <tr className="border-b border-gray-200">
                 <td
-                  className="py-4 px-6 bg-gray-50 font-medium text-gray-700 border-r border-gray-200 w-1/3"
+                  className="py-2.5 px-6 text-gray-700 border-r border-gray-200 w-1/3"
                   rowSpan={moduleSpecs.length}
                 >
                   Module
                 </td>
-                <td className="py-4 px-6 text-gray-600 border-r border-gray-200">
+                <td className="py-2.5 px-6 text-gray-600 border-r border-gray-200">
                   {moduleSpecs[0].label}
                 </td>
-                <td className="py-4 px-6 text-gray-800 font-medium">
+                <td className="py-2.5 px-6 text-gray-700">
                   {moduleSpecs[0].value}
                 </td>
               </tr>
               {moduleSpecs.slice(1).map((spec, index) => (
                 <tr key={index} className="border-b border-gray-200">
-                  <td className="py-4 px-6 text-gray-600 border-r border-gray-200">
+                  <td className="py-2.5 px-6 text-gray-600 border-r border-gray-200">
                     {spec.label}
                   </td>
-                  <td className="py-4 px-6 text-gray-800 font-medium">
-                    {spec.value}
-                  </td>
+                  <td className="py-2.5 px-6 text-gray-700">{spec.value}</td>
                 </tr>
               ))}
 
               <tr className="border-b border-gray-200">
                 <td
-                  className="py-4 px-6 bg-gray-50 font-medium text-gray-700 border-r border-gray-200 w-1/3"
+                  className="py-2.5 px-6 text-gray-700 border-r border-gray-200 w-1/3"
                   rowSpan={cabinetSpecs.length}
                 >
                   Cabinet
                 </td>
-                <td className="py-4 px-6 text-gray-600 border-r border-gray-200">
+                <td className="py-2.5 px-6 text-gray-600 border-r border-gray-200">
                   {cabinetSpecs[0].label}
                 </td>
-                <td className="py-4 px-6 text-gray-800 font-medium">
+                <td className="py-2.5 px-6 text-gray-700">
                   {cabinetSpecs[0].value}
                 </td>
               </tr>
@@ -109,16 +115,32 @@ export const ProductSpecificationPage = () => {
                       : "border-b border-gray-200"
                   }
                 >
-                  <td className="py-4 px-6 text-gray-600 border-r border-gray-200">
+                  <td className="py-2.5 px-6 text-gray-600 border-r border-gray-200">
                     {spec.label}
                   </td>
-                  <td className="py-4 px-6 text-gray-800 font-medium">
-                    {spec.value}
-                  </td>
+                  <td className="py-2.5 px-6 text-gray-700">{spec.value}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+      {/* Footer */}
+      <div className="absolute bottom-6 left-8 text-xs space-y-2 text-gray-600">
+        <div className="font-semibold">MJ Solution Indonesia</div>
+        <div>
+          The Mansion Bougenville Kemayoran Tower Fontana Zona I Lantai 50
+          Kemayoran Jakarta Utara
+        </div>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            <img src="/icons/icon-web.svg" className="w-4 h-4" alt="web" />
+            <span>mjsolution.co.id</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <img src="/icons/icon-call.svg" className="w-4 h-4" alt="call" />
+            <span>(+62) 811-1122-492</span>
+          </div>
         </div>
       </div>
     </BasePage>

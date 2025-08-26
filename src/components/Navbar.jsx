@@ -42,7 +42,7 @@ export const Navbar = () => {
   };
 
   return (
-    <div className="w-[320px] h-screen bg-white">
+    <div className="w-[350px] h-screen bg-white">
       {/* Header with Logo */}
       <div className="p-6">
         <div className="flex items-center justify-center">
@@ -119,7 +119,10 @@ export const Navbar = () => {
           <div className="border-2 border-gray-100 h-[140px] rounded-lg mb-4 flex items-center justify-center">
             {!selectedModel ? (
               /* Empty Model */
-              <button onClick={openModal} className="w-full h-full cursor-pointer">
+              <button
+                onClick={openModal}
+                className="w-full h-full cursor-pointer"
+              >
                 <div className="flex items-center justify-center">
                   <div className="space-y-1 ">
                     <CirclePlus className="w-4 h-4 mx-auto text-gray-600" />

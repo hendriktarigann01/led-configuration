@@ -1,6 +1,7 @@
 import React from "react";
 import { FileDown, Eye } from "lucide-react";
 import { UseHeaderStore } from "../store/UseHeaderStore";
+// import { UseExportStore } from "../store/UseExportStore";
 
 export const Header = () => {
   const {
@@ -26,6 +27,8 @@ export const Header = () => {
     incrementWallWidth,
     decrementWallWidth,
   } = UseHeaderStore();
+
+  // const { openModalExport } = UseExportStore();
 
   const NumberInput = ({
     label,
@@ -159,7 +162,9 @@ export const Header = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-col space-y-2 my-auto">
-          <button className="flex items-center justify-center space-x-2 w-[144px] px-4 py-2 bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors">
+          <button
+            className="flex items-center justify-center space-x-2 w-[144px] px-4 py-2 bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
+          >
             <FileDown size={16} />
             <span className="text-xs">Export to PDF</span>
           </button>
@@ -172,4 +177,4 @@ export const Header = () => {
       </div>
     </div>
   );
-}
+};

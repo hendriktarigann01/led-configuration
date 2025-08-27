@@ -50,13 +50,13 @@ export const ModelPage = () => {
         <div className="mb-16">
           <h3 className="text-xl font-light text-gray-700 text-center mb-5 flex items-center justify-center space-x-4">
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
             </div>
             <span className="font-medium">Led Configuration Rendering</span>
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
-              <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
             </div>
           </h3>
 
@@ -64,7 +64,7 @@ export const ModelPage = () => {
             <div className="relative h-[400px] flex justify-center items-center">
               {/* Sample image placeholder */}
               <div className="scale-75">
-                <img src="/canvas-bg.webp" alt="canvas" />
+                <img src="/canvas/canvas-bg.webp" alt="canvas" />
               </div>
             </div>
 

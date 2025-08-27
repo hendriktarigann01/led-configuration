@@ -13,12 +13,16 @@ export const UseNavbarStore = create((set) => ({
   // Default state
   selectedContent: "Default Image",
 
+  // Custom image URL for uploaded files
+  customImageUrl: null,
+
   // Actions
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedApplication: (application) =>
     set({ selectedApplication: application }),
   setSelectedModel: (model) => set({ selectedModel: model }),
   setSelectedContent: (content) => set({ selectedContent: content }),
+  setCustomImageUrl: (url) => set({ customImageUrl: url }),
 
   // Clear selected model (back to empty state)
   clearSelectedModel: () => set({ selectedModel: null }),
@@ -30,5 +34,6 @@ export const UseNavbarStore = create((set) => ({
       selectedApplication: "Control Room",
       selectedModel: null,
       selectedContent: "Default Image",
+      customImageUrl: null,
     }),
 }));

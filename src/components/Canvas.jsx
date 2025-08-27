@@ -4,6 +4,7 @@ import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseModalStore } from "../store/UseModalStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
 import { UseHeaderStore } from "../store/UseHeaderStore";
+import { UseCalculatorStore } from "../store/UseCalculatorStore";
 import { ConfigurationModal } from "./ConfigurationModal";
 
 export const Canvas = () => {
@@ -21,59 +22,91 @@ export const Canvas = () => {
     getActualScreenSize,
     getImageScale,
     updateModelData,
+    isConfigured,
+    setScreenSize,
   } = UseCanvasStore();
 
   const { openModal } = UseModalStore();
-  const { selectedModel } = UseNavbarStore();
-  const {
-    setScreenWidth,
-    setScreenHeight,
-    incrementScreenWidth,
-    decrementScreenWidth,
-    incrementScreenHeight,
-    decrementScreenHeight,
-  } = UseHeaderStore();
+  const { selectedModel, selectedContent, customImageUrl, roomImageUrl } = UseNavbarStore();
+  const { syncWithCanvas } = UseHeaderStore();
 
   // Update canvas store when model is selected
   useEffect(() => {
     if (selectedModel && selectedModel.modelData) {
       updateModelData(selectedModel.modelData, selectedModel.name);
+      // Sync header store with updated canvas values
+      setTimeout(() => syncWithCanvas(), 0);
     }
-  }, [selectedModel, updateModelData]);
+  }, [selectedModel, updateModelData, syncWithCanvas]);
 
   // Calculate display values
   const cabinetCount = getCabinetCount();
   const actualScreenSize = getActualScreenSize();
   const imageScale = getImageScale();
+  const configured = isConfigured();
 
-  // Handle control button actions
+  // Handle control button actions with proper step calculations
   const handleWidthIncrement = () => {
-    const newWidth = screenWidth + baseWidth;
-    setScreenWidth(newWidth);
-    incrementScreenWidth();
+    if (!configured || baseWidth === 0) return;
+    const newWidth = Number((screenWidth + baseWidth).toFixed(3));
+    setScreenSize(newWidth, screenHeight);
+    syncWithCanvas();
   };
 
   const handleWidthDecrement = () => {
-    const newWidth = Math.max(baseWidth, screenWidth - baseWidth);
-    setScreenWidth(newWidth);
-    decrementScreenWidth();
+    if (!configured || baseWidth === 0) return;
+    const newWidth = Math.max(
+      baseWidth,
+      Number((screenWidth - baseWidth).toFixed(3))
+    );
+    setScreenSize(newWidth, screenHeight);
+    syncWithCanvas();
   };
 
   const handleHeightIncrement = () => {
-    const newHeight = screenHeight + baseHeight;
-    setScreenHeight(newHeight);
-    incrementScreenHeight();
+    if (!configured || baseHeight === 0) return;
+    const newHeight = Number((screenHeight + baseHeight).toFixed(3));
+    setScreenSize(screenWidth, newHeight);
+    syncWithCanvas();
   };
 
   const handleHeightDecrement = () => {
-    const newHeight = Math.max(baseHeight, screenHeight - baseHeight);
-    setScreenHeight(newHeight);
-    decrementScreenHeight();
+    if (!configured || baseHeight === 0) return;
+    const newHeight = Math.max(
+      baseHeight,
+      Number((screenHeight - baseHeight).toFixed(3))
+    );
+    setScreenSize(screenWidth, newHeight);
+    syncWithCanvas();
   };
 
-  // Calculate image size for display
-  const imageWidth = 384 * imageScale; // 80% of 480px (w-4/5 h-4/5 of 600px container)
-  const imageHeight = 256 * imageScale; // 80% of 320px
+  // Calculate image size for display based on actual screen size and scale
+  const baseImageWidth = 384;
+  const baseImageHeight = 256;
+
+  // Scale image based on actual screen dimensions and wall size
+  const imageWidth = baseImageWidth * imageScale;
+  const imageHeight = baseImageHeight * imageScale;
+
+  // Get content source based on selected content
+  const getContentSource = () => {
+    switch (selectedContent) {
+      case "Default Image":
+        return "/canvas/canvas-bg.webp";
+      case "Default Video":
+        return "/canvas/ringroad-bg.mp4";
+      case "No Content":
+        return "/canvas/no-content.png";
+      case "Custom":
+        // Get the uploaded image URL from Zustand store
+        return customImageUrl || "/canvas/canvas-bg.webp";
+      default:
+        return "/canvas/canvas-bg.webp";
+    }
+  };
+
+  const contentSource = getContentSource();
+  const isVideo = selectedContent === "Default Video";
 
   return (
     <>
@@ -90,28 +123,60 @@ export const Canvas = () => {
 
         {/* Canvas Container */}
         <div className="relative m-auto flex justify-center items-center">
-          {selectedModel ? (
+          {configured && selectedModel ? (
             /* Canvas Preview */
-            <div className="w-[600px] h-[320px] z-10 rounded-lg flex items-center justify-center">
-              <div className="w-4/5 h-4/5 bg-white p-5 flex items-center justify-center">
-                <img
-                  src="/canvas-bg.webp"
-                  alt="Canvas Preview"
-                  style={{
-                    width: `${imageWidth}px`,
-                    height: `${imageHeight}px`,
-                    maxWidth: "100%",
-                    maxHeight: "100%",
-                  }}
-                  className="object-cover"
-                />
+            <div
+              className="w-[600px] h-[320px] z-10 rounded-lg flex items-center justify-center"
+              style={{
+                backgroundImage: roomImageUrl ? `url(${roomImageUrl})` : "none",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            >
+              <div
+                className={`w-4/5 h-4/5 ${
+                  roomImageUrl ? "bg-transparent" : "bg-white"
+                } p-5 flex items-center justify-center`}
+              >
+                {isVideo ? (
+                  <video
+                    src={contentSource}
+                    autoPlay
+                    loop
+                    muted
+                    style={{
+                      width: `${imageWidth}px`,
+                      height: `${imageHeight}px`,
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                    }}
+                    className="object-cover"
+                  />
+                ) : (
+                  <img
+                    src={contentSource}
+                    alt="Canvas Preview"
+                    style={{
+                      width: `${imageWidth}px`,
+                      height: `${imageHeight}px`,
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                    }}
+                    className="object-cover"
+                  />
+                )}
               </div>
 
               {/* Top controls */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-50">
                 <button
                   onClick={handleWidthDecrement}
-                  className="flex items-center justify-center text-gray-300 text-sm w-5 h-5 border border-gray-300 hover:bg-gray-50"
+                  disabled={!configured}
+                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
+                    configured
+                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
+                      : "text-gray-300 border-gray-200 cursor-not-allowed"
+                  }`}
                 >
                   <Minus size={12} />
                 </button>
@@ -120,7 +185,12 @@ export const Canvas = () => {
                 </span>
                 <button
                   onClick={handleWidthIncrement}
-                  className="flex items-center justify-center text-gray-300 text-sm w-5 h-5 border border-gray-300 hover:bg-gray-50"
+                  disabled={!configured}
+                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
+                    configured
+                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
+                      : "text-gray-300 border-gray-200 cursor-not-allowed"
+                  }`}
                 >
                   <Plus size={12} />
                 </button>
@@ -130,7 +200,12 @@ export const Canvas = () => {
               <div className="absolute top-80 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-50">
                 <button
                   onClick={handleWidthDecrement}
-                  className="flex items-center justify-center text-gray-300 text-sm w-5 h-5 border border-gray-300 hover:bg-gray-50"
+                  disabled={!configured}
+                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
+                    configured
+                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
+                      : "text-gray-300 border-gray-200 cursor-not-allowed"
+                  }`}
                 >
                   <Minus size={12} />
                 </button>
@@ -139,7 +214,12 @@ export const Canvas = () => {
                 </span>
                 <button
                   onClick={handleWidthIncrement}
-                  className="flex items-center justify-center text-gray-300 text-sm w-5 h-5 border border-gray-300 hover:bg-gray-50"
+                  disabled={!configured}
+                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
+                    configured
+                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
+                      : "text-gray-300 border-gray-200 cursor-not-allowed"
+                  }`}
                 >
                   <Plus size={12} />
                 </button>
@@ -149,7 +229,12 @@ export const Canvas = () => {
               <div className="absolute left-5 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
                 <button
                   onClick={handleHeightIncrement}
-                  className="flex items-center justify-center text-gray-300 text-sm w-5 h-5 border border-gray-300 hover:bg-gray-50"
+                  disabled={!configured}
+                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
+                    configured
+                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
+                      : "text-gray-300 border-gray-200 cursor-not-allowed"
+                  }`}
                 >
                   <Plus size={12} />
                 </button>
@@ -163,7 +248,12 @@ export const Canvas = () => {
                 </div>
                 <button
                   onClick={handleHeightDecrement}
-                  className="flex items-center justify-center text-gray-300 text-sm w-5 h-5 border border-gray-300 hover:bg-gray-50"
+                  disabled={!configured}
+                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
+                    configured
+                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
+                      : "text-gray-300 border-gray-200 cursor-not-allowed"
+                  }`}
                 >
                   <Minus size={12} />
                 </button>
@@ -182,7 +272,7 @@ export const Canvas = () => {
               </div>
 
               {/* Cabinet Count Info */}
-              <div className="absolute bottom-2 left-2 text-xs text-gray-500 bg-white/80 px-2 py-1 rounded">
+              <div className="absolute bottom-1 left-15 text-xs text-gray-500 px-2 py-1">
                 {cabinetCount.horizontal} × {cabinetCount.vertical} units
               </div>
             </div>
@@ -195,7 +285,7 @@ export const Canvas = () => {
               </p>
               <button
                 onClick={openModal}
-                className="mt-6 flex items-center justify-center space-x-2 w-1/2 h-10 text-white bg-teal-500 hover:bg-teal-600 transition-colors"
+                className="mt-6 flex items-center justify-center space-x-2 w-1/2 h-10 text-white bg-[#3AAFA9] hover:bg-teal-600 transition-colors"
               >
                 <CirclePlus size={20} className="shrink-0" />
                 <span className="text-base">Configuration</span>

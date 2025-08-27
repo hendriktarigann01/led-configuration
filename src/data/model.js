@@ -5,15 +5,15 @@ export const model = [
     data: [
       {
         pixel_pitch: "P 1.2",
-        cabinet_size: "640*480mm",
-        cabinet_weight: "7.8kg/pcs",
+        cabinet_size: "640*480mm", // calculate
+        cabinet_weight: "7.8kg/pcs", // calculate
         brightness: "500 - 1.000 Nits",
         refresh_rate: "1920 Hz / 2400 Hz / 3840 Hz",
-        cabinet_resolution: "512 X 384 dots",
+        cabinet_resolution: "512 X 384 dots", // calculate
         cabinet_pixels: "196608 dots",
         pixel_density: "640000 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 650W/m², Average; 300W/m²",
+        power_consumption: "Max: 650W/m², Average; 300W/m²", // calculate (max and average values ​only)
         life_span: ">10,000 hours",
       },
       {
@@ -89,11 +89,11 @@ export const model = [
     data: [
       {
         pixel_pitch: "P 1.2",
-        module_size: "320*160mm",
-        module_weight: "0.48kg/pcs",
+        module_size: "320*160mm", // calculate
+        module_weight: "0.48kg/pcs", // calculate
         brightness: "500 - 1.000 Nits",
         refresh_rate: "1920 Hz / 2400 Hz / 3840 Hz",
-        module_resolution: "256 x 128 dots",
+        module_resolution: "256 x 128 dots", // calculate
         module_pixels: "32768 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
@@ -167,7 +167,7 @@ export const model = [
     data: [
       {
         pixel_pitch: "P 3.0",
-        cabinet_size: "960*960 mm",
+        cabinet_size: "960*960 mm", // calculate
         module_weight: "0.45kg/pcs",
         brightness: "5500 - 6000 Nits",
         refresh_rate: "1920 Hz / 3840 Hz / 7680 Hz",
@@ -177,12 +177,12 @@ export const model = [
         module_thickness: "17MM",
         drive_type: "Constant drive",
         application: "Outdoor Fixed Installation",
-        cabinet_resolution: "312*312 dots",
+        cabinet_resolution: "312*312 dots", // calculate
         pixel_density: "105625 dots/m²",
-        power_consumption: "Max: 800W/m², Average: 300W/m²",
+        power_consumption: "Max: 800W/m², Average: 300W/m²", // calculate (max and average values ​only)
         cabinet_material: "Die-casting Magnesium Cabinet",
         life_span: "≥100,000 Hours",
-        cabinet_weight: "25kg/pcs",
+        cabinet_weight: "25kg/pcs", // calculate
         working_voltage: "AC220v+-10%",
         humidity: "10%-75%",
         best_viewing_distance: "3-10M",
@@ -284,8 +284,8 @@ export const model = [
       {
         inch: '46"',
         b2b: "1.8 mm",
-        unit_size_mm: "1,075 (W) x 606 (H) x 54 (D)",
-        brightness: "500 cd/m",
+        unit_size_mm: "1,075 (W) x 606 (H) x 54 (D)", // calculate
+        brightness: "500 cd/m", // calculate
         resolution: "FHD 1920 x 1080",
         contrast_ratio: "4000:1",
         aspect_ratio: "16:9",
@@ -298,7 +298,7 @@ export const model = [
         audio_in_out: "Stereo Mini Jack",
         video_in: "HDMI1, HDMI2",
         power_supply: "AC 100 - 240 V / 50 - 60 Hz",
-        power_consumption: "≤180 W",
+        power_consumption: "≤180 W", // calculate (max and average values ​only)
         standby_power: "3W",
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",

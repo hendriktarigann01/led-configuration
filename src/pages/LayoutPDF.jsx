@@ -38,7 +38,7 @@ const LayoutPDF = () => {
               onClick={() => setCurrentPage(page.id)}
               className={`block w-full text-left px-3 py-2 rounded text-sm ${
                 currentPage === page.id
-                  ? "bg-teal-500 text-white"
+                  ? "bg-[#3AAFA9] text-white"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
             >

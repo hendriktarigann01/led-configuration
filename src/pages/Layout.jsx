@@ -3,13 +3,20 @@ import { Navbar } from "../components/Navbar";
 import { Header } from "../components/Header";
 import { Canvas } from "../components/Canvas";
 import { ConfigurationModal } from "../components/ConfigurationModal";
+import { ExportModal } from "../components/ExportModal";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
 
 const Layout = () => {
-  const { screenHeight, screenWidth, wallHeight, wallWidth, resolution } =
-    UseHeaderStore();
+  const {
+    screenHeight,
+    screenWidth,
+    wallHeight,
+    wallWidth,
+    resolution,
+    syncWithCanvas,
+  } = UseHeaderStore();
 
   const { setScreenSize, setWallSize, updateModelData } = UseCanvasStore();
   const { selectedModel } = UseNavbarStore();
@@ -27,8 +34,10 @@ const Layout = () => {
   useEffect(() => {
     if (selectedModel && selectedModel.modelData) {
       updateModelData(selectedModel.modelData, selectedModel.name);
+      // Sync header store with updated canvas values
+      setTimeout(() => syncWithCanvas(), 0);
     }
-  }, [selectedModel, updateModelData]);
+  }, [selectedModel, updateModelData, syncWithCanvas]);
 
   return (
     <div className="max-h-screen bg-gray-100 flex">
@@ -36,7 +45,6 @@ const Layout = () => {
       <div className="flex-shrink-0">
         <Navbar />
       </div>
-
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Header Controls */}
@@ -47,9 +55,9 @@ const Layout = () => {
           <Canvas />
         </div>
       </div>
-
-      {/* Configuration Modal - renders at root level */}
+      {/* Modal - renders at root level */}
       <ConfigurationModal />
+      <ExportModal />
     </div>
   );
 };

@@ -9,10 +9,6 @@ export default defineConfig({
     host: true,
     port: 5173,
     cors: true,
-    allowedHosts: [
-      "localhost",
-      "19ee4e8d0097.ngrok-free.app",
-      "script.google.com/macros/s/AKfycbxgi5iaPT7x1ZravNioV1SMzvGcXBtCY5j7vj1icBTfhRMhrnZnPgyxZ5btACsIWCaIoQ/exec",
-    ],
+    allowedHosts: ["localhost", "19ee4e8d0097.ngrok-free.app"],
   },
 });

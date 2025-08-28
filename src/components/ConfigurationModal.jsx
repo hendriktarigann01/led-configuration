@@ -122,7 +122,7 @@ export const ConfigurationModal = () => {
 
   // Display Type Grid Component
   const DisplayTypeGrid = ({ clickable = true }) => (
-    <div className="grid grid-cols-3 gap-4 mb-6">
+    <div className="grid grid-cols-3 mb-6">
       {displayTypes
         .filter((type) => type.id !== 2)
         .map((type) => (
@@ -146,7 +146,7 @@ export const ConfigurationModal = () => {
             </div>
 
             <div
-              className={`px-3 py-2 w-full rounded-md text-xs font-medium transition-colors ${
+              className={`px-3 py-2 w-[200px] rounded-md text-xs font-medium transition-colors ${
                 type.id === selectedDisplayTypeId
                   ? "bg-[#3AAFA9] text-white border border-[#3AAFA9]"
                   : "text-gray-600 border border-transparent hover:border-[#3AAFA9]"
@@ -200,13 +200,7 @@ export const ConfigurationModal = () => {
         ))}
       </div>
 
-      <div className="flex justify-between w-full max-w-lg gap-4">
-        <button
-          onClick={goBack}
-          className="flex-1 py-2 border-2 border-[#3AAFA9] text-[#3AAFA9] rounded-lg text-sm font-medium hover:bg-teal-50 transition-colors"
-        >
-          Back
-        </button>
+      <div className="flex w-[200px]">
         <button
           onClick={nextStep}
           disabled={!selectedSubTypeId}
@@ -234,13 +228,13 @@ export const ConfigurationModal = () => {
                     [&::-webkit-scrollbar-thumb]:rounded-full"
         >
           <table className="w-full text-xs">
-            <thead className="sticky top-0 bg-white">
+            <thead className="sticky top-0 bg-white border-b-2 border-gray-300">
               <tr>
                 {getTableHeaders(selectedDisplayType, selectedSubTypeId).map(
                   (header, index) => (
                     <th
                       key={index}
-                      className="py-2 text-left sticky border-b-2 border-gray-300 text-xs font-medium text-gray-700"
+                      className="py-3 w-32 text-left text-xs font-medium text-gray-700"
                     >
                       {header}
                     </th>
@@ -266,11 +260,7 @@ export const ConfigurationModal = () => {
                   ).map((data, dataIndex) => (
                     <td
                       key={dataIndex}
-                      className={`py-2 text-xs w-64 ${
-                        dataIndex === 0
-                          ? "text-gray-900 font-medium"
-                          : "text-gray-700"
-                      }`}
+                      className="py-3 w-32 text-xs text-gray-700"
                     >
                       {data}
                     </td>
@@ -285,16 +275,16 @@ export const ConfigurationModal = () => {
       <div className="flex justify-center gap-6">
         <button
           onClick={goBack}
-          className="w-32 py-2 border-2 border-[#3AAFA9] text-[#3AAFA9] rounded-lg text-sm font-medium hover:bg-teal-50 transition-colors"
+          className="w-[200px] py-2  border-2 border-[#3AAFA9] text-[#3AAFA9] rounded-lg text-sm font-medium hover:bg-teal-50 transition-colors"
         >
           Back
         </button>
         <button
           onClick={confirmSelection}
           disabled={!selectedModel}
-          className={`w-32 py-2 rounded-lg text-sm font-medium transition-colors ${
+          className={`w-[200px] py-2 rounded-lg text-sm font-medium transition-colors ${
             selectedModel
-              ? "bg-gray-400 text-white hover:bg-gray-500"
+              ? "bg-[#3AAFA9] text-white hover:bg-[#2d9e98]"
               : "text-gray-400 cursor-not-allowed"
           }`}
         >
@@ -331,7 +321,7 @@ export const ConfigurationModal = () => {
 
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-50 overflow-hidden">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] max-h-[600px] overflow-hidden">
+      <div className="bg-white rounded-xl w-full max-w-[820px] h-[90vh] max-h-[600px] overflow-hidden">
         <div className="p-6 h-full">
           {currentStep === "select" || currentStep === "subtype"
             ? renderSelectStep()

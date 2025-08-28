@@ -135,13 +135,6 @@ export const ExportModal = () => {
                 )}
               </button>
             </div>
-
-            {/* Status message */}
-            {isExporting && (
-              <div className="text-center text-sm text-gray-600 pt-2">
-                Menyimpan data ke Google Sheets dan mengunduh PDF...
-              </div>
-            )}
           </div>
         </div>
       </div>

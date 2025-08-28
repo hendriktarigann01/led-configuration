@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FirstPage } from "../components/export/FirstPage";
 import { ModelPage } from "../components/export/ModelPage";
 import { SpecificationPage } from "../components/export/SpecificationPage";
-import { ProductSpecificationPage } from "../components/export/ProductSpecificationPage";
+import { Indoor } from "../components/export/spec/Indoor";
 import { LastPage } from "../components/export/LastPage";
 
 const LayoutPDF = () => {
@@ -19,7 +19,7 @@ const LayoutPDF = () => {
     {
       id: "product-spec",
       name: "Product Spec",
-      component: ProductSpecificationPage,
+      component: Indoor,
     },
     { id: "last", name: "Last Page", component: LastPage },
   ];

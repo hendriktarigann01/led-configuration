@@ -45,7 +45,7 @@ export const Header = () => {
     <div className="flex flex-col space-y-1">
       <label className="text-xs text-gray-600">{label}</label>
       <div
-        className={`flex items-center justify-between w-[110px] border rounded bg-white ${
+        className={`flex  items-center justify-between w-[110px] border rounded bg-white ${
           disabled ? "border-gray-200 bg-gray-50" : "border-gray-300"
         }`}
       >

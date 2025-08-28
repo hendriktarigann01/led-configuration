@@ -106,7 +106,7 @@ export const Navbar = () => {
           className={`flex-1 py-3 px-4 text-xs font-medium ${
             activeTab === "LED Setup"
               ? "bg-[#3AAFA9] text-white"
-              : "bg-white text-gray-600 hover:bg-gray-200"
+              : "bg-white text-gray-500 hover:bg-gray-200"
           }`}
         >
           LED Setup
@@ -116,7 +116,7 @@ export const Navbar = () => {
           className={`flex-1 py-3 px-4 text-xs font-medium ${
             activeTab === "Room Setup"
               ? "bg-[#3AAFA9] text-white"
-              : "bg-white text-gray-600 hover:bg-gray-200"
+              : "bg-white text-gray-500 hover:bg-gray-200"
           }`}
         >
           Room Setup
@@ -129,7 +129,7 @@ export const Navbar = () => {
           <>
             {/* Application Section */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">
+              <h3 className="text-sm font-normal text-gray-700 mb-3">
                 Application
               </h3>
               <div className="space-y-3.5">
@@ -160,7 +160,7 @@ export const Navbar = () => {
 
             {/* Model Section */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Model</h3>
+              <h3 className="text-sm font-normal text-gray-700 mb-3">Model</h3>
 
               {/* Model Display */}
               <div className="border-2 border-gray-100 h-[140px] rounded-lg mb-4 flex items-center justify-center">
@@ -172,9 +172,9 @@ export const Navbar = () => {
                   >
                     <div className="flex items-center justify-center">
                       <div className="space-y-1 ">
-                        <CirclePlus className="w-4 h-4 mx-auto text-gray-600" />
+                        <CirclePlus className="w-4 h-4 mx-auto text-gray-500" />
 
-                        <p className="text-xs text-gray-600">Select Model</p>
+                        <p className="text-xs text-gray-700">Select Model</p>
                       </div>
                     </div>
                   </button>
@@ -182,15 +182,15 @@ export const Navbar = () => {
                   /* Fill Model */
                   <div className="flex items-center justify-between w-full m-3 cursor-pointer">
                     <div>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-gray-500">
                         {selectedModel.name}
                       </p>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-gray-700">
                         {selectedModel.code}
                       </p>
                       <button
                         onClick={handleChangeModel}
-                        className="flex items-center mt-4 space-x-2 text-gray-600 hover:text-gray-800"
+                        className="flex items-center mt-4 space-x-2 text-gray-500 hover:text-gray-700"
                       >
                         <span className="text-xs">Change Model</span>
                         <ArrowRight className="w-4 h-4" />
@@ -210,7 +210,7 @@ export const Navbar = () => {
 
             {/* Content Section */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">
+              <h3 className="text-sm font-normal text-gray-700 mb-3">
                 Content
               </h3>
 
@@ -225,7 +225,7 @@ export const Navbar = () => {
                       className={`flex items-center justify-center h-10 border space-x-2 transition-colors ${
                         selectedContent === option.id
                           ? "bg-[#3AAFA9] text-white border-[#3AAFA9]"
-                          : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
+                          : "bg-white text-gray-500 border-gray-300 hover:border-gray-400"
                       }`}
                     >
                       <IconComponent className="w-4 h-4" />
@@ -264,9 +264,6 @@ export const Navbar = () => {
 
             <DragDropUpload onFileSelect={handleRoomImageUpload} />
 
-            <p className="text-[10px] text-gray-500 mt-3">
-              JPG or PNG only, Max 3mb
-            </p>
           </div>
         )}
       </div>

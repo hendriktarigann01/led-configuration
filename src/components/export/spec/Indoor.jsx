@@ -1,6 +1,6 @@
-import { BasePage } from "./BasePage";
+import { BasePage } from "../BasePage";
 
-export const ProductSpecificationPage = () => {
+export const Indoor = () => {
   const specs = [
     { label: "Pixel Pitch", value: "P 1.8" },
     { label: "Refresh Rate", value: "1920 Hz / 2400 Hz / 3840 Hz" },

@@ -81,13 +81,39 @@ export const Canvas = () => {
     syncWithCanvas();
   };
 
-  // Calculate image size for display based on actual screen size and scale
-  const baseImageWidth = 384;
-  const baseImageHeight = 256;
+  // Calculate dynamic image and canvas dimensions
+  const canvasContainerWidth = 550;
+  const canvasContainerHeight = 300;
 
-  // Scale image based on actual screen dimensions and wall size
-  const imageWidth = baseImageWidth * imageScale;
-  const imageHeight = baseImageHeight * imageScale;
+  // Calculate wall scale (how much of the canvas the wall occupies)
+  const maxWallWidth = 10; // maximum wall width in meters for scaling reference
+  const maxWallHeight = 6; // maximum wall height in meters for scaling reference
+
+  const wallScaleX = Math.min(1, wallWidth / maxWallWidth);
+  const wallScaleY = Math.min(1, wallHeight / maxWallHeight);
+
+  // Wall takes up portion of canvas based on its size
+  const effectiveCanvasWidth = canvasContainerWidth * wallScaleX;
+  const effectiveCanvasHeight = canvasContainerHeight * wallScaleY;
+
+  // Calculate screen scale relative to wall
+  const screenToWallRatioX = actualScreenSize.width / wallWidth;
+  const screenToWallRatioY = actualScreenSize.height / wallHeight;
+
+  // Image size is screen size relative to wall, scaled to fit in canvas
+  const imageWidth = Math.min(
+    effectiveCanvasWidth * screenToWallRatioX,
+    effectiveCanvasWidth * 1.5 // max 150% of canvas width
+  );
+  const imageHeight = Math.min(
+    effectiveCanvasHeight * screenToWallRatioY,
+    effectiveCanvasHeight * 1.5 // max 150% of canvas height
+  );
+
+  // Calculate measurement line lengths based on proportions
+  const measurementLineLength = 80; // base length in pixels
+  const horizontalMeasureLength = Math.max(imageWidth * 0.5);
+  const verticalMeasureLength = Math.max(imageHeight * 0.5);
 
   // Get content source based on selected content
   const getContentSource = () => {
@@ -99,7 +125,6 @@ export const Canvas = () => {
       case "No Content":
         return "/canvas/no-content.png";
       case "Custom":
-        // Get the uploaded image URL from Zustand store
         return customImageUrl || "/canvas/canvas-bg.webp";
       default:
         return "/canvas/canvas-bg.webp";
@@ -154,61 +179,158 @@ export const Canvas = () => {
                       }}
                       className="object-cover z-20"
                     />
-                    {/* Garis vertikal dari pojok kanan atas */}
-                    <div className="absolute top-0 right-0 translate-x-full -translate-y-3/4 h-[110%] border-l border-dashed border-teal-400 pointer-events-none"></div>
-                    {/* Garis horizontal dari pojok kiri bawah */}
-                    <div className="absolute bottom-0 left-0 translate-y-full -translate-x-3/4 w-[110%] border-t border-dashed border-teal-400 pointer-events-none"></div>
+                    {/* Dynamic Video Measurements */}
+                    {/* V Top Right Measure Image */}
+                    <div
+                      className="absolute top-0 right-0 border-l border-dashed h- border-teal-400 pointer-events-none"
+                      style={{
+                        transform: "translateX(100%) translateY(-80%)",
+                        height: `${verticalMeasureLength}px`,
+                      }}
+                    ></div>
+
+                    {/* V Top Left Measure Image */}
+                    <div
+                      className="absolute top-0 left-0 border-l border-dashed h- border-teal-400 pointer-events-none"
+                      style={{
+                        transform: "translateX(-100%) translateY(-80%)",
+                        height: `${verticalMeasureLength}px`,
+                      }}
+                    ></div>
+
+                    {/* H Bottom Right Measure Image */}
+                    <div
+                      className="absolute bottom-0 right-0 border-t border-dashed w-96 border-teal-400 pointer-events-none"
+                      style={{
+                        transform: "translateY(100%) translateX(80%)",
+                        width: `${horizontalMeasureLength}px`,
+                      }}
+                    ></div>
+
+                    {/* H Bottom Left Measure Image */}
+                    <div
+                      className="absolute bottom-0 left-0 border-t border-dashed w-96 border-teal-400 pointer-events-none"
+                      style={{
+                        transform: "translateY(100%) translateX(-80%)",
+                        width: `${horizontalMeasureLength}px`,
+                      }}
+                    ></div>
                   </div>
                 ) : (
                   <div className="relative inline-block">
-                    <img
-                      src={contentSource}
-                      alt="Canvas Preview"
+                    <div
+                      className="relative"
                       style={{
                         width: `${imageWidth}px`,
                         height: `${imageHeight}px`,
-                        maxWidth: "100%",
-                        maxHeight: "100%",
                       }}
-                      className="object-cover z-20"
-                    />
-                    {/* V Top Right - sama dengan V Top Left luar */}
-                    <div className="absolute top-0 right-0 translate-x-full -translate-y-4/5 h-96  border-l border-dashed border-teal-400 pointer-events-none"></div>
+                    >
+                      <img
+                        src={contentSource}
+                        alt="Canvas Preview"
+                        className="object-fill w-full h-full z-10"
+                      />
 
-                    {/* V Top Left - sama dengan V Top Left luar */}
-                    <div className="absolute top-0 left-0 translate-x-full -translate-y-4/5 h-96  border-l border-dashed border-teal-400 pointer-events-none"></div>
+                      {/* Overlay grid */}
+                      <div className="absolute inset-0 z-20 pointer-events-none">
+                        {/* Vertical lines */}
+                        <div className="absolute top-0 bottom-0 left-1/3 border-l-2 border-[#D9D9D9]/40"></div>
+                        <div className="absolute top-0 bottom-0 left-2/3 border-l-2 border-[#D9D9D9]/40"></div>
 
-                    {/* H Bottom Right - sama dengan H Bottom luar */}
-                    <div className="absolute top-0 left-0 translate-y-full -translate-x-4/5 w-96  border-t border-dashed border-teal-400 pointer-events-none"></div>
+                        {/* Horizontal lines */}
+                        <div className="absolute left-0 right-0 top-1/3 border-t-2 border-[#D9D9D9]/40"></div>
+                        <div className="absolute left-0 right-0 top-2/3 border-t-2 border-[#D9D9D9]/40"></div>
+                      </div>
+                    </div>
+                    {/* Dynamic Image Measurements */}
+                    {/* V Top Right Measure Image */}
+                    <div
+                      className="absolute top-0 right-0 border-l border-dashed h- border-teal-400 pointer-events-none"
+                      style={{
+                        transform: "translateX(100%) translateY(-80%)",
+                        height: `${verticalMeasureLength}px`,
+                      }}
+                    ></div>
 
-                    {/* H Bottom Left - sama dengan H Bottom luar */}
-                    <div className="absolute bottom-0 left-0 translate-y-full -translate-x-4/5 w-96  border-t border-dashed border-teal-400 pointer-events-none"></div>
+                    {/* V Top Left Measure Image */}
+                    <div
+                      className="absolute top-0 left-0 border-l border-dashed h- border-teal-400 pointer-events-none"
+                      style={{
+                        transform: "translateX(-100%) translateY(-80%)",
+                        height: `${verticalMeasureLength}px`,
+                      }}
+                    ></div>
+
+                    {/* H Bottom Right Measure Image */}
+                    <div
+                      className="absolute bottom-0 right-0 border-t border-dashed w-96 border-teal-400 pointer-events-none"
+                      style={{
+                        transform: "translateY(100%) translateX(80%)",
+                        width: `${horizontalMeasureLength}px`,
+                      }}
+                    ></div>
+
+                    {/* H Bottom Left Measure Image */}
+                    <div
+                      className="absolute bottom-0 left-0 border-t border-dashed w-96 border-teal-400 pointer-events-none"
+                      style={{
+                        transform: "translateY(100%) translateX(-80%)",
+                        width: `${horizontalMeasureLength}px`,
+                      }}
+                    ></div>
                   </div>
                 )}
               </div>
 
-              {/* H Bottom */}
-              <div className="absolute bottom-9 -z-10 left-0 translate-y-full -translate-x-3/4 w-full border-t border-dashed border-teal-400 pointer-events-none"></div>
-              {/* V Top Left */}
-              <div className="absolute top-0 right-13 -z-10 translate-x-full -translate-y-3/4 h-full border-l border-dashed border-teal-400 pointer-events-none"></div>
+              {/* Canvas to Wall Measurement Lines */}
+              {/* H Bottom Measure Canvas to Wall */}
+              <div
+                className="absolute -z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
+                style={{
+                  bottom: "36px",
+                  transform: "translateX(-75%) translateY(100%)",
+                  width: `${effectiveCanvasWidth + 100}px`,
+                }}
+              ></div>
 
-              {/* Left Teks Top */}
-              <div className="absolute left-4 top-[20%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
+              {/* V Right Measure Canvas to Wall */}
+              <div
+                className="absolute -z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
+                style={{
+                  right: "52px",
+                  transform: "translateX(100%) translateY(-75%)",
+                  height: `${effectiveCanvasHeight + 100}px`,
+                }}
+              ></div>
+
+              {/* Dynamic Wall Dimension Labels */}
+              <div className="absolute left-4 top-[30%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
                 <span
                   className="text-xs text-gray-700 text-center rotate-180"
                   style={{ writingMode: "vertical-lr" }}
                 >
-                  12 m
+                  {(wallHeight / 2).toFixed(2)} m
                 </span>
               </div>
 
-              {/* Left Teks Bottom */}
-              <div className="absolute left-4 top-[80%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
+              <div className="absolute left-4 top-[70%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
                 <span
                   className="text-xs text-gray-700 text-center rotate-180"
                   style={{ writingMode: "vertical-lr" }}
                 >
-                  12 m
+                  {(wallHeight / 2).toFixed(2)} m
+                </span>
+              </div>
+
+              <div className="absolute top-0 left-1/4 -translate-x-1/2 flex flex-col items-center justify-center space-y-2 z-50">
+                <span className="text-xs text-gray-700 text-center">
+                  {(wallWidth / 2).toFixed(2)} m
+                </span>
+              </div>
+
+              <div className="absolute top-0 right-1/4 translate-x-1/2 flex flex-col items-center justify-center space-y-2 z-50">
+                <span className="text-xs text-gray-700 text-center">
+                  {(wallWidth / 2).toFixed(2)} m
                 </span>
               </div>
 

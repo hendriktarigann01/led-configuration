@@ -3,6 +3,8 @@ import { FirstPage } from "../components/export/FirstPage";
 import { ModelPage } from "../components/export/ModelPage";
 import { SpecificationPage } from "../components/export/SpecificationPage";
 import { Indoor } from "../components/export/spec/Indoor";
+import { Outdoor } from "../components/export/spec/Outdoor";
+import { VideoWall } from "../components/export/spec/VideoWall";
 import { LastPage } from "../components/export/LastPage";
 
 const LayoutPDF = () => {
@@ -17,9 +19,19 @@ const LayoutPDF = () => {
       component: SpecificationPage,
     },
     {
-      id: "product-spec",
-      name: "Product Spec",
+      id: "product-spec-1",
+      name: "Product Spec Indoor",
       component: Indoor,
+    },
+    {
+      id: "product-spec-2",
+      name: "Product Spec Outdoor",
+      component: Outdoor,
+    },
+    {
+      id: "product-spec-3",
+      name: "Product Spec VideoWall",
+      component: VideoWall,
     },
     { id: "last", name: "Last Page", component: LastPage },
   ];

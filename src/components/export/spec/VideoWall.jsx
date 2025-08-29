@@ -1,30 +1,35 @@
 import { BasePage } from "../BasePage";
 
-export const Indoor = () => {
+export const VideoWall = () => {
   const specs = [
-    { label: "Pixel Pitch", value: "P 1.8" },
-    { label: "Refresh Rate", value: "1920 Hz / 2400 Hz / 3840 Hz" },
-    { label: "Brightness", value: "500 nits - 1.000 nits" },
+    { label: "Pixel Pitch", value: "P 3.0" },
+    { label: "Refresh Rate", value: "1920Hz / 3840Hz / 7680Hz" },
+    { label: "Brightness", value: "5500 - 6000 Nits" },
   ];
 
   const moduleSpecs = [
-    { label: "Module Size", value: "320mm x 160mm" },
-    { label: "Module Resolution", value: "172 x 86 dots" },
-    { label: "Moduli Pixels", value: "14792 dots" },
-    { label: "IC", value: "ICN2153" },
-    { label: "Led Configuration", value: "3 in 1" },
-    { label: "Weight", value: "0.48 KG" },
-    { label: "Weight", value: "0.48 KG" },
+    { label: "Resolution", value: "1078 (H) x 1078 (V) x 244 (D)" },
+    { label: "Control System", value: "Li Nova" },
+    { label: "Aspect Ratio", value: "16 : 9" },
+    { label: "Viewing Angle", value: "120°H / 120°V" },
+    { label: "Color Output", value: "12%" },
+    { label: "Maximum Temp", value: "70°" },
+    { label: "Viewing Range", value: "3 to 10 M" },
+    { label: "H. Scanning Frequency", value: "15kHz - 80 kHz" },
+    { label: "V. Scanning Frequency", value: "50Hz - 200Hz" },
   ];
 
-  const cabinetSpecs = [
-    { label: "Cabinet size (WH)", value: "640 X 480mm" },
-    { label: "Cabinet resolution", value: "344 X 258 dots" },
-    { label: "Cabinet pixels", value: "88752 dots" },
-    { label: "Pixel density", value: "288906 dots/m²" },
-    { label: "Cabinet material", value: "Die-casting aluminum" },
-    { label: "Weight", value: "7.8KG" },
-    { label: "Life span", value: "0->10,000 hours KG" },
+  const connectivitySpecs = [
+    { label: "Audio in/Out", value: "Stereo RCA Jack" },
+    { label: "Power Supply", value: "AC Input: 240 V | DC : 400 wc" },
+  ];
+
+  const powerSpecs = [
+    { label: "Power Consumption (W)", value: "800 W" },
+    { label: "Standby Power", value: "15W/cm²" },
+    { label: "Operation Temperature", value: "0 - 60 °C" },
+    { label: "Storage Temperature", value: "0 - 60 °C" },
+    { label: "Operation", value: "24/7" },
   ];
 
   return (
@@ -58,6 +63,7 @@ export const Indoor = () => {
         <div className="overflow-hidden rounded-lg border border-gray-200">
           <table className="w-full">
             <tbody>
+              {/* Basic specs without category */}
               {specs.map((spec, index) => (
                 <tr key={index} className="border-b border-gray-200">
                   <td className="py-1.5 px-3 text-gray-700 border-r border-gray-200 w-1/3">
@@ -69,12 +75,13 @@ export const Indoor = () => {
                 </tr>
               ))}
 
+              {/* Module section */}
               <tr className="border-b border-gray-200">
                 <td
                   className="py-1.5 px-3 text-gray-700 border-r border-gray-200 w-1/3"
                   rowSpan={moduleSpecs.length}
                 >
-                  Module
+                  Panel
                 </td>
                 <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
                   {moduleSpecs[0].label}
@@ -92,25 +99,50 @@ export const Indoor = () => {
                 </tr>
               ))}
 
+              {/* Connectivity section */}
               <tr className="border-b border-gray-200">
                 <td
                   className="py-1.5 px-3 text-gray-700 border-r border-gray-200 w-1/3"
-                  rowSpan={cabinetSpecs.length}
+                  rowSpan={connectivitySpecs.length}
                 >
-                  Cabinet
+                  Connectivity
                 </td>
                 <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
-                  {cabinetSpecs[0].label}
+                  {connectivitySpecs[0].label}
                 </td>
                 <td className="py-1.5 px-3 text-gray-700">
-                  {cabinetSpecs[0].value}
+                  {connectivitySpecs[0].value}
                 </td>
               </tr>
-              {cabinetSpecs.slice(1).map((spec, index) => (
+              {connectivitySpecs.slice(1).map((spec, index) => (
+                <tr key={index} className="border-b border-gray-200">
+                  <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
+                    {spec.label}
+                  </td>
+                  <td className="py-1.5 px-3 text-gray-700">{spec.value}</td>
+                </tr>
+              ))}
+
+              {/* Power section */}
+              <tr className="border-b border-gray-200">
+                <td
+                  className="py-1.5 px-3 text-gray-700 border-r border-gray-200 w-1/3"
+                  rowSpan={powerSpecs.length}
+                >
+                  Environment
+                </td>
+                <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
+                  {powerSpecs[0].label}
+                </td>
+                <td className="py-1.5 px-3 text-gray-700">
+                  {powerSpecs[0].value}
+                </td>
+              </tr>
+              {powerSpecs.slice(1).map((spec, index) => (
                 <tr
                   key={index}
                   className={
-                    index === cabinetSpecs.length - 2
+                    index === powerSpecs.length - 2
                       ? ""
                       : "border-b border-gray-200"
                   }

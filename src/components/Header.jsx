@@ -1,6 +1,7 @@
 import React from "react";
 import { FileDown, Eye } from "lucide-react";
 import { UseHeaderStore } from "../store/UseHeaderStore";
+import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseExportStore } from "../store/UseExportStore";
 import { ExportModal } from "./ExportModal";
 
@@ -31,7 +32,26 @@ export const Header = () => {
     isWallControlsEnabled,
   } = UseHeaderStore();
 
+  const { baseWidth, baseHeight, getActualScreenSize } = UseCanvasStore();
+
   const { openModal } = UseExportStore();
+
+  // Get actual screen size for validation
+  const actualScreenSize = getActualScreenSize();
+
+  // Validation rules - Wall always bigger than Screen
+  const canIncreaseScreenWidth =
+    actualScreenSize.width + baseWidth <= wallWidth;
+  const canDecreaseScreenWidth = actualScreenSize.width > baseWidth;
+  const canIncreaseScreenHeight =
+    actualScreenSize.height + baseHeight <= wallHeight;
+  const canDecreaseScreenHeight = actualScreenSize.height > baseHeight;
+
+  // Wall validation - Screen always smaller than Wall
+  const canIncreaseWallWidth = true; // Wall can always increase
+  const canDecreaseWallWidth = wallWidth > actualScreenSize.width + 1; // Keep 1m minimum margin
+  const canIncreaseWallHeight = true; // Wall can always increase
+  const canDecreaseWallHeight = wallHeight > actualScreenSize.height + 1; // Keep 1m minimum margin
 
   const NumberInput = ({
     label,
@@ -41,19 +61,21 @@ export const Header = () => {
     onChange,
     step = 0.01,
     disabled = false,
+    canIncrease = true,
+    canDecrease = true,
   }) => (
     <div className="flex flex-col space-y-1">
       <label className="text-xs text-gray-600">{label}</label>
       <div
-        className={`flex  items-center justify-between w-[110px] border rounded bg-white ${
+        className={`flex items-center justify-between w-[110px] border rounded bg-white ${
           disabled ? "border-gray-200 bg-gray-50" : "border-gray-300"
         }`}
       >
         <button
           onClick={onDecrement}
-          disabled={disabled}
+          disabled={disabled || !canDecrease}
           className={`px-3 py-2 ${
-            disabled
+            disabled || !canDecrease
               ? "text-gray-300 cursor-not-allowed"
               : "text-gray-500 hover:text-gray-600 hover:bg-gray-50"
           }`}
@@ -79,9 +101,9 @@ export const Header = () => {
         />
         <button
           onClick={onIncrement}
-          disabled={disabled}
+          disabled={disabled || !canIncrease}
           className={`px-3 py-2 ${
-            disabled
+            disabled || !canIncrease
               ? "text-gray-300 cursor-not-allowed"
               : "text-gray-500 hover:text-gray-600 hover:bg-gray-50"
           }`}
@@ -149,6 +171,8 @@ export const Header = () => {
                 onDecrement={decrementScreenHeight}
                 onChange={setScreenHeight}
                 disabled={!screenControlsEnabled}
+                canIncrease={canIncreaseScreenHeight}
+                canDecrease={canDecreaseScreenHeight}
               />
 
               <NumberInput
@@ -158,6 +182,8 @@ export const Header = () => {
                 onDecrement={decrementScreenWidth}
                 onChange={setScreenWidth}
                 disabled={!screenControlsEnabled}
+                canIncrease={canIncreaseScreenWidth}
+                canDecrease={canDecreaseScreenWidth}
               />
             </div>
           </div>
@@ -182,6 +208,8 @@ export const Header = () => {
                 onChange={setWallHeight}
                 step={0.1}
                 disabled={!wallControlsEnabled}
+                canIncrease={canIncreaseWallHeight}
+                canDecrease={canDecreaseWallHeight}
               />
 
               <NumberInput
@@ -192,6 +220,8 @@ export const Header = () => {
                 onChange={setWallWidth}
                 step={0.1}
                 disabled={!wallControlsEnabled}
+                canIncrease={canIncreaseWallWidth}
+                canDecrease={canDecreaseWallWidth}
               />
             </div>
           </div>

@@ -10,9 +10,8 @@ export const UseCanvasStore = create((set, get) => ({
   screenWidth: 0, // meters - start at 0
   screenHeight: 0, // meters - start at 0
 
-  // Wall basic properties
-  wallWidth: 5, // meters
-  wallHeight: 3, // meters
+  wallWidth: 0,
+  wallHeight: 0,
 
   // Cabinet/Module base size (derived from selected model)
   baseWidth: 0, // meters - no default, must be set from config

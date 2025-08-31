@@ -37,10 +37,15 @@ export const Navbar = () => {
     { id: "No Content", label: "No Content", icon: X },
   ];
 
-  const handleChangeModel = () => {
+  const handleChangeModel = (e) => {
+    // Prevent event bubbling if this button is inside a larger clickable area
+    e.preventDefault();
+    e.stopPropagation();
+
     if (selectedModel && selectedModel.displayTypeId) {
       // Open modal with pre-selected display type
       selectDisplayType(selectedModel.displayTypeId);
+      openModal();
     } else {
       // Open modal from beginning
       openModal();
@@ -83,9 +88,11 @@ export const Navbar = () => {
     // Reset input value to allow selecting the same file again
     event.target.value = "";
   };
+
   const handleRoomImageUpload = (fileUrl) => {
     setRoomImageUrl(fileUrl);
   };
+
   return (
     <div className="w-[350px] h-screen bg-white">
       {/* Header with Logo */}
@@ -173,14 +180,13 @@ export const Navbar = () => {
                     <div className="flex items-center justify-center">
                       <div className="space-y-1 ">
                         <CirclePlus className="w-4 h-4 mx-auto text-gray-500" />
-
                         <p className="text-xs text-gray-700">Select Model</p>
                       </div>
                     </div>
                   </button>
                 ) : (
                   /* Fill Model */
-                  <div className="flex items-center justify-between w-full m-3 cursor-pointer">
+                  <div className="flex items-center justify-between w-full m-3">
                     <div>
                       <p className="text-xs text-gray-500">
                         {selectedModel.name}
@@ -190,7 +196,7 @@ export const Navbar = () => {
                       </p>
                       <button
                         onClick={handleChangeModel}
-                        className="flex items-center mt-4 space-x-2 text-gray-500 hover:text-gray-700"
+                        className="flex items-center mt-4 space-x-2 text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
                       >
                         <span className="text-xs">Change Model</span>
                         <ArrowRight className="w-4 h-4" />
@@ -263,7 +269,6 @@ export const Navbar = () => {
             </p>
 
             <DragDropUpload onFileSelect={handleRoomImageUpload} />
-
           </div>
         )}
       </div>

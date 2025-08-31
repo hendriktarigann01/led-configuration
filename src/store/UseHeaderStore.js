@@ -8,10 +8,24 @@ export const UseHeaderStore = create((set, get) => ({
   screenHeight: 0,
   screenWidth: 0,
 
-  // Wall settings
+  // Wall settings with default values
   unit: "Meter",
-  wallHeight: 0,
-  wallWidth: 0,
+  wallHeight: 3, // Default 3m height
+  wallWidth: 5, // Default 5m width
+
+  // Initialize default wall values in canvas store
+  initializeDefaults: () => {
+    const canvasStore = UseCanvasStore.getState();
+    const { wallWidth, wallHeight } = get();
+
+    // Only set if canvas store doesn't have proper wall dimensions
+    if (
+      canvasStore.wallWidth !== wallWidth ||
+      canvasStore.wallHeight !== wallHeight
+    ) {
+      canvasStore.setWallSize(wallWidth, wallHeight);
+    }
+  },
 
   // Screen dimension actions
   setScreenSize: (size) => set({ screenSize: size }),
@@ -29,17 +43,23 @@ export const UseHeaderStore = create((set, get) => ({
     canvasStore.setScreenSize(width, get().screenHeight);
   },
 
-  // Wall dimension actions
+  // Wall dimension actions with minimum limits
   setWallHeight: (height) => {
     const canvasStore = UseCanvasStore.getState();
-    set({ wallHeight: height });
-    canvasStore.setWallSize(get().wallWidth, height);
+    const minHeight = 3; // Minimum 3m height
+    const finalHeight = Math.max(minHeight, height);
+
+    set({ wallHeight: finalHeight });
+    canvasStore.setWallSize(get().wallWidth, finalHeight);
   },
 
   setWallWidth: (width) => {
     const canvasStore = UseCanvasStore.getState();
-    set({ wallWidth: width });
-    canvasStore.setWallSize(width, get().wallHeight);
+    const minWidth = 5; // Minimum 5m width
+    const finalWidth = Math.max(minWidth, width);
+
+    set({ wallWidth: finalWidth });
+    canvasStore.setWallSize(finalWidth, get().wallHeight);
   },
 
   // Screen increment/decrement utilities
@@ -93,7 +113,7 @@ export const UseHeaderStore = create((set, get) => ({
     state.setScreenWidth(newWidth);
   },
 
-  // Wall increment/decrement utilities (by 1 unit)
+  // Wall increment/decrement utilities (by 1 unit) with minimum limits
   incrementWallHeight: () => {
     const state = get();
     const newHeight = Number((state.wallHeight + 1).toFixed(1));
@@ -102,7 +122,11 @@ export const UseHeaderStore = create((set, get) => ({
 
   decrementWallHeight: () => {
     const state = get();
-    const newHeight = Math.max(1, Number((state.wallHeight - 1).toFixed(1)));
+    const minHeight = 3; // Minimum 3m height
+    const newHeight = Math.max(
+      minHeight,
+      Number((state.wallHeight - 1).toFixed(1))
+    );
     state.setWallHeight(newHeight);
   },
 
@@ -114,7 +138,11 @@ export const UseHeaderStore = create((set, get) => ({
 
   decrementWallWidth: () => {
     const state = get();
-    const newWidth = Math.max(1, Number((state.wallWidth - 1).toFixed(1)));
+    const minWidth = 5; // Minimum 5m width
+    const newWidth = Math.max(
+      minWidth,
+      Number((state.wallWidth - 1).toFixed(1))
+    );
     state.setWallWidth(newWidth);
   },
 
@@ -125,8 +153,9 @@ export const UseHeaderStore = create((set, get) => ({
   },
 
   isWallControlsEnabled: () => {
-    const state = get();
-    return state.wallHeight > 0 && state.wallWidth > 0;
+    const canvasStore = UseCanvasStore.getState();
+    // Wall controls are enabled when model is configured
+    return canvasStore.isConfigured();
   },
 
   // Canvas integration methods
@@ -135,6 +164,10 @@ export const UseHeaderStore = create((set, get) => ({
 
   syncWithCanvas: () => {
     const canvasStore = UseCanvasStore.getState();
+
+    // Initialize defaults first if needed
+    get().initializeDefaults();
+
     set({
       screenWidth: canvasStore.screenWidth,
       screenHeight: canvasStore.screenHeight,

@@ -10,8 +10,9 @@ export const UseCanvasStore = create((set, get) => ({
   screenWidth: 0, // meters - start at 0
   screenHeight: 0, // meters - start at 0
 
-  wallWidth: 0,
-  wallHeight: 0,
+  // Default wall size (5m width, 3m height)
+  wallWidth: 5,
+  wallHeight: 3,
 
   // Cabinet/Module base size (derived from selected model)
   baseWidth: 0, // meters - no default, must be set from config
@@ -38,9 +39,13 @@ export const UseCanvasStore = create((set, get) => ({
     const calculator = UseCalculatorStore.getState();
     const validated = calculator.validateWallSize(width, height);
 
+    // Ensure minimum wall size is 5m x 3m
+    const finalWidth = Math.max(5, validated.width);
+    const finalHeight = Math.max(3, validated.height);
+
     set({
-      wallWidth: validated.width,
-      wallHeight: validated.height,
+      wallWidth: finalWidth,
+      wallHeight: finalHeight,
     });
   },
 
@@ -87,13 +92,13 @@ export const UseCanvasStore = create((set, get) => ({
     );
   },
 
-  // Reset to defaults
+  // Reset to defaults (keep default wall size)
   reset: () =>
     set({
       screenWidth: 0,
       screenHeight: 0,
-      wallWidth: 5,
-      wallHeight: 3,
+      wallWidth: 5, // Keep default 5m width
+      wallHeight: 3, // Keep default 3m height
       baseWidth: 0,
       baseHeight: 0,
     }),
@@ -109,6 +114,9 @@ export const UseCanvasStore = create((set, get) => ({
       // Initialize screen size to one unit
       screenWidth: dimensions.width,
       screenHeight: dimensions.height,
+      // Ensure wall defaults are maintained (wall controls should be enabled after model selection)
+      wallWidth: Math.max(5, get().wallWidth), // Keep existing or set to 5m minimum
+      wallHeight: Math.max(3, get().wallHeight), // Keep existing or set to 3m minimum
     });
   },
 

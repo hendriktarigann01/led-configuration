@@ -1,139 +1,114 @@
 import React from "react";
-import { X, Download } from "lucide-react";
-import { UseExportStore } from "../store/UseExportStore";
+import { X } from "lucide-react";
+import { UseCanvasStore } from "../store/UseCanvasStore";
 
-export const ExportModal = () => {
+export const ResultModal = ({ isOpen, onClose }) => {
   const {
-    isOpen,
-    pdfTitle,
-    projectName,
-    userName,
-    email,
-    setPdfTitle,
-    setProjectName,
-    setUserName,
-    setEmail,
-    closeModal,
-    exportToPdf,
-    isExporting,
-    isFormValid,
-  } = UseExportStore();
+    getCabinetCount,
+    getActualScreenSize,
+    baseWidth,
+    baseHeight,
+    wallWidth,
+    wallHeight,
+    isConfigured,
+  } = UseCanvasStore();
 
-  if (!isOpen) return null;
+  if (!isOpen || !isConfigured()) return null;
 
-  const handleSubmit = () => {
-    if (!isFormValid()) {
-      alert("Please fill in all required fields correctly");
-      return;
-    }
-    exportToPdf();
-  };
-
-  const isFormComplete = isFormValid();
+  const cabinetCount = getCabinetCount();
+  const actualScreenSize = getActualScreenSize();
+  const totalUnits = cabinetCount.horizontal * cabinetCount.vertical;
+  const displayArea = (
+    actualScreenSize.width * actualScreenSize.height
+  ).toFixed(2);
 
   return (
-    <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-50 overflow-hidden">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl h-[90vh] max-h-[600px] overflow-hidden">
-        <div className="p-6 h-full">
+    <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+        <div className="p-8 h-full overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-medium text-gray-800">
-              Export Calculator Simulation
+            <h2 className="text-2xl font-medium text-gray-800">
+              Specification
             </h2>
             <button
-              onClick={closeModal}
+              onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
-              disabled={isExporting}
             >
               <X size={24} />
             </button>
           </div>
 
-          {/* Form */}
-          <div className="space-y-6">
-            {/* PDF Title */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                PDF Title<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={pdfTitle}
-                onChange={(e) => setPdfTitle(e.target.value)}
-                placeholder="ex. Calculator LED P 1.8"
-                disabled={isExporting}
-                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] focus:border-transparent placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              />
+          {/* Content */}
+          <div className="space-y-8">
+            {/* Display Requirements */}
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-medium text-gray-700 mb-4">
+                  Display Requirements
+                </h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1">
+                    Screen Configuration
+                  </h4>
+                  <p className="text-gray-800">
+                    {cabinetCount.horizontal} x {cabinetCount.vertical}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1">
+                    Number of screens
+                  </h4>
+                  <p className="text-gray-800">{totalUnits} Pcs</p>
+                </div>
+              </div>
             </div>
 
-            {/* Project Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Project Name<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                placeholder="ex. Building Project"
-                disabled={isExporting}
-                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] focus:border-transparent placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              />
+            {/* Display Wall */}
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-medium text-gray-700 mb-4">
+                  Display Wall
+                </h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1">
+                    Dimensions
+                  </h4>
+                  <p className="text-gray-800">
+                    {actualScreenSize.width.toFixed(3)} x
+                    {actualScreenSize.height.toFixed(3)} 
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1">
+                    Display Area
+                  </h4>
+                  <p className="text-gray-800">{displayArea} m2</p>
+                </div>
+              </div>
             </div>
 
-            {/* Your Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Name<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                placeholder="ex. Daniel Samantha"
-                disabled={isExporting}
-                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] focus:border-transparent placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="ex. samantha@mj.com"
-                disabled={isExporting}
-                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] focus:border-transparent placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              />
-            </div>
-
-            {/* Submit Button */}
-            <div className="pt-4 flex justify-center">
-              <button
-                onClick={handleSubmit}
-                disabled={!isFormComplete || isExporting}
-                className={`w-40 font-medium py-3 px-4 rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${
-                  isFormComplete && !isExporting
-                    ? "bg-[#3AAFA9] hover:bg-[#2d8680] text-white shadow-md hover:shadow-lg"
-                    : "bg-gray-400 text-gray-600 cursor-not-allowed"
-                }`}
-              >
-                {isExporting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    Exporting...
-                  </>
-                ) : (
-                  <>
-                    <Download size={18} />
-                    Export to PDF
-                  </>
-                )}
-              </button>
+            {/* Power Requirements */}
+            <div className="grid grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-medium text-gray-700 mb-4">
+                  Power Requirements
+                </h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1">
+                    Max Power
+                  </h4>
+                  <p className="text-gray-800">
+                    {(totalUnits * 180).toFixed(0)} W
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

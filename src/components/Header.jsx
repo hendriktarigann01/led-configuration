@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FileDown, Eye } from "lucide-react";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseExportStore } from "../store/UseExportStore";
 import { ExportModal } from "./ExportModal";
+import { ResultModal } from "./ResultModal";
 
 export const Header = () => {
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+
   const {
     screenSize,
     resolution,
@@ -30,11 +33,19 @@ export const Header = () => {
     decrementWallWidth,
     isScreenControlsEnabled,
     isWallControlsEnabled,
+    initializeDefaults,
+    syncWithCanvas,
   } = UseHeaderStore();
 
-  const { baseWidth, baseHeight, getActualScreenSize } = UseCanvasStore();
-
+  const { baseWidth, baseHeight, getActualScreenSize, isConfigured } =
+    UseCanvasStore();
   const { openModal } = UseExportStore();
+
+  // Initialize defaults and sync on component mount
+  useEffect(() => {
+    initializeDefaults();
+    syncWithCanvas();
+  }, [initializeDefaults, syncWithCanvas]);
 
   // Get actual screen size for validation
   const actualScreenSize = getActualScreenSize();
@@ -47,11 +58,13 @@ export const Header = () => {
     actualScreenSize.height + baseHeight <= wallHeight;
   const canDecreaseScreenHeight = actualScreenSize.height > baseHeight;
 
-  // Wall validation - Screen always smaller than Wall
+  // Wall validation with minimum limits (5m width, 3m height)
   const canIncreaseWallWidth = true; // Wall can always increase
-  const canDecreaseWallWidth = wallWidth > actualScreenSize.width + 1; // Keep 1m minimum margin
+  const canDecreaseWallWidth =
+    wallWidth > 5 && wallWidth > actualScreenSize.width + 1; // Cannot go below 5m and must keep margin
   const canIncreaseWallHeight = true; // Wall can always increase
-  const canDecreaseWallHeight = wallHeight > actualScreenSize.height + 1; // Keep 1m minimum margin
+  const canDecreaseWallHeight =
+    wallHeight > 3 && wallHeight > actualScreenSize.height + 1; // Cannot go below 3m and must keep margin
 
   const NumberInput = ({
     label,
@@ -236,15 +249,27 @@ export const Header = () => {
               <span className="text-xs">Export to PDF</span>
             </button>
 
-            <button className="flex items-center justify-center space-x-2 w-[144px] px-4 py-2 cursor-pointer bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors">
+            <button
+              onClick={() => setIsResultModalOpen(true)}
+              disabled={!isConfigured()}
+              className={`flex items-center justify-center space-x-2 w-[144px] px-4 py-2 rounded text-xs transition-colors ${
+                isConfigured()
+                  ? "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+                  : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
+              }`}
+            >
               <Eye size={16} />
-              <span className="text-xs">View Result</span>
+              <span>View Result</span>
             </button>
           </div>
         </div>
       </div>
 
       <ExportModal />
+      <ResultModal
+        isOpen={isResultModalOpen}
+        onClose={() => setIsResultModalOpen(false)}
+      />
     </>
   );
 };

@@ -4,6 +4,7 @@ import { Header } from "../components/Header";
 import { Canvas } from "../components/Canvas";
 import { ConfigurationModal } from "../components/ConfigurationModal";
 import { ExportModal } from "../components/ExportModal";
+import { ResultModal } from "../components/ResultModal";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
@@ -58,6 +59,7 @@ const Layout = () => {
       {/* Modal - renders at root level */}
       <ConfigurationModal />
       <ExportModal />
+      <ResultModal />
     </div>
   );
 };

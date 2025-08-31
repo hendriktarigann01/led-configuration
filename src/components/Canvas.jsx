@@ -29,16 +29,27 @@ export const Canvas = () => {
   const { openModal } = UseModalStore();
   const { selectedModel, selectedContent, customImageUrl, roomImageUrl } =
     UseNavbarStore();
-  const { syncWithCanvas } = UseHeaderStore();
+  const {
+    syncWithCanvas,
+    incrementScreenWidth,
+    decrementScreenWidth,
+    incrementScreenHeight,
+    decrementScreenHeight,
+    initializeDefaults,
+  } = UseHeaderStore();
 
-  // Update canvas store when model is selected
+  // Update canvas store when model is selected and initialize defaults
   useEffect(() => {
     if (selectedModel && selectedModel.modelData) {
       updateModelData(selectedModel.modelData, selectedModel.name);
-      // Sync header store with updated canvas values
-      setTimeout(() => syncWithCanvas(), 0);
+
+      // Initialize defaults first, then sync
+      setTimeout(() => {
+        initializeDefaults();
+        syncWithCanvas();
+      }, 50);
     }
-  }, [selectedModel, updateModelData, syncWithCanvas]);
+  }, [selectedModel, updateModelData, syncWithCanvas, initializeDefaults]);
 
   // Calculate display values
   const cabinetCount = getCabinetCount();
@@ -46,39 +57,33 @@ export const Canvas = () => {
   const imageScale = getImageScale();
   const configured = isConfigured();
 
-  // Handle control button actions with proper step calculations
+  // Get validation from header store for consistent button states
+  const canIncreaseScreenWidth =
+    actualScreenSize.width + baseWidth <= wallWidth;
+  const canDecreaseScreenWidth = actualScreenSize.width > baseWidth;
+  const canIncreaseScreenHeight =
+    actualScreenSize.height + baseHeight <= wallHeight;
+  const canDecreaseScreenHeight = actualScreenSize.height > baseHeight;
+
+  // Handle control button actions using header store methods for consistency
   const handleWidthIncrement = () => {
-    if (!configured || baseWidth === 0) return;
-    const newWidth = Number((screenWidth + baseWidth).toFixed(3));
-    setScreenSize(newWidth, screenHeight);
-    syncWithCanvas();
+    if (!configured || !canIncreaseScreenWidth) return;
+    incrementScreenWidth();
   };
 
   const handleWidthDecrement = () => {
-    if (!configured || baseWidth === 0) return;
-    const newWidth = Math.max(
-      baseWidth,
-      Number((screenWidth - baseWidth).toFixed(3))
-    );
-    setScreenSize(newWidth, screenHeight);
-    syncWithCanvas();
+    if (!configured || !canDecreaseScreenWidth) return;
+    decrementScreenWidth();
   };
 
   const handleHeightIncrement = () => {
-    if (!configured || baseHeight === 0) return;
-    const newHeight = Number((screenHeight + baseHeight).toFixed(3));
-    setScreenSize(screenWidth, newHeight);
-    syncWithCanvas();
+    if (!configured || !canIncreaseScreenHeight) return;
+    incrementScreenHeight();
   };
 
   const handleHeightDecrement = () => {
-    if (!configured || baseHeight === 0) return;
-    const newHeight = Math.max(
-      baseHeight,
-      Number((screenHeight - baseHeight).toFixed(3))
-    );
-    setScreenSize(screenWidth, newHeight);
-    syncWithCanvas();
+    if (!configured || !canDecreaseScreenHeight) return;
+    decrementScreenHeight();
   };
 
   // Calculate dynamic image and canvas dimensions
@@ -86,8 +91,8 @@ export const Canvas = () => {
   const canvasContainerHeight = 300;
 
   // Calculate wall scale (how much of the canvas the wall occupies)
-  const maxWallWidth = 10; // maximum wall width in meters for scaling reference
-  const maxWallHeight = 6; // maximum wall height in meters for scaling reference
+  const maxWallWidth = 11; // maximum wall width in meters for scaling reference
+  const maxWallHeight = 8; // increased from 6 to 8 for better scaling sensitivity
 
   const wallScaleX = Math.min(1, wallWidth / maxWallWidth);
   const wallScaleY = Math.min(1, wallHeight / maxWallHeight);
@@ -100,20 +105,36 @@ export const Canvas = () => {
   const screenToWallRatioX = actualScreenSize.width / wallWidth;
   const screenToWallRatioY = actualScreenSize.height / wallHeight;
 
-  // Image size is screen size relative to wall, scaled to fit in canvas
   const imageWidth = Math.min(
     effectiveCanvasWidth * screenToWallRatioX,
-    effectiveCanvasWidth * 1.5 // max 150% of canvas width
+    effectiveCanvasWidth * 1.5
   );
   const imageHeight = Math.min(
     effectiveCanvasHeight * screenToWallRatioY,
-    effectiveCanvasHeight * 1.5 // max 150% of canvas height
+    effectiveCanvasHeight * 1.5
   );
 
   // Calculate measurement line lengths based on proportions
-  const measurementLineLength = 80; // base length in pixels
-  const horizontalMeasureLength = Math.max(imageWidth * 0.5);
-  const verticalMeasureLength = Math.max(imageHeight * 0.5);
+  const horizontalMeasureLength = Math.min(imageWidth, effectiveCanvasWidth);
+  const verticalMeasureLength = Math.min(imageHeight, effectiveCanvasHeight);
+
+  // Calculate remaining space for measures (NEW FORMULAS)
+  const remainingWallHeight = (wallHeight - actualScreenSize.height) / 2;
+  const remainingWallWidth = (wallWidth - actualScreenSize.width) / 2;
+
+  // Calculate realistic human silhouette height based on wall height
+  const humanRealHeight = 1.7; // 170 cm in meters (standard Indonesian height)
+
+  // Use fixed canvas height for consistent calculation
+  const baseCanvasHeight = canvasContainerHeight; // Always use full 300px canvas height
+
+  // Calculate human height relative to wall height, then scale to canvas
+  const humanToWallRatio = humanRealHeight / wallHeight;
+  const humanDisplayHeight = baseCanvasHeight * humanToWallRatio;
+
+  // Only minimal minimum size constraint
+  const minHumanHeight = 8; // minimum 8px for very tall walls
+  const finalHumanHeight = Math.max(minHumanHeight, humanDisplayHeight);
 
   // Get content source based on selected content
   const getContentSource = () => {
@@ -151,7 +172,7 @@ export const Canvas = () => {
         <div className="relative m-auto flex justify-center items-center">
           {configured && selectedModel ? (
             /* Canvas Preview */
-            <div className="relative w-[650px] h-[370px] z-10 rounded-lg flex items-center justify-center overflow-hidden">
+            <div className="relative w-[650px] h-[370px] rounded-lg flex items-center justify-center overflow-hidden">
               <div
                 className={`w-[550px] h-[300px] ${
                   roomImageUrl ? "bg-transparent" : "bg-white"
@@ -182,37 +203,37 @@ export const Canvas = () => {
                     {/* Dynamic Video Measurements */}
                     {/* V Top Right Measure Image */}
                     <div
-                      className="absolute top-0 right-0 border-l border-dashed h- border-teal-400 pointer-events-none"
+                      className="absolute top-0 right-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateX(100%) translateY(-80%)",
-                        height: `${verticalMeasureLength}px`,
+                        transform: "translateX(80%) translateY(-80%)",
+                        height: `${verticalMeasureLength + 180}px`,
                       }}
                     ></div>
 
                     {/* V Top Left Measure Image */}
                     <div
-                      className="absolute top-0 left-0 border-l border-dashed h- border-teal-400 pointer-events-none"
+                      className="absolute top-0 left-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateX(-100%) translateY(-80%)",
-                        height: `${verticalMeasureLength}px`,
+                        transform: "translateX(-80%) translateY(-80%)",
+                        height: `${verticalMeasureLength + 180}px`,
                       }}
                     ></div>
 
                     {/* H Bottom Right Measure Image */}
                     <div
-                      className="absolute bottom-0 right-0 border-t border-dashed w-96 border-teal-400 pointer-events-none"
+                      className="absolute top-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateY(100%) translateX(80%)",
-                        width: `${horizontalMeasureLength}px`,
+                        transform: "translateY(100%) translateX(-100%)",
+                        width: `${horizontalMeasureLength + 250}px`,
                       }}
                     ></div>
 
                     {/* H Bottom Left Measure Image */}
                     <div
-                      className="absolute bottom-0 left-0 border-t border-dashed w-96 border-teal-400 pointer-events-none"
+                      className="absolute bottom-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateY(100%) translateX(-80%)",
-                        width: `${horizontalMeasureLength}px`,
+                        transform: "translateY(100%) translateX(-100%)",
+                        width: `${horizontalMeasureLength + 250}px`,
                       }}
                     ></div>
                   </div>
@@ -228,11 +249,11 @@ export const Canvas = () => {
                       <img
                         src={contentSource}
                         alt="Canvas Preview"
-                        className="object-fill w-full h-full z-10"
+                        className="object-fill w-full h-full z-20"
                       />
 
                       {/* Overlay grid */}
-                      <div className="absolute inset-0 z-20 pointer-events-none">
+                      <div className="absolute inset-0 z-30 pointer-events-none">
                         {/* Vertical lines */}
                         <div className="absolute top-0 bottom-0 left-1/3 border-l-2 border-[#D9D9D9]/40"></div>
                         <div className="absolute top-0 bottom-0 left-2/3 border-l-2 border-[#D9D9D9]/40"></div>
@@ -245,37 +266,37 @@ export const Canvas = () => {
                     {/* Dynamic Image Measurements */}
                     {/* V Top Right Measure Image */}
                     <div
-                      className="absolute top-0 right-0 border-l border-dashed h- border-teal-400 pointer-events-none"
+                      className="absolute top-0 right-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateX(100%) translateY(-80%)",
-                        height: `${verticalMeasureLength}px`,
+                        transform: "translateX(80%) translateY(-100%)",
+                        height: `${verticalMeasureLength + 180}px`,
                       }}
                     ></div>
 
                     {/* V Top Left Measure Image */}
                     <div
-                      className="absolute top-0 left-0 border-l border-dashed h- border-teal-400 pointer-events-none"
+                      className="absolute top-0 left-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateX(-100%) translateY(-80%)",
-                        height: `${verticalMeasureLength}px`,
+                        transform: "translateX(-80%) translateY(-100%)",
+                        height: `${verticalMeasureLength + 180}px`,
                       }}
                     ></div>
 
                     {/* H Bottom Right Measure Image */}
                     <div
-                      className="absolute bottom-0 right-0 border-t border-dashed w-96 border-teal-400 pointer-events-none"
+                      className="absolute top-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateY(100%) translateX(80%)",
-                        width: `${horizontalMeasureLength}px`,
+                        transform: "translateY(100%) translateX(-100%)",
+                        width: `${horizontalMeasureLength + 250}px`,
                       }}
                     ></div>
 
                     {/* H Bottom Left Measure Image */}
                     <div
-                      className="absolute bottom-0 left-0 border-t border-dashed w-96 border-teal-400 pointer-events-none"
+                      className="absolute bottom-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateY(100%) translateX(-80%)",
-                        width: `${horizontalMeasureLength}px`,
+                        transform: "translateY(100%) translateX(-100%)",
+                        width: `${horizontalMeasureLength + 250}px`,
                       }}
                     ></div>
                   </div>
@@ -303,44 +324,47 @@ export const Canvas = () => {
                 }}
               ></div>
 
-              {/* Dynamic Wall Dimension Labels */}
-              <div className="absolute left-4 top-[30%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
+              {/* Start Measure of Height */}
+              <div className="absolute left-4 top-[25%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
                 <span
                   className="text-xs text-gray-700 text-center rotate-180"
                   style={{ writingMode: "vertical-lr" }}
                 >
-                  {(wallHeight / 2).toFixed(2)} m
+                  {remainingWallHeight.toFixed(2)} m
                 </span>
               </div>
 
-              <div className="absolute left-4 top-[70%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
+              <div className="absolute left-4 top-[75%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
                 <span
                   className="text-xs text-gray-700 text-center rotate-180"
                   style={{ writingMode: "vertical-lr" }}
                 >
-                  {(wallHeight / 2).toFixed(2)} m
+                  {remainingWallHeight.toFixed(2)} m
                 </span>
               </div>
+              {/* End Measure of Height*/}
 
+              {/* Start Measure of Width */}
               <div className="absolute top-0 left-1/4 -translate-x-1/2 flex flex-col items-center justify-center space-y-2 z-50">
                 <span className="text-xs text-gray-700 text-center">
-                  {(wallWidth / 2).toFixed(2)} m
+                  {remainingWallWidth.toFixed(2)} m
                 </span>
               </div>
 
               <div className="absolute top-0 right-1/4 translate-x-1/2 flex flex-col items-center justify-center space-y-2 z-50">
                 <span className="text-xs text-gray-700 text-center">
-                  {(wallWidth / 2).toFixed(2)} m
+                  {remainingWallWidth.toFixed(2)} m
                 </span>
               </div>
+              {/* End Measure of Width */}
 
-              {/* Top controls */}
+              {/* Width controls with proper validation */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-50">
                 <button
                   onClick={handleWidthDecrement}
-                  disabled={!configured}
+                  disabled={!configured || !canDecreaseScreenWidth}
                   className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured
+                    configured && canDecreaseScreenWidth
                       ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
                       : "text-gray-300 border-gray-200 cursor-not-allowed"
                   }`}
@@ -352,9 +376,9 @@ export const Canvas = () => {
                 </span>
                 <button
                   onClick={handleWidthIncrement}
-                  disabled={!configured}
+                  disabled={!configured || !canIncreaseScreenWidth}
                   className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured
+                    configured && canIncreaseScreenWidth
                       ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
                       : "text-gray-300 border-gray-200 cursor-not-allowed"
                   }`}
@@ -363,13 +387,13 @@ export const Canvas = () => {
                 </button>
               </div>
 
-              {/* Left controls */}
+              {/* Height controls with proper validation */}
               <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
                 <button
                   onClick={handleHeightIncrement}
-                  disabled={!configured}
+                  disabled={!configured || !canIncreaseScreenHeight}
                   className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured
+                    configured && canIncreaseScreenHeight
                       ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
                       : "text-gray-300 border-gray-200 cursor-not-allowed"
                   }`}
@@ -386,9 +410,9 @@ export const Canvas = () => {
                 </div>
                 <button
                   onClick={handleHeightDecrement}
-                  disabled={!configured}
+                  disabled={!configured || !canDecreaseScreenHeight}
                   className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured
+                    configured && canDecreaseScreenHeight
                       ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
                       : "text-gray-300 border-gray-200 cursor-not-allowed"
                   }`}
@@ -397,16 +421,30 @@ export const Canvas = () => {
                 </button>
               </div>
 
-              {/* Human silhouette */}
+              {/* Human silhouette container with fixed position */}
               <div
-                className="absolute -right-2 w-auto h-36 rounded flex items-center justify-center z-50"
-                style={{ bottom: "calc(50% - 150px)" }}
+                className="absolute -right-21 bottom-8 z-50"
+                style={{
+                  width: "150px", // Fixed width container
+                  height: "auto", // Fixed height container
+                  alignItems: "flex-end", // Human selalu di bottom container
+                }}
               >
-                <img
-                  src="/human.webp"
-                  alt="Human Scale"
-                  className="w-full h-full"
-                />
+                {/* Human silhouette with dynamic height only */}
+                <div className="relative flex flex-col">
+                  <img
+                    src="/human.webp"
+                    alt={`Human Scale Reference (1.7m) - ${(
+                      humanToWallRatio * 100
+                    ).toFixed(1)}% of wall`}
+                    style={{
+                      height: `${finalHumanHeight}px`,
+                      width: "auto",
+                      objectFit: "contain",
+                      maxWidth: "80px", // Ensure width doesn't get too wide
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Cabinet Count Info */}

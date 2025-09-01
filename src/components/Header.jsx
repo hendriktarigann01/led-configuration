@@ -35,10 +35,20 @@ export const Header = () => {
     isWallControlsEnabled,
     initializeDefaults,
     syncWithCanvas,
+    // Add new methods for cabinet controls
+    incrementCabinetWidth,
+    decrementCabinetWidth,
+    incrementCabinetHeight,
+    decrementCabinetHeight,
   } = UseHeaderStore();
 
-  const { baseWidth, baseHeight, getActualScreenSize, isConfigured } =
-    UseCanvasStore();
+  const {
+    baseWidth,
+    baseHeight,
+    getActualScreenSize,
+    isConfigured,
+    getCabinetCount,
+  } = UseCanvasStore();
   const { openModal } = UseExportStore();
 
   // Initialize defaults and sync on component mount
@@ -47,8 +57,9 @@ export const Header = () => {
     syncWithCanvas();
   }, [initializeDefaults, syncWithCanvas]);
 
-  // Get actual screen size for validation
+  // Get actual screen size and cabinet count for validation
   const actualScreenSize = getActualScreenSize();
+  const cabinetCount = getCabinetCount();
 
   // Validation rules - Wall always bigger than Screen
   const canIncreaseScreenWidth =
@@ -57,6 +68,14 @@ export const Header = () => {
   const canIncreaseScreenHeight =
     actualScreenSize.height + baseHeight <= wallHeight;
   const canDecreaseScreenHeight = actualScreenSize.height > baseHeight;
+
+  // Cabinet validation (same logic but different display)
+  const canIncreaseCabinetWidth = canIncreaseScreenWidth;
+  const canDecreaseCabinetWidth =
+    canDecreaseScreenWidth && cabinetCount.horizontal > 1;
+  const canIncreaseCabinetHeight = canIncreaseScreenHeight;
+  const canDecreaseCabinetHeight =
+    canDecreaseScreenHeight && cabinetCount.vertical > 1;
 
   // Wall validation with minimum limits (5m width, 3m height)
   const canIncreaseWallWidth = true; // Wall can always increase
@@ -76,6 +95,7 @@ export const Header = () => {
     disabled = false,
     canIncrease = true,
     canDecrease = true,
+    isInteger = false, // New prop for cabinet count display
   }) => (
     <div className="flex flex-col space-y-1">
       <label className="text-xs text-gray-600">{label}</label>
@@ -97,19 +117,19 @@ export const Header = () => {
         </button>
         <input
           type="number"
-          value={value}
+          value={isInteger ? Math.round(value) : value}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           step={step}
-          disabled={disabled}
+          disabled={disabled || isInteger} // Disable input for cabinet count
           className={`w-full text-center border-none outline-none text-xs
                     appearance-none
                     [appearance:textfield]
                     [&::-webkit-inner-spin-button]:appearance-none
                     [&::-webkit-outer-spin-button]:appearance-none
                     ${
-                      disabled
-                        ? "bg-gray-50 text-gray-400 cursor-not-allowed"
-                        : ""
+                      disabled || isInteger
+                        ? "bg-gray-50 text-gray-500 cursor-not-allowed"
+                        : "text-gray-500"
                     }`}
         />
         <button
@@ -148,6 +168,9 @@ export const Header = () => {
   const screenControlsEnabled = isScreenControlsEnabled();
   const wallControlsEnabled = isWallControlsEnabled();
 
+  // Determine if we're in cabinet mode
+  const isCabinetMode = screenSize === "Column/Row";
+
   return (
     <>
       <div className="bg-white border-gray-200 p-4">
@@ -169,7 +192,7 @@ export const Header = () => {
               <div className="flex flex-col space-y-1">
                 <label className="text-xs text-gray-600">Resolution</label>
                 <ToggleButton
-                  options={["FHD", "UHD"]}
+                  options={["Custom", "FHD", "UHD"]}
                   selected={resolution}
                   onChange={setResolution}
                 />
@@ -177,27 +200,59 @@ export const Header = () => {
             </div>
 
             <div className="flex items-end space-x-6">
-              <NumberInput
-                label="Screen Height(m)"
-                value={screenHeight}
-                onIncrement={incrementScreenHeight}
-                onDecrement={decrementScreenHeight}
-                onChange={setScreenHeight}
-                disabled={!screenControlsEnabled}
-                canIncrease={canIncreaseScreenHeight}
-                canDecrease={canDecreaseScreenHeight}
-              />
+              {isCabinetMode ? (
+                // Cabinet Mode - Show cabinet counts
+                <>
+                  <NumberInput
+                    label="Column Count"
+                    value={cabinetCount.vertical}
+                    onIncrement={incrementCabinetHeight}
+                    onDecrement={decrementCabinetHeight}
+                    onChange={() => {}} // No direct input for cabinet count
+                    disabled={!screenControlsEnabled}
+                    canIncrease={canIncreaseCabinetHeight}
+                    canDecrease={canDecreaseCabinetHeight}
+                    isInteger={true}
+                  />
 
-              <NumberInput
-                label="Screen Width(m)"
-                value={screenWidth}
-                onIncrement={incrementScreenWidth}
-                onDecrement={decrementScreenWidth}
-                onChange={setScreenWidth}
-                disabled={!screenControlsEnabled}
-                canIncrease={canIncreaseScreenWidth}
-                canDecrease={canDecreaseScreenWidth}
-              />
+                  <NumberInput
+                    label="Row Count"
+                    value={cabinetCount.horizontal}
+                    onIncrement={incrementCabinetWidth}
+                    onDecrement={decrementCabinetWidth}
+                    onChange={() => {}} // No direct input for cabinet count
+                    disabled={!screenControlsEnabled}
+                    canIncrease={canIncreaseCabinetWidth}
+                    canDecrease={canDecreaseCabinetWidth}
+                    isInteger={true}
+                  />
+                </>
+              ) : (
+                // Area Mode - Show screen dimensions in meters
+                <>
+                  <NumberInput
+                    label="Screen Height(m)"
+                    value={screenHeight}
+                    onIncrement={incrementScreenHeight}
+                    onDecrement={decrementScreenHeight}
+                    onChange={setScreenHeight}
+                    disabled={!screenControlsEnabled}
+                    canIncrease={canIncreaseScreenHeight}
+                    canDecrease={canDecreaseScreenHeight}
+                  />
+
+                  <NumberInput
+                    label="Screen Width(m)"
+                    value={screenWidth}
+                    onIncrement={incrementScreenWidth}
+                    onDecrement={decrementScreenWidth}
+                    onChange={setScreenWidth}
+                    disabled={!screenControlsEnabled}
+                    canIncrease={canIncreaseScreenWidth}
+                    canDecrease={canDecreaseScreenWidth}
+                  />
+                </>
+              )}
             </div>
           </div>
 

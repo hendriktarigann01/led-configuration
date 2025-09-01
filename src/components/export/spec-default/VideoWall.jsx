@@ -2,33 +2,38 @@ import { BasePage } from "../BasePage";
 
 export const VideoWall = () => {
   const specs = [
-    { label: "Pixel Pitch", value: "P 3.0" },
-    { label: "Refresh Rate", value: "1920Hz / 3840Hz / 7680Hz" },
-    { label: "Brightness", value: "5500 - 6000 Nits" },
+    { label: "Inch", value: "46”" },
+    { label: "Unit Size (mm)", value: "1,075 (W) x 606 (H) x 54 (D)" },
+    { label: "B2B", value: "1,8 mm" },
+    { label: "Brightness", value: "500 cd/m2" },
   ];
 
   const moduleSpecs = [
-    { label: "Resolution", value: "1078 (H) x 1078 (V) x 244 (D)" },
-    { label: "Control System", value: "Li Nova" },
+    { label: "Resolution", value: "FHD 1920 x 1080)" },
+    { label: "Contrast Ratio", value: "4000" },
     { label: "Aspect Ratio", value: "16 : 9" },
-    { label: "Viewing Angle", value: "120°H / 120°V" },
-    { label: "Color Output", value: "12%" },
-    { label: "Maximum Temp", value: "70°" },
-    { label: "Viewing Range", value: "3 to 10 M" },
-    { label: "H. Scanning Frequency", value: "15kHz - 80 kHz" },
-    { label: "V. Scanning Frequency", value: "50Hz - 200Hz" },
+    { label: "Display Color", value: "8 bit / 16.7 M" },
+    { label: "Color Gamut", value: "72%" },
+    { label: "Response Time", value: "8 ms" },
+    { label: "Viewing Angle", value: "178 (H) / 178 (V)" },
+    { label: "H. Scanning Frequency", value: "30 kHz ~ 81 kHz" },
+    { label: "V. Scanning Frequency", value: "48Hz ~ 75Hz" },
   ];
 
   const connectivitySpecs = [
-    { label: "Audio in/Out", value: "Stereo RCA Jack" },
-    { label: "Power Supply", value: "AC Input: 240 V | DC : 400 wc" },
+    { label: "Audio in/Out", value: "Stereo Mini Jack" },
+    { label: "Video In", value: "HDMI1, HDMI2" },
   ];
 
   const powerSpecs = [
-    { label: "Power Consumption (W)", value: "800 W" },
-    { label: "Standby Power", value: "15W/cm²" },
-    { label: "Operation Temperature", value: "0 - 60 °C" },
-    { label: "Storage Temperature", value: "0 - 60 °C" },
+    { label: "Power Supply", value: "AC 100 - 240 V / 50 - 60 Hz" },
+    { label: "Power Consumption (W)", value: "≤180 W" },
+    { label: "Standby Power", value: "3W" },
+  ];
+
+  const EnvirontmentSpecs = [
+    { label: "Operation Temperature", value: "0 ~ 50 ℃" },
+    { label: "Storage Temperature", value: "-20 ~ 65 ℃" },
     { label: "Operation", value: "24/7" },
   ];
 
@@ -105,7 +110,7 @@ export const VideoWall = () => {
                   className="py-1.5 px-3 text-gray-700 border-r border-gray-200 w-1/3"
                   rowSpan={connectivitySpecs.length}
                 >
-                  Connectivity
+                  Connectivity 
                 </td>
                 <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
                   {connectivitySpecs[0].label}
@@ -116,6 +121,37 @@ export const VideoWall = () => {
               </tr>
               {connectivitySpecs.slice(1).map((spec, index) => (
                 <tr key={index} className="border-b border-gray-200">
+                  <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
+                    {spec.label}
+                  </td>
+                  <td className="py-1.5 px-3 text-gray-700">{spec.value}</td>
+                </tr>
+              ))}
+
+              {/* Power section */}
+              <tr className="border-b border-gray-200">
+                <td
+                  className="py-1.5 px-3 text-gray-700 border-r border-gray-200 w-1/3"
+                  rowSpan={powerSpecs.length}
+                >
+                  Power
+                </td>
+                <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
+                  {powerSpecs[0].label}
+                </td>
+                <td className="py-1.5 px-3 text-gray-700">
+                  {powerSpecs[0].value}
+                </td>
+              </tr>
+              {powerSpecs.slice(1).map((spec, index) => (
+                <tr
+                  key={index}
+                  className={
+                    index === powerSpecs.length - 2
+                      ? "border-b border-gray-200"
+                      : "border-b border-gray-200"
+                  }
+                >
                   <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
                     {spec.label}
                   </td>

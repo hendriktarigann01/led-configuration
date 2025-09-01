@@ -22,10 +22,19 @@ export const ResultModal = ({ isOpen, onClose }) => {
     actualScreenSize.width * actualScreenSize.height
   ).toFixed(2);
 
+  // Kalkulasi tambahan
+  const resolutionPerCabinet = 512; // Asumsi resolusi per cabinet
+  const totalResolutionWidth = cabinetCount.horizontal * resolutionPerCabinet;
+  const totalResolutionHeight = cabinetCount.vertical * resolutionPerCabinet;
+  const weightPerCabinet = 25; 
+  const totalWeight = totalUnits * weightPerCabinet;
+  const maxPower = totalUnits * 180;
+  const averagePower = Math.round(maxPower * 0.6); // Asumsi average power 60% dari max power
+
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-        <div className="p-8 h-full overflow-y-auto">
+        <div className="p-6 h-full">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-medium text-gray-800">
@@ -40,7 +49,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
           </div>
 
           {/* Content */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* Display Requirements */}
             <div className="grid grid-cols-2 gap-8">
               <div>
@@ -48,7 +57,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
                   Display Requirements
                 </h3>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <div>
                   <h4 className="text-sm font-medium text-gray-600 mb-1">
                     Screen Configuration
@@ -59,9 +68,19 @@ export const ResultModal = ({ isOpen, onClose }) => {
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-600 mb-1">
-                    Number of screens
+                    Number of Cabinets
                   </h4>
-                  <p className="text-gray-800">{totalUnits} Pcs</p>
+                  <p className="text-gray-800">{totalUnits} pcs</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1">
+                    Display Resolution
+                  </h4>
+                  <p className="text-gray-800">
+                    {totalResolutionWidth > 0
+                      ? `${totalResolutionWidth} x ${totalResolutionHeight}`
+                      : "N/A"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -73,14 +92,14 @@ export const ResultModal = ({ isOpen, onClose }) => {
                   Display Wall
                 </h3>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <div>
                   <h4 className="text-sm font-medium text-gray-600 mb-1">
                     Dimensions
                   </h4>
                   <p className="text-gray-800">
-                    {actualScreenSize.width.toFixed(3)} x
-                    {actualScreenSize.height.toFixed(3)} 
+                    {actualScreenSize.width.toFixed(3)} x{" "}
+                    {actualScreenSize.height.toFixed(3)}
                   </p>
                 </div>
                 <div>
@@ -88,6 +107,14 @@ export const ResultModal = ({ isOpen, onClose }) => {
                     Display Area
                   </h4>
                   <p className="text-gray-800">{displayArea} m2</p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1">
+                    Weight Cabinets
+                  </h4>
+                  <p className="text-gray-800">
+                    {totalWeight > 0 ? `${totalWeight.toFixed(1)} kg` : "N/A"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -99,13 +126,21 @@ export const ResultModal = ({ isOpen, onClose }) => {
                   Power Requirements
                 </h3>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <div>
                   <h4 className="text-sm font-medium text-gray-600 mb-1">
                     Max Power
                   </h4>
                   <p className="text-gray-800">
-                    {(totalUnits * 180).toFixed(0)} W
+                    {maxPower > 0 ? `${maxPower} W` : "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-gray-600 mb-1">
+                    Average Power
+                  </h4>
+                  <p className="text-gray-800">
+                    {averagePower > 0 ? `${averagePower} W` : "N/A"}
                   </p>
                 </div>
               </div>

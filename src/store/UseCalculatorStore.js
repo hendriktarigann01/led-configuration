@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export const UseCalculatorStore = create((set, get) => ({
-  // Parse size dari string menjadi dimensi dalam meter
+  // Parse size dari string menjaFdi dimensi dalam meter
   parseDimensions: (sizeString) => {
     if (!sizeString) return { width: 0, height: 0 };
 

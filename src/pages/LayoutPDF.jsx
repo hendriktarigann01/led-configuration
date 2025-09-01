@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { FirstPage } from "../components/export/FirstPage";
 import { ModelPage } from "../components/export/ModelPage";
-import { SpecificationPage } from "../components/export/SpecificationPage";
-import { Indoor } from "../components/export/spec/Indoor";
-import { Outdoor } from "../components/export/spec/Outdoor";
-import { VideoWall } from "../components/export/spec/VideoWall";
+import { IndoorOutdoorConfig } from "../components/export/spec-config/IndoorOutdoor";
+import { VideoWallConfig } from "../components/export/spec-config/VideoWall";
+import { Indoor } from "../components/export/spec-default/Indoor";
+import { Outdoor } from "../components/export/spec-default/Outdoor";
+import { VideoWall } from "../components/export/spec-default/VideoWall";
 import { LastPage } from "../components/export/LastPage";
 
 const LayoutPDF = () => {
@@ -14,23 +15,28 @@ const LayoutPDF = () => {
     { id: "first", name: "First Page", component: FirstPage },
     { id: "model", name: "Model", component: ModelPage },
     {
-      id: "specification",
-      name: "Specification",
-      component: SpecificationPage,
+      id: "spec-config-1",
+      name: "Spec Config Indoor Outdoor",
+      component: IndoorOutdoorConfig,
     },
     {
-      id: "product-spec-1",
-      name: "Product Spec Indoor",
+      id: "spec-config-2",
+      name: "Spec Config Video Wall",
+      component: VideoWallConfig,
+    },
+    {
+      id: "spec-default-1",
+      name: "Spec Default Indoor",
       component: Indoor,
     },
     {
-      id: "product-spec-2",
-      name: "Product Spec Outdoor",
+      id: "spec-default-2",
+      name: "Spec Default Outdoor",
       component: Outdoor,
     },
     {
-      id: "product-spec-3",
-      name: "Product Spec VideoWall",
+      id: "spec-default-3",
+      name: "Spec Default VideoWall",
       component: VideoWall,
     },
     { id: "last", name: "Last Page", component: LastPage },
@@ -59,11 +65,7 @@ const LayoutPDF = () => {
           ))}
         </div>
         <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="text-xs text-gray-500">
-            Size: A4 (210mm x 297mm)
-            <br />
-            Print Ready
-          </div>
+          <div className="text-xs text-gray-500">Size: A4 (210mm x 297mm)</div>
         </div>
       </div>
 

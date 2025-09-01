@@ -1,7 +1,7 @@
 import React from "react";
-import { BasePage } from "./BasePage";
+import { BasePage } from "../BasePage";
 
-export const SpecificationPage = () => {
+export const IndoorOutdoorConfig = () => {
   const specifications = [
     {
       category: "Display Requirements",

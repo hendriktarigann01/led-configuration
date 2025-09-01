@@ -4,7 +4,7 @@ import { UseCanvasStore } from "./UseCanvasStore";
 export const UseHeaderStore = create((set, get) => ({
   // Display settings
   screenSize: "Area",
-  resolution: "FHD",
+  resolution: "Custom",
   screenHeight: 0,
   screenWidth: 0,
 
@@ -111,6 +111,27 @@ export const UseHeaderStore = create((set, get) => ({
       Number((state.screenWidth - baseWidth).toFixed(3))
     );
     state.setScreenWidth(newWidth);
+  },
+
+  // New Cabinet increment/decrement methods
+  incrementCabinetHeight: () => {
+    // This is the same as incrementing screen height (adds one cabinet row)
+    get().incrementScreenHeight();
+  },
+
+  decrementCabinetHeight: () => {
+    // This is the same as decrementing screen height (removes one cabinet row)
+    get().decrementScreenHeight();
+  },
+
+  incrementCabinetWidth: () => {
+    // This is the same as incrementing screen width (adds one cabinet column)
+    get().incrementScreenWidth();
+  },
+
+  decrementCabinetWidth: () => {
+    // This is the same as decrementing screen width (removes one cabinet column)
+    get().decrementScreenWidth();
   },
 
   // Wall increment/decrement utilities (by 1 unit) with minimum limits

@@ -91,8 +91,8 @@ export const Canvas = () => {
   const canvasContainerHeight = 300;
 
   // Calculate wall scale (how much of the canvas the wall occupies)
-  const maxWallWidth = 11; // maximum wall width in meters for scaling reference
-  const maxWallHeight = 8; // increased from 6 to 8 for better scaling sensitivity
+  const maxWallWidth = 10; // maximum wall width in meters for scaling reference
+  const maxWallHeight = 5.5; // increased from 6 to 8 for better scaling sensitivity
 
   const wallScaleX = Math.min(1, wallWidth / maxWallWidth);
   const wallScaleY = Math.min(1, wallHeight / maxWallHeight);
@@ -176,7 +176,7 @@ export const Canvas = () => {
               <div
                 className={`w-[550px] h-[300px] ${
                   roomImageUrl ? "bg-transparent" : "bg-white"
-                } p-5 flex items-center justify-center`}
+                } p-5 flex items-center justify-center z-20`}
                 style={{
                   backgroundImage: roomImageUrl
                     ? `url(${roomImageUrl})`
@@ -201,25 +201,25 @@ export const Canvas = () => {
                       className="object-cover z-20"
                     />
                     {/* Dynamic Video Measurements */}
-                    {/* V Top Right Measure Image */}
+                    {/* V Top Right Measure Video */}
                     <div
                       className="absolute top-0 right-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateX(80%) translateY(-80%)",
+                        transform: "translateX(80%) translateY(-100%)",
                         height: `${verticalMeasureLength + 180}px`,
                       }}
                     ></div>
 
-                    {/* V Top Left Measure Image */}
+                    {/* V Top Left Measure Video */}
                     <div
                       className="absolute top-0 left-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
-                        transform: "translateX(-80%) translateY(-80%)",
+                        transform: "translateX(-80%) translateY(-100%)",
                         height: `${verticalMeasureLength + 180}px`,
                       }}
                     ></div>
 
-                    {/* H Bottom Right Measure Image */}
+                    {/* H Bottom Right Measure Video */}
                     <div
                       className="absolute top-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
@@ -228,7 +228,7 @@ export const Canvas = () => {
                       }}
                     ></div>
 
-                    {/* H Bottom Left Measure Image */}
+                    {/* H Bottom Left Measure Video */}
                     <div
                       className="absolute bottom-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
                       style={{
@@ -252,16 +252,45 @@ export const Canvas = () => {
                         className="object-fill w-full h-full z-20"
                       />
 
-                      {/* Overlay grid */}
-                      <div className="absolute inset-0 z-30 pointer-events-none">
-                        {/* Vertical lines */}
-                        <div className="absolute top-0 bottom-0 left-1/3 border-l-2 border-[#D9D9D9]/40"></div>
-                        <div className="absolute top-0 bottom-0 left-2/3 border-l-2 border-[#D9D9D9]/40"></div>
+                      {/* Dynamic Overlay Grid - Bezel Simulation */}
+                      {(cabinetCount.horizontal > 1 ||
+                        cabinetCount.vertical > 1) && (
+                        <div className="absolute inset-0 z-30 pointer-events-none border-1 border-[#D9D9D9]/40">
+                          {/* Vertical bezel lines */}
+                          {cabinetCount.horizontal > 1 &&
+                            Array.from(
+                              { length: cabinetCount.horizontal - 1 },
+                              (_, i) => (
+                                <div
+                                  key={`vertical-${i}`}
+                                  className="absolute top-0 bottom-0 border-l-1 border-[#D9D9D9]/40"
+                                  style={{
+                                    left: `${
+                                      ((i + 1) / cabinetCount.horizontal) * 100
+                                    }%`,
+                                  }}
+                                ></div>
+                              )
+                            )}
 
-                        {/* Horizontal lines */}
-                        <div className="absolute left-0 right-0 top-1/3 border-t-2 border-[#D9D9D9]/40"></div>
-                        <div className="absolute left-0 right-0 top-2/3 border-t-2 border-[#D9D9D9]/40"></div>
-                      </div>
+                          {/* Horizontal bezel lines */}
+                          {cabinetCount.vertical > 1 &&
+                            Array.from(
+                              { length: cabinetCount.vertical - 1 },
+                              (_, i) => (
+                                <div
+                                  key={`horizontal-${i}`}
+                                  className="absolute left-0 right-0 border-t-1 border-[#D9D9D9]/40"
+                                  style={{
+                                    top: `${
+                                      ((i + 1) / cabinetCount.vertical) * 100
+                                    }%`,
+                                  }}
+                                ></div>
+                              )
+                            )}
+                        </div>
+                      )}
                     </div>
                     {/* Dynamic Image Measurements */}
                     {/* V Top Right Measure Image */}
@@ -306,7 +335,7 @@ export const Canvas = () => {
               {/* Canvas to Wall Measurement Lines */}
               {/* H Bottom Measure Canvas to Wall */}
               <div
-                className="absolute -z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
+                className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
                 style={{
                   bottom: "36px",
                   transform: "translateX(-75%) translateY(100%)",
@@ -316,7 +345,7 @@ export const Canvas = () => {
 
               {/* V Right Measure Canvas to Wall */}
               <div
-                className="absolute -z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
+                className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
                 style={{
                   right: "52px",
                   transform: "translateX(100%) translateY(-75%)",
@@ -357,6 +386,13 @@ export const Canvas = () => {
                 </span>
               </div>
               {/* End Measure of Width */}
+
+              {/* Value of Resolution*/}
+              <div className="absolute bottom-0 left-8 translate-x-1/2 flex flex-col items-center justify-center space-y-2 z-50">
+                <span className="text-xs text-gray-700 text-center">
+                  Resolution:
+                </span>
+              </div>
 
               {/* Width controls with proper validation */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-50">

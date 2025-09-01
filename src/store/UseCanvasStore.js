@@ -7,8 +7,8 @@ export const UseCanvasStore = create((set, get) => ({
   canvasHeight: 600,
 
   // LED Screen basic properties
-  screenWidth: 0, // meters - start at 0
-  screenHeight: 0, // meters - start at 0
+  screenWidth: 0, // meters 
+  screenHeight: 0, // meters 
 
   // Default wall size (5m width, 3m height)
   wallWidth: 5,

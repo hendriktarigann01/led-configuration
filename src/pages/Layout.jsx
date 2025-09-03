@@ -41,7 +41,7 @@ const Layout = () => {
   }, [selectedModel, updateModelData, syncWithCanvas]);
 
   return (
-    <div className="max-h-screen bg-gray-100 flex">
+    <div className="sm:h-auto  max-h-screen bg-gray-100 flex">
       {/* Sidebar Navigation */}
       <div className="flex-shrink-0">
         <Navbar />

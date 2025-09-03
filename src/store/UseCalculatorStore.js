@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export const UseCalculatorStore = create((set, get) => ({
-  // Parse size dari string menjaFdi dimensi dalam meter
+  // Parse size dari string menjadi dimensi dalam meter
   parseDimensions: (sizeString) => {
     if (!sizeString) return { width: 0, height: 0 };
 
@@ -31,6 +31,208 @@ export const UseCalculatorStore = create((set, get) => ({
     }
 
     return { width: 0, height: 0 };
+  },
+
+  // Parse resolution from different formats
+  parseResolution: (resolutionString) => {
+    if (!resolutionString) return { width: 0, height: 0 };
+
+    // Handle different formats:
+    // "512 X 384 dots" (LED Cabinet/Outdoor)
+    // "256 x 128 dots" (LED Module)
+    // "FHD 1920 x 1080" (Video Wall)
+    // "1920 x 1080" (Video Wall alternative)
+
+    let cleanResolution = resolutionString.toLowerCase();
+
+    // Extract numbers from string
+    const numberMatch = cleanResolution.match(/(\d+)\s*[x×]\s*(\d+)/);
+
+    if (numberMatch) {
+      return {
+        width: parseInt(numberMatch[1]),
+        height: parseInt(numberMatch[2]),
+      };
+    }
+
+    return { width: 0, height: 0 };
+  },
+
+  // Parse power consumption from different formats
+  parsePowerConsumption: (powerString) => {
+    if (!powerString) return { max: 0, average: 0 };
+
+    // Handle LED format: "Max: 650W/m², Average: 300W/m²"
+    const ledPattern = /Max:\s*(\d+)W\/m².*?Average[;:]?\s*(\d+)W\/m²/i;
+    const ledMatch = powerString.match(ledPattern);
+
+    if (ledMatch) {
+      return {
+        max: parseFloat(ledMatch[1]),
+        average: parseFloat(ledMatch[2]),
+      };
+    }
+
+    // Handle Video Wall format: "≤180 W" or "<=180 W"
+    const videoWallPattern = /[≤<=]\s*(\d+)\s*W/i;
+    const videoWallMatch = powerString.match(videoWallPattern);
+
+    if (videoWallMatch) {
+      const maxPower = parseFloat(videoWallMatch[1]);
+      return {
+        max: maxPower,
+        average: maxPower * 0.6, // Assume average is 60% of max for video walls
+      };
+    }
+
+    return { max: 0, average: 0 };
+  },
+
+  // Parse weight from string (remove kg/pcs and convert to number)
+  parseWeight: (weightString) => {
+    if (!weightString) return 0;
+
+    const weightMatch = weightString.match(/(\d+(?:\.\d+)?)/);
+    return weightMatch ? parseFloat(weightMatch[1]) : 0;
+  },
+
+  // Get resolution string based on display type
+  getResolutionField: (modelData, displayType) => {
+    if (!modelData) return null;
+
+    // Indoor LED Fixed (Cabinet) and Outdoor
+    if (modelData.cabinet_resolution) {
+      return modelData.cabinet_resolution;
+    }
+
+    // Indoor LED Fixed (Module)
+    if (modelData.module_resolution) {
+      return modelData.module_resolution;
+    }
+
+    // Video Wall
+    if (modelData.resolution) {
+      return modelData.resolution;
+    }
+
+    return null;
+  },
+
+  // Get weight field based on display type
+  getWeightField: (modelData, displayType) => {
+    if (!modelData) return null;
+
+    // Check for cabinet weight first (Cabinet and Outdoor)
+    if (modelData.cabinet_weight) {
+      return modelData.cabinet_weight;
+    }
+
+    // Then check for module weight (Module)
+    if (modelData.module_weight) {
+      return modelData.module_weight;
+    }
+
+    // Video Wall doesn't have weight data
+    return null;
+  },
+
+  // Calculate units needed to achieve target resolution
+  calculateUnitsForResolution: (modelData, displayType, targetResolution) => {
+    const resolutionField = get().getResolutionField(modelData, displayType);
+    if (!resolutionField) return { horizontal: 1, vertical: 1 };
+
+    const modelResolution = get().parseResolution(resolutionField);
+    if (modelResolution.width === 0 || modelResolution.height === 0) {
+      return { horizontal: 1, vertical: 1 };
+    }
+
+    // Calculate how many units needed for target resolution
+    const unitsNeededWidth = Math.ceil(
+      targetResolution.width / modelResolution.width
+    );
+    const unitsNeededHeight = Math.ceil(
+      targetResolution.height / modelResolution.height
+    );
+
+    return {
+      horizontal: Math.max(1, unitsNeededWidth),
+      vertical: Math.max(1, unitsNeededHeight),
+    };
+  },
+
+  // Calculate screen size based on resolution mode
+  calculateScreenSizeFromResolution: (
+    modelData,
+    displayType,
+    resolutionMode,
+    baseWidth,
+    baseHeight
+  ) => {
+    if (!modelData || baseWidth === 0 || baseHeight === 0) {
+      return { width: baseWidth, height: baseHeight };
+    }
+
+    let targetResolution = null;
+
+    switch (resolutionMode) {
+      case "FHD":
+        targetResolution = { width: 1920, height: 1080 };
+        break;
+      case "UHD":
+        targetResolution = { width: 3840, height: 2160 };
+        break;
+      case "Custom":
+      default:
+        // Keep current screen size for custom mode
+        return { width: baseWidth, height: baseHeight };
+    }
+
+    // Get required units for target resolution
+    const requiredUnits = get().calculateUnitsForResolution(
+      modelData,
+      displayType,
+      targetResolution
+    );
+
+    // Calculate actual screen size
+    const screenWidth = requiredUnits.horizontal * baseWidth;
+    const screenHeight = requiredUnits.vertical * baseHeight;
+
+    return { width: screenWidth, height: screenHeight };
+  },
+
+  // Get target resolution info for display
+  getTargetResolutionInfo: (modelData, displayType, resolutionMode) => {
+    if (resolutionMode === "Custom") return null;
+
+    const targetResolution =
+      resolutionMode === "FHD"
+        ? { width: 1920, height: 1080 }
+        : { width: 3840, height: 2160 };
+
+    const requiredUnits = get().calculateUnitsForResolution(
+      modelData,
+      displayType,
+      targetResolution
+    );
+    const modelResolutionField = get().getResolutionField(
+      modelData,
+      displayType
+    );
+    const modelResolution = get().parseResolution(modelResolutionField);
+
+    // Calculate actual achieved resolution
+    const actualResolution = {
+      width: requiredUnits.horizontal * modelResolution.width,
+      height: requiredUnits.vertical * modelResolution.height,
+    };
+
+    return {
+      target: targetResolution,
+      actual: actualResolution,
+      units: requiredUnits,
+      modelResolution: modelResolution,
+    };
   },
 
   // Get base dimensions dari model data
@@ -81,6 +283,114 @@ export const UseCalculatorStore = create((set, get) => ({
     return {
       width: unitCount.horizontal * baseWidth,
       height: unitCount.vertical * baseHeight,
+    };
+  },
+
+  // NEW: Calculate total resolution per cabinet/module
+  calculateResolutionPerUnit: (modelData, displayType, totalUnits) => {
+    const resolutionField = get().getResolutionField(modelData, displayType);
+    if (!resolutionField || totalUnits === 0) {
+      return { width: 0, height: 0 };
+    }
+
+    const unitResolution = get().parseResolution(resolutionField);
+
+    return {
+      width: unitResolution.width * totalUnits,
+      height: unitResolution.height * totalUnits,
+    };
+  },
+
+  // NEW: Calculate total power consumption
+  calculateTotalPowerConsumption: (modelData, displayType, totalUnits) => {
+    if (!modelData.power_consumption || totalUnits === 0) {
+      return { max: 0, average: 0 };
+    }
+
+    const powerData = get().parsePowerConsumption(modelData.power_consumption);
+
+    // For LED displays, power consumption format is "W/m²" but calculation is per unit
+    if (displayType.includes("LED")) {
+      // Calculate total screen area in m²
+      const baseDimensions = get().getBaseDimensions(modelData, displayType);
+      const unitArea = baseDimensions.width * baseDimensions.height; // area per unit in m²
+      const totalArea = unitArea * totalUnits; // total area in m²
+
+      return {
+        max: powerData.max * totalUnits,
+        average: powerData.average * totalUnits,
+      };
+    }
+
+    // For Video Wall, power is per unit
+    return {
+      max: powerData.max * totalUnits,
+      average: powerData.average * totalUnits,
+    };
+  },
+
+  // NEW: Calculate total weight
+  calculateTotalWeight: (modelData, displayType, totalUnits) => {
+    const weightField = get().getWeightField(modelData, displayType);
+    if (!weightField || totalUnits === 0) {
+      return 0;
+    }
+
+    const unitWeight = get().parseWeight(weightField);
+    return unitWeight * totalUnits;
+  },
+
+  // NEW: Get comprehensive calculation results
+  getCalculationResults: (
+    modelData,
+    displayType,
+    screenWidth,
+    screenHeight,
+    baseWidth,
+    baseHeight
+  ) => {
+    if (!modelData || baseWidth === 0 || baseHeight === 0) {
+      return null;
+    }
+
+    const unitCount = get().calculateUnitCount(
+      screenWidth,
+      screenHeight,
+      baseWidth,
+      baseHeight
+    );
+    const totalUnits = unitCount.horizontal * unitCount.vertical;
+
+    const actualScreenSize = get().calculateActualScreenSize(
+      screenWidth,
+      screenHeight,
+      baseWidth,
+      baseHeight
+    );
+    const resolutionPerUnit = get().calculateResolutionPerUnit(
+      modelData,
+      displayType,
+      totalUnits
+    );
+    const totalPower = get().calculateTotalPowerConsumption(
+      modelData,
+      displayType,
+      totalUnits
+    );
+    const totalWeight = get().calculateTotalWeight(
+      modelData,
+      displayType,
+      totalUnits
+    );
+
+    return {
+      unitCount,
+      totalUnits,
+      actualScreenSize,
+      resolutionPerUnit,
+      totalPower,
+      totalWeight,
+      baseDimensions: { width: baseWidth, height: baseHeight },
     };
   },
 

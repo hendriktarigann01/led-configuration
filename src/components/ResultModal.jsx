@@ -1,6 +1,8 @@
 import React from "react";
 import { X } from "lucide-react";
 import { UseCanvasStore } from "../store/UseCanvasStore";
+import { UseCalculatorStore } from "../store/UseCalculatorStore";
+import { UseNavbarStore } from "../store/UseNavbarStore";
 
 export const ResultModal = ({ isOpen, onClose }) => {
   const {
@@ -11,25 +13,65 @@ export const ResultModal = ({ isOpen, onClose }) => {
     wallWidth,
     wallHeight,
     isConfigured,
+    screenWidth,
+    screenHeight,
   } = UseCanvasStore();
 
-  if (!isOpen || !isConfigured()) return null;
+  const calculator = UseCalculatorStore();
+  const { selectedModel } = UseNavbarStore();
 
-  const cabinetCount = getCabinetCount();
-  const actualScreenSize = getActualScreenSize();
-  const totalUnits = cabinetCount.horizontal * cabinetCount.vertical;
+  if (!isOpen || !isConfigured() || !selectedModel) return null;
+
+  const modelData = selectedModel.modelData;
+  const displayType = selectedModel.name;
+
+  // Get comprehensive calculation results
+  const results = calculator.getCalculationResults(
+    modelData,
+    displayType,
+    screenWidth,
+    screenHeight,
+    baseWidth,
+    baseHeight
+  );
+
+  if (!results) return null;
+
+  const {
+    unitCount,
+    totalUnits,
+    actualScreenSize,
+    resolutionPerUnit,
+    totalPower,
+    totalWeight,
+  } = results;
+
   const displayArea = (
     actualScreenSize.width * actualScreenSize.height
   ).toFixed(2);
 
-  // Kalkulasi tambahan
-  const resolutionPerCabinet = 512; // Asumsi resolusi per cabinet
-  const totalResolutionWidth = cabinetCount.horizontal * resolutionPerCabinet;
-  const totalResolutionHeight = cabinetCount.vertical * resolutionPerCabinet;
-  const weightPerCabinet = 25; 
-  const totalWeight = totalUnits * weightPerCabinet;
-  const maxPower = totalUnits * 180;
-  const averagePower = Math.round(maxPower * 0.6); // Asumsi average power 60% dari max power
+  // Format display names based on type
+  const getUnitName = () => {
+    if (displayType.includes("Cabinet") || displayType.includes("Outdoor")) {
+      return "Cabinets";
+    } else if (displayType.includes("Module")) {
+      return "Modules";
+    } else if (displayType.includes("Video Wall")) {
+      return "Units";
+    }
+    return "Units";
+  };
+
+  const getWeightLabel = () => {
+    if (displayType.includes("Cabinet") || displayType.includes("Outdoor")) {
+      return "Weight Cabinets";
+    } else if (displayType.includes("Module")) {
+      return "Weight Modules";
+    } else if (displayType.includes("Video Wall")) {
+      return "Weight Units";
+    }
+    return "Weight";
+  };
 
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
@@ -63,22 +105,22 @@ export const ResultModal = ({ isOpen, onClose }) => {
                     Screen Configuration
                   </h4>
                   <p className="text-gray-800">
-                    {cabinetCount.horizontal} x {cabinetCount.vertical}
+                    {unitCount.horizontal} x {unitCount.vertical}
                   </p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-600 mb-1">
-                    Number of Cabinets
+                    Number of {getUnitName()}
                   </h4>
                   <p className="text-gray-800">{totalUnits} pcs</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-600 mb-1">
-                    Display Resolution
+                    Total Display Resolution
                   </h4>
                   <p className="text-gray-800">
-                    {totalResolutionWidth > 0
-                      ? `${totalResolutionWidth} x ${totalResolutionHeight}`
+                    {resolutionPerUnit.width > 0 && resolutionPerUnit.height > 0
+                      ? `${resolutionPerUnit.width} x ${resolutionPerUnit.height} dots`
                       : "N/A"}
                   </p>
                 </div>
@@ -98,19 +140,18 @@ export const ResultModal = ({ isOpen, onClose }) => {
                     Dimensions
                   </h4>
                   <p className="text-gray-800">
-                    {actualScreenSize.width.toFixed(3)} x{" "}
-                    {actualScreenSize.height.toFixed(3)}
+                    {screenWidth.toFixed(3)} x {screenHeight.toFixed(3)} m
                   </p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-600 mb-1">
                     Display Area
                   </h4>
-                  <p className="text-gray-800">{displayArea} m2</p>
+                  <p className="text-gray-800">{displayArea} m²</p>
                 </div>
                 <div>
                   <h4 className="text-sm font-medium text-gray-600 mb-1">
-                    Weight Cabinets
+                    {getWeightLabel()}
                   </h4>
                   <p className="text-gray-800">
                     {totalWeight > 0 ? `${totalWeight.toFixed(1)} kg` : "N/A"}
@@ -119,32 +160,38 @@ export const ResultModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Power Requirements */}
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <h3 className="text-lg font-medium text-gray-700 mb-4">
-                  Power Requirements
-                </h3>
-              </div>
-              <div className="space-y-2">
+            {/* Power Requirements - Only show if model has power_consumption */}
+            {modelData.power_consumption && (
+              <div className="grid grid-cols-2 gap-8">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-600 mb-1">
-                    Max Power
-                  </h4>
-                  <p className="text-gray-800">
-                    {maxPower > 0 ? `${maxPower} W` : "N/A"}
-                  </p>
+                  <h3 className="text-lg font-medium text-gray-700 mb-4">
+                    Power Requirements
+                  </h3>
                 </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-600 mb-1">
-                    Average Power
-                  </h4>
-                  <p className="text-gray-800">
-                    {averagePower > 0 ? `${averagePower} W` : "N/A"}
-                  </p>
+                <div className="space-y-2">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-600 mb-1">
+                      Max Power
+                    </h4>
+                    <p className="text-gray-800">
+                      {totalPower.max > 0
+                        ? `${totalPower.max.toFixed(0)} W`
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-600 mb-1">
+                      Average Power
+                    </h4>
+                    <p className="text-gray-800">
+                      {totalPower.average > 0
+                        ? `${totalPower.average.toFixed(0)} W`
+                        : "N/A"}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

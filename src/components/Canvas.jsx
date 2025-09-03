@@ -36,6 +36,8 @@ export const Canvas = () => {
     incrementScreenHeight,
     decrementScreenHeight,
     initializeDefaults,
+    resolution,
+    getResolutionInfo,
   } = UseHeaderStore();
 
   // Update canvas store when model is selected and initialize defaults
@@ -56,6 +58,7 @@ export const Canvas = () => {
   const actualScreenSize = getActualScreenSize();
   const imageScale = getImageScale();
   const configured = isConfigured();
+  const resolutionInfo = getResolutionInfo();
 
   // Get validation from header store for consistent button states
   const canIncreaseScreenWidth =
@@ -67,22 +70,26 @@ export const Canvas = () => {
 
   // Handle control button actions using header store methods for consistency
   const handleWidthIncrement = () => {
-    if (!configured || !canIncreaseScreenWidth) return;
+    if (!configured || !canIncreaseScreenWidth || resolution !== "Custom")
+      return;
     incrementScreenWidth();
   };
 
   const handleWidthDecrement = () => {
-    if (!configured || !canDecreaseScreenWidth) return;
+    if (!configured || !canDecreaseScreenWidth || resolution !== "Custom")
+      return;
     decrementScreenWidth();
   };
 
   const handleHeightIncrement = () => {
-    if (!configured || !canIncreaseScreenHeight) return;
+    if (!configured || !canIncreaseScreenHeight || resolution !== "Custom")
+      return;
     incrementScreenHeight();
   };
 
   const handleHeightDecrement = () => {
-    if (!configured || !canDecreaseScreenHeight) return;
+    if (!configured || !canDecreaseScreenHeight || resolution !== "Custom")
+      return;
     decrementScreenHeight();
   };
 
@@ -154,6 +161,16 @@ export const Canvas = () => {
 
   const contentSource = getContentSource();
   const isVideo = selectedContent === "Default Video";
+
+  // Format resolution display string
+  const getResolutionDisplayString = () => {
+    if (!resolutionInfo) {
+      return "";
+    }
+
+    const { actual } = resolutionInfo;
+    return `${actual.width} × ${actual.height} px`;
+  };
 
   return (
     <>
@@ -387,10 +404,10 @@ export const Canvas = () => {
               </div>
               {/* End Measure of Width */}
 
-              {/* Value of Resolution*/}
-              <div className="absolute bottom-0 left-8 translate-x-1/2 flex flex-col items-center justify-center space-y-2 z-50">
-                <span className="text-xs text-gray-700 text-center">
-                  Resolution:
+              {/* Resolution Info Display */}
+              <div className="absolute bottom-1 left-13 flex flex-col items-start justify-center z-50">
+                <span className="text-xs text-gray-700">
+                  Resolution: {getResolutionDisplayString()}
                 </span>
               </div>
 
@@ -398,9 +415,15 @@ export const Canvas = () => {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-50">
                 <button
                   onClick={handleWidthDecrement}
-                  disabled={!configured || !canDecreaseScreenWidth}
+                  disabled={
+                    !configured ||
+                    !canDecreaseScreenWidth ||
+                    resolution !== "Custom"
+                  }
                   className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured && canDecreaseScreenWidth
+                    configured &&
+                    canDecreaseScreenWidth &&
+                    resolution === "Custom"
                       ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
                       : "text-gray-300 border-gray-200 cursor-not-allowed"
                   }`}
@@ -412,9 +435,15 @@ export const Canvas = () => {
                 </span>
                 <button
                   onClick={handleWidthIncrement}
-                  disabled={!configured || !canIncreaseScreenWidth}
+                  disabled={
+                    !configured ||
+                    !canIncreaseScreenWidth ||
+                    resolution !== "Custom"
+                  }
                   className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured && canIncreaseScreenWidth
+                    configured &&
+                    canIncreaseScreenWidth &&
+                    resolution === "Custom"
                       ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
                       : "text-gray-300 border-gray-200 cursor-not-allowed"
                   }`}
@@ -427,9 +456,15 @@ export const Canvas = () => {
               <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
                 <button
                   onClick={handleHeightIncrement}
-                  disabled={!configured || !canIncreaseScreenHeight}
+                  disabled={
+                    !configured ||
+                    !canIncreaseScreenHeight ||
+                    resolution !== "Custom"
+                  }
                   className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured && canIncreaseScreenHeight
+                    configured &&
+                    canIncreaseScreenHeight &&
+                    resolution === "Custom"
                       ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
                       : "text-gray-300 border-gray-200 cursor-not-allowed"
                   }`}
@@ -446,9 +481,15 @@ export const Canvas = () => {
                 </div>
                 <button
                   onClick={handleHeightDecrement}
-                  disabled={!configured || !canDecreaseScreenHeight}
+                  disabled={
+                    !configured ||
+                    !canDecreaseScreenHeight ||
+                    resolution !== "Custom"
+                  }
                   className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured && canDecreaseScreenHeight
+                    configured &&
+                    canDecreaseScreenHeight &&
+                    resolution === "Custom"
                       ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
                       : "text-gray-300 border-gray-200 cursor-not-allowed"
                   }`}
@@ -481,11 +522,6 @@ export const Canvas = () => {
                     }}
                   />
                 </div>
-              </div>
-
-              {/* Cabinet Count Info */}
-              <div className="absolute -bottom-6 left-5 text-xs text-gray-500 px-2 py-1">
-                {cabinetCount.horizontal} × {cabinetCount.vertical} units
               </div>
             </div>
           ) : (

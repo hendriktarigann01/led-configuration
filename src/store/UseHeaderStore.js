@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { UseCanvasStore } from "./UseCanvasStore";
+import { UseNavbarStore } from "./UseNavbarStore";
+import { UseCalculatorStore } from "./UseCalculatorStore";
 
 export const UseHeaderStore = create((set, get) => ({
   // Display settings
@@ -27,9 +29,96 @@ export const UseHeaderStore = create((set, get) => ({
     }
   },
 
+  // Helper function to get current model data
+  getCurrentModelData: () => {
+    const navbarStore = UseNavbarStore.getState();
+    if (!navbarStore.selectedModel || !navbarStore.selectedModel.modelData) {
+      return { modelData: null, displayType: null };
+    }
+
+    return {
+      modelData: navbarStore.selectedModel.modelData,
+      displayType: navbarStore.selectedModel.name,
+    };
+  },
+
+  // Calculate screen size based on resolution mode
+  calculateScreenSizeFromResolution: (resolutionMode) => {
+    const canvasStore = UseCanvasStore.getState();
+    const calculator = UseCalculatorStore.getState();
+    const { baseWidth, baseHeight } = canvasStore;
+    const { modelData, displayType } = get().getCurrentModelData();
+
+    if (!baseWidth || !baseHeight || !modelData) {
+      return { width: 0, height: 0 };
+    }
+
+    // Use calculator to determine screen size based on resolution
+    return calculator.calculateScreenSizeFromResolution(
+      modelData,
+      displayType,
+      resolutionMode,
+      baseWidth,
+      baseHeight
+    );
+  },
+
+  // Get resolution info for display purposes
+  getResolutionInfo: () => {
+    const { resolution } = get();
+    const { modelData, displayType } = get().getCurrentModelData();
+
+    if (resolution === "Custom" || !modelData) return null;
+
+    const calculator = UseCalculatorStore.getState();
+    return calculator.getTargetResolutionInfo(
+      modelData,
+      displayType,
+      resolution
+    );
+  },
+
   // Screen dimension actions
   setScreenSize: (size) => set({ screenSize: size }),
-  setResolution: (resolution) => set({ resolution }),
+
+  setResolution: (resolution) => {
+    set({ resolution });
+
+    // If not custom, calculate and set screen size based on resolution
+    if (resolution !== "Custom") {
+      const screenSize = get().calculateScreenSizeFromResolution(resolution);
+      const canvasStore = UseCanvasStore.getState();
+
+      // Update header store values
+      set({
+        screenWidth: screenSize.width,
+        screenHeight: screenSize.height,
+      });
+
+      // Update canvas store
+      canvasStore.setScreenSize(screenSize.width, screenSize.height);
+
+      // Auto-adjust wall size to accommodate new screen size with margin
+      const currentState = get();
+      const minWallWidth = Math.max(5, screenSize.width + 2); // 2m margin minimum
+      const minWallHeight = Math.max(3, screenSize.height + 1.5); // 1.5m margin minimum
+
+      if (
+        currentState.wallWidth < minWallWidth ||
+        currentState.wallHeight < minWallHeight
+      ) {
+        const newWallWidth = Math.max(currentState.wallWidth, minWallWidth);
+        const newWallHeight = Math.max(currentState.wallHeight, minWallHeight);
+
+        set({
+          wallWidth: newWallWidth,
+          wallHeight: newWallHeight,
+        });
+
+        canvasStore.setWallSize(newWallWidth, newWallHeight);
+      }
+    }
+  },
 
   setScreenHeight: (height) => {
     const canvasStore = UseCanvasStore.getState();
@@ -64,6 +153,9 @@ export const UseHeaderStore = create((set, get) => ({
 
   // Screen increment/decrement utilities
   incrementScreenHeight: () => {
+    // Only allow manual adjustments in Custom mode
+    if (get().resolution !== "Custom") return;
+
     const canvasStore = UseCanvasStore.getState();
     const { baseHeight } = canvasStore;
 
@@ -75,6 +167,9 @@ export const UseHeaderStore = create((set, get) => ({
   },
 
   decrementScreenHeight: () => {
+    // Only allow manual adjustments in Custom mode
+    if (get().resolution !== "Custom") return;
+
     const canvasStore = UseCanvasStore.getState();
     const { baseHeight } = canvasStore;
 
@@ -89,6 +184,9 @@ export const UseHeaderStore = create((set, get) => ({
   },
 
   incrementScreenWidth: () => {
+    // Only allow manual adjustments in Custom mode
+    if (get().resolution !== "Custom") return;
+
     const canvasStore = UseCanvasStore.getState();
     const { baseWidth } = canvasStore;
 
@@ -100,6 +198,9 @@ export const UseHeaderStore = create((set, get) => ({
   },
 
   decrementScreenWidth: () => {
+    // Only allow manual adjustments in Custom mode
+    if (get().resolution !== "Custom") return;
+
     const canvasStore = UseCanvasStore.getState();
     const { baseWidth } = canvasStore;
 
@@ -115,22 +216,26 @@ export const UseHeaderStore = create((set, get) => ({
 
   // New Cabinet increment/decrement methods
   incrementCabinetHeight: () => {
-    // This is the same as incrementing screen height (adds one cabinet row)
+    // Only allow manual adjustments in Custom mode
+    if (get().resolution !== "Custom") return;
     get().incrementScreenHeight();
   },
 
   decrementCabinetHeight: () => {
-    // This is the same as decrementing screen height (removes one cabinet row)
+    // Only allow manual adjustments in Custom mode
+    if (get().resolution !== "Custom") return;
     get().decrementScreenHeight();
   },
 
   incrementCabinetWidth: () => {
-    // This is the same as incrementing screen width (adds one cabinet column)
+    // Only allow manual adjustments in Custom mode
+    if (get().resolution !== "Custom") return;
     get().incrementScreenWidth();
   },
 
   decrementCabinetWidth: () => {
-    // This is the same as decrementing screen width (removes one cabinet column)
+    // Only allow manual adjustments in Custom mode
+    if (get().resolution !== "Custom") return;
     get().decrementScreenWidth();
   },
 
@@ -179,6 +284,11 @@ export const UseHeaderStore = create((set, get) => ({
     return canvasStore.isConfigured();
   },
 
+  // Check if screen controls should be interactive (only in Custom mode)
+  isScreenControlsInteractive: () => {
+    return get().resolution === "Custom" && get().isScreenControlsEnabled();
+  },
+
   // Canvas integration methods
   syncScreenDimensions: (width, height) =>
     set({ screenWidth: width, screenHeight: height }),
@@ -202,7 +312,8 @@ export const UseHeaderStore = create((set, get) => ({
     const state = get();
     const canvasStore = UseCanvasStore.getState();
 
-    if (!canvasStore.isConfigured()) return false;
+    if (!canvasStore.isConfigured() || state.resolution !== "Custom")
+      return false;
 
     return canvasStore.getActualScreenSize().width < state.wallWidth;
   },
@@ -211,7 +322,8 @@ export const UseHeaderStore = create((set, get) => ({
     const state = get();
     const canvasStore = UseCanvasStore.getState();
 
-    if (!canvasStore.isConfigured()) return false;
+    if (!canvasStore.isConfigured() || state.resolution !== "Custom")
+      return false;
 
     return canvasStore.getActualScreenSize().width > canvasStore.baseWidth;
   },
@@ -220,7 +332,8 @@ export const UseHeaderStore = create((set, get) => ({
     const state = get();
     const canvasStore = UseCanvasStore.getState();
 
-    if (!canvasStore.isConfigured()) return false;
+    if (!canvasStore.isConfigured() || state.resolution !== "Custom")
+      return false;
 
     return canvasStore.getActualScreenSize().height < state.wallHeight;
   },
@@ -229,7 +342,8 @@ export const UseHeaderStore = create((set, get) => ({
     const state = get();
     const canvasStore = UseCanvasStore.getState();
 
-    if (!canvasStore.isConfigured()) return false;
+    if (!canvasStore.isConfigured() || state.resolution !== "Custom")
+      return false;
 
     return canvasStore.getActualScreenSize().height > canvasStore.baseHeight;
   },

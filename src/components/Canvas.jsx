@@ -330,7 +330,7 @@ export const Canvas = () => {
 
   return (
     <>
-      <div className="flex-1 bg-gray-100 h-96 lg:h-full p-2 lg:p-4 flex items-center justify-center">
+      <div className="flex-1 bg-gray-100 h-80  lg:h-full p-2 lg:p-4 flex items-center justify-center">
         {renderResetButton()}
 
         {/* Canvas Container */}

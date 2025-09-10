@@ -3,6 +3,7 @@ import { FileDown, Eye, Info } from "lucide-react";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseExportStore } from "../store/UseExportStore";
+import { UseNavbarStore } from "../store/UseNavbarStore";
 import { ExportModal } from "./ExportModal";
 import { ResultModal } from "./ResultModal";
 
@@ -14,7 +15,7 @@ export const Header = () => {
     resolution,
     screenHeight,
     screenWidth,
-    unit,
+
     wallHeight,
     wallWidth,
     setScreenSize,
@@ -39,7 +40,6 @@ export const Header = () => {
     decrementCabinetWidth,
     incrementCabinetHeight,
     decrementCabinetHeight,
-    getResolutionInfo,
   } = UseHeaderStore();
 
   const {
@@ -51,6 +51,9 @@ export const Header = () => {
   } = UseCanvasStore();
   const { openModal } = UseExportStore();
 
+  // Import navbar store for tab functionality
+  const { activeTab, setActiveTab } = UseNavbarStore();
+
   // Initialize defaults and sync on component mount
   useEffect(() => {
     initializeDefaults();
@@ -60,7 +63,6 @@ export const Header = () => {
   // Get actual screen size and cabinet count for validation
   const actualScreenSize = getActualScreenSize();
   const cabinetCount = getCabinetCount();
-  const resolutionInfo = getResolutionInfo();
 
   // Validation rules - Wall always bigger than Screen
   const canIncreaseScreenWidth =
@@ -100,15 +102,14 @@ export const Header = () => {
     disabled = false,
     canIncrease = true,
     canDecrease = true,
-    isInteger = false, // New prop for cabinet count display
-    showResolutionInfo = false, // New prop to show resolution mode info
+    isInteger = false,
   }) => (
     <div className="flex flex-col space-y-1">
       <div className="flex items-center space-x-2">
         <label className="text-xs text-gray-600">{label}</label>
       </div>
       <div
-        className={`flex items-center justify-between w-[110px] border rounded bg-white ${
+        className={`flex items-center justify-between w-[110px] h-8 lg:h-auto border rounded bg-white ${
           disabled ? "border-gray-200 bg-gray-50" : "border-gray-300"
         }`}
       >
@@ -118,17 +119,17 @@ export const Header = () => {
           className={`px-3 py-2 ${
             disabled || !canDecrease
               ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-500 hover:text-gray-600 hover:bg-gray-50"
+              : "text-gray-500 hover:text-gray-600 hover:bg-gray-50 cursor-pointer"
           }`}
         >
           −
         </button>
         <input
           type="number"
-          value={isInteger ? Math.round(value) : value.toFixed(1)}
+          value={isInteger ? Math.round(value) : value}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           step={step}
-          disabled={disabled || isInteger || !isCustomMode} // Disable input for cabinet count or non-custom mode
+          disabled={disabled || isInteger || !isCustomMode}
           className={`w-full text-center border-none outline-none text-xs
                     appearance-none
                     [appearance:textfield]
@@ -137,7 +138,7 @@ export const Header = () => {
                     ${
                       disabled || isInteger || !isCustomMode
                         ? "bg-gray-50 text-gray-400 cursor-not-allowed"
-                        : "text-gray-600"
+                        : "text-gray-600 cursor-not-allowed"
                     }`}
         />
         <button
@@ -146,7 +147,7 @@ export const Header = () => {
           className={`px-3 py-2 ${
             disabled || !canIncrease
               ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-500 hover:text-gray-600 hover:bg-gray-50"
+              : "text-gray-500 hover:text-gray-600 hover:bg-gray-50 cursor-pointer"
           }`}
         >
           +
@@ -156,18 +157,18 @@ export const Header = () => {
   );
 
   const ToggleButton = ({ options, selected, onChange, disabled = false }) => (
-    <div className="flex border border-gray-300 rounded overflow-hidden bg-white">
+    <div className="flex border w-auto border-gray-300 rounded overflow-hidden bg-white">
       {options.map((option) => (
         <button
           key={option}
           onClick={() => !disabled && onChange(option)}
           disabled={disabled}
-          className={`px-4 py-2 text-xs transition-colors ${
+          className={`px-4 py-2 w-full text-xs transition-colors ${
             disabled
               ? "cursor-not-allowed bg-gray-100 text-gray-400"
               : selected === option
               ? "bg-[#3AAFA9] text-white"
-              : "bg-white text-gray-600 hover:bg-gray-50"
+              : "bg-white text-gray-600 hover:bg-gray-50 cursor-pointer"
           }`}
         >
           {option}
@@ -184,13 +185,46 @@ export const Header = () => {
 
   return (
     <>
-      <div className="bg-white border-gray-200 p-4">
-        <div className="flex items-start justify-between w-full mx-auto">
+      <div className="bg-white border-gray-200 p-5">
+        {/* Mobile: Show logo here */}
+        <div className="lg:hidden flex justify-center mb-4">
+          <img
+            src="/logo/mjs_logo_text.png"
+            alt="logo"
+            className="w-32 h-auto"
+          />
+        </div>
+
+        {/* Tab Navigation - Moved from Navbar */}
+        <div className="-mx-5 lg:hidden flex mb-4">
+          <button
+            onClick={() => setActiveTab("LED Setup")}
+            className={`flex-1 py-3 px-4 text-xs font-medium ${
+              activeTab === "LED Setup"
+                ? "bg-[#3AAFA9] text-white"
+                : "bg-white text-gray-500 hover:bg-gray-200 cursor-pointer"
+            }`}
+          >
+            LED Setup
+          </button>
+          <button
+            onClick={() => setActiveTab("Room Setup")}
+            className={`flex-1 py-3 px-4 text-xs font-medium ${
+              activeTab === "Room Setup"
+                ? "bg-[#3AAFA9] text-white"
+                : "bg-white text-gray-500 hover:bg-gray-200 cursor-pointer"
+            }`}
+          >
+            Room Setup
+          </button>
+        </div>
+
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between w-full mx-auto space-y-2 lg:space-y-0">
           {/* Display Section */}
           <div className="flex flex-col space-y-2">
             <h3 className="text-base font-medium text-gray-800">Display</h3>
 
-            <div className="flex items-end space-x-6">
+            <div className="flex justify-between lg:flex-row lg:items-end space-y-4 lg:space-y-0 gap-2 lg:space-x-6">
               <div className="flex flex-col space-y-1">
                 <label className="text-xs text-gray-600">Screen Size</label>
                 <ToggleButton
@@ -214,7 +248,7 @@ export const Header = () => {
               </div>
             </div>
 
-            <div className="flex items-end space-x-6">
+            <div className="flex gap-5 lg:gap-0 lg:flex-row lg:items-end space-y-4 lg:space-y-0 lg:space-x-6">
               {isCabinetMode ? (
                 // Cabinet Mode - Show cabinet counts
                 <>
@@ -277,44 +311,78 @@ export const Header = () => {
           <div className="flex flex-col space-y-2">
             <h3 className="text-base font-medium text-gray-800">Wall</h3>
 
-            <div className="flex flex-col space-y-1">
-              <label className="text-xs text-gray-600">Unit</label>
-              <span className="px-4 py-2 text-xs rounded border bg-[#3AAFA9] text-white w-fit">
-                Meter
-              </span>
-            </div>
+            {/* Container utama */}
+            <div className="flex flex-col lg:space-y-2">
+              {/* Mobile: semua horizontal, Desktop: unit sendiri */}
+              <div className="flex space-x-4 lg:space-x-0 space-y-4 lg:space-y-0">
+                {/* Unit */}
+                <div className="flex flex-col space-y-1 ">
+                  <label className="text-xs text-gray-600">Unit</label>
+                  <span className="px-4 py-2 text-xs rounded border bg-[#3AAFA9] text-white justify-center text-center w-[110px] lg:w-fit h-[32px] lg:h-auto">
+                    Meter
+                  </span>
+                </div>
 
-            <div className="flex items-end space-x-6">
-              <NumberInput
-                label="Wall Width(m)"
-                value={wallWidth}
-                onIncrement={incrementWallWidth}
-                onDecrement={decrementWallWidth}
-                onChange={setWallWidth}
-                step={0.1}
-                disabled={!wallControlsEnabled}
-                canIncrease={canIncreaseWallWidth}
-                canDecrease={canDecreaseWallWidth}
-              />
-              <NumberInput
-                label="Wall Height(m)"
-                value={wallHeight}
-                onIncrement={incrementWallHeight}
-                onDecrement={decrementWallHeight}
-                onChange={setWallHeight}
-                step={0.1}
-                disabled={!wallControlsEnabled}
-                canIncrease={canIncreaseWallHeight}
-                canDecrease={canDecreaseWallHeight}
-              />
+                {/* Mobile: Height & Width ikut sejajar, Desktop: dipindah ke bawah */}
+                <div className="flex flex-row space-x-4 lg:hidden">
+                  <NumberInput
+                    label="Wall Width(m)"
+                    value={wallWidth}
+                    onIncrement={incrementWallWidth}
+                    onDecrement={decrementWallWidth}
+                    onChange={setWallWidth}
+                    step={0.1}
+                    disabled={!wallControlsEnabled}
+                    canIncrease={canIncreaseWallWidth}
+                    canDecrease={canDecreaseWallWidth}
+                  />
+                  <NumberInput
+                    label="Wall Height(m)"
+                    value={wallHeight}
+                    onIncrement={incrementWallHeight}
+                    onDecrement={decrementWallHeight}
+                    onChange={setWallHeight}
+                    step={0.1}
+                    disabled={!wallControlsEnabled}
+                    canIncrease={canIncreaseWallHeight}
+                    canDecrease={canDecreaseWallHeight}
+                  />
+                </div>
+              </div>
+
+              {/* Desktop: Height & Width horizontal */}
+              <div className="hidden lg:flex lg:flex-row lg:space-x-6">
+                <NumberInput
+                  label="Wall Width(m)"
+                  value={wallWidth}
+                  onIncrement={incrementWallWidth}
+                  onDecrement={decrementWallWidth}
+                  onChange={setWallWidth}
+                  step={0.1}
+                  disabled={!wallControlsEnabled}
+                  canIncrease={canIncreaseWallWidth}
+                  canDecrease={canDecreaseWallWidth}
+                />
+                <NumberInput
+                  label="Wall Height(m)"
+                  value={wallHeight}
+                  onIncrement={incrementWallHeight}
+                  onDecrement={decrementWallHeight}
+                  onChange={setWallHeight}
+                  step={0.1}
+                  disabled={!wallControlsEnabled}
+                  canIncrease={canIncreaseWallHeight}
+                  canDecrease={canDecreaseWallHeight}
+                />
+              </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col space-y-2 my-auto">
+          <div className="flex justify-center lg:flex-col space-y-2 gap-5 lg:gap-0 my-auto">
             <button
               onClick={openModal}
-              className="flex items-center justify-center space-x-2 w-[144px] px-4 py-2 cursor-pointer bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-center space-x-2 w-[144px] h-8 lg:h-auto px-4 py-2 cursor-pointer bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
             >
               <FileDown size={16} />
               <span className="text-xs">Export to PDF</span>
@@ -323,7 +391,7 @@ export const Header = () => {
             <button
               onClick={() => setIsResultModalOpen(true)}
               disabled={!isConfigured()}
-              className={`flex items-center justify-center space-x-2 w-[144px] px-4 py-2 rounded text-xs transition-colors ${
+              className={`flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
                 isConfigured()
                   ? "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
                   : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"

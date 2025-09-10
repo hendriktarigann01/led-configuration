@@ -2,6 +2,7 @@ export const model = [
   {
     id: 1,
     name: "Indoor LED Fixed (Cabinet)",
+    description: "Suitable for indoor use with a modular and flexible design.",
     data: [
       {
         pixel_pitch: "P 1.2",
@@ -86,6 +87,7 @@ export const model = [
   {
     id: 2,
     name: "Indoor LED Fixed (Module)",
+    description: "Suitable for indoor use with a modular and flexible design.",
     data: [
       {
         pixel_pitch: "P 1.2",
@@ -164,6 +166,7 @@ export const model = [
   {
     id: 3,
     name: "Outdoor LED Fixed",
+    description: "Ideal for outdoor use in all weather conditions.",
     data: [
       {
         pixel_pitch: "P 3.0",
@@ -280,6 +283,7 @@ export const model = [
   {
     id: 4,
     name: "Video Wall",
+    description: "Perfect for dynamic, professional visual presentations.",
     data: [
       {
         inch: '46"',

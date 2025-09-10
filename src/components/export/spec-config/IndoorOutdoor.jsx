@@ -1,32 +1,85 @@
 import React from "react";
 import { BasePage } from "../BasePage";
 
-export const IndoorOutdoorConfig = () => {
-  const specifications = [
-    {
-      category: "Display Requirements",
-      items: [
-        { label: "Screen Configuration", value: "4 x 4" },
-        { label: "Number Of Cabinet", value: "16 Pcs" },
-        { label: "Display Resolution", value: "1.376 x 1.032" },
-      ],
-    },
-    {
-      category: "Display Wall",
-      items: [
-        { label: "Dimensions", value: "2.56 (0.64) x 1.92 (0.48)" },
-        { label: "Display Area", value: "0.84 m2" },
-        { label: "Weight Cabinet", value: "124.8 kg" },
-      ],
-    },
-    {
-      category: "Power Requirements",
-      items: [
-        { label: "Max Power", value: "10.400 W" },
-        { label: "Average Power", value: "4.800 W" },
-      ],
-    },
-  ];
+export const IndoorOutdoorConfig = ({ data }) => {
+  // Helper function to get specifications with default values like code 1
+  const getSpecifications = () => {
+    const specifications = [
+      {
+        category: "Display Requirements",
+        items: [
+          {
+            label: "Screen Configuration",
+            value: data?.calculations
+              ? `${data.calculations.unitCount.horizontal} x ${data.calculations.unitCount.vertical}`
+              : "4 x 4",
+          },
+          {
+            label: `Number Of ${data?.calculations?.unitName || "Cabinet"}`,
+            value: data?.calculations
+              ? `${data.calculations.totalUnits} pcs`
+              : "16 Pcs",
+          },
+          {
+            label: "Display Resolution",
+            value:
+              data?.calculations?.resolution?.width > 0 &&
+              data?.calculations?.resolution?.height > 0
+                ? `${data.calculations.resolution.width} x ${data.calculations.resolution.height} dots`
+                : "1.376 x 1.032",
+          },
+        ],
+      },
+      {
+        category: "Display Wall",
+        items: [
+          {
+            label: "Dimensions",
+            value:
+              data?.screenConfig && data?.calculations?.baseDimensions
+                ? `${data.screenConfig.width} (${data.calculations.baseDimensions.width}) x ${data.screenConfig.height} (${data.calculations.baseDimensions.height})`
+                : "2.56 (0.64) x 1.92 (0.48)",
+          },
+          {
+            label: "Display Area",
+            value: data?.screenConfig
+              ? `${data.screenConfig.area} m²`
+              : "0.84 m²",
+          },
+          {
+            label: "Weight Cabinet",
+            value:
+              data?.calculations?.weight > 0
+                ? `${data.calculations.weight.toFixed(0)} kg`
+                : "124.8 kg",
+          },
+        ],
+      },
+      {
+        category: "Power Requirements",
+        items: [
+          {
+            label: "Max Power",
+            value:
+              data?.calculations?.power?.max > 0
+                ? `${data.calculations.power.max.toFixed(0)} W`
+                : "10.400 W",
+          },
+          {
+            label: "Average Power",
+            value:
+              data?.calculations?.power?.average > 0
+                ? `${data.calculations.power.average.toFixed(0)} W`
+                : "4.800 W",
+          },
+        ],
+      },
+    ];
+
+    return specifications;
+  };
+
+  const specifications = getSpecifications();
 
   return (
     <BasePage>
@@ -38,46 +91,126 @@ export const IndoorOutdoorConfig = () => {
           className="w-auto h-10"
         />
       </div>
+
       {/* Main Content */}
       <div className="px-16 py-20">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl text-gray-700 flex items-center justify-center space-x-4">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-[#2A7A78] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#E0F2F0] rounded-full"></div>
+        <div className="text-center mb-10 mt-20">
+          <div
+            className="text-gray-700 flex items-center justify-center space-x-4 h-10 p-2"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "1rem", // fallback untuk space-x-4
+              height: "2.5rem", // fallback h-10
+              padding: "0.5rem", // fallback p-2
+              color: "#374151", // fallback text-gray-700
+            }}
+          >
+            {/* Dots kiri */}
+            <div
+              className="flex space-x-1"
+              style={{ display: "flex", gap: "0.25rem" }}
+            >
+              <div
+                className="w-2 h-2 bg-[#2A7A78] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#2A7A78",
+                  borderRadius: "9999px",
+                }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#3AAFA9",
+                  borderRadius: "9999px",
+                }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#E0F2F0",
+                  borderRadius: "9999px",
+                }}
+              ></div>
             </div>
-            <span className="font-medium">Specification</span>
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-[#E0F2F0] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#2A7A78] rounded-full"></div>
+
+            {/* Title */}
+            <p
+              className="font-medium text-lg leading-none flex items-center"
+              style={{
+                fontWeight: 500,
+                fontSize: "1.125rem",
+                lineHeight: 1,
+                display: "flex",
+                alignItems: "center",
+                margin: 0,
+              }}
+            >
+              Specification
+            </p>
+
+            {/* Dots kanan */}
+            <div
+              className="flex space-x-1"
+              style={{ display: "flex", gap: "0.25rem" }}
+            >
+              <div
+                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#E0F2F0",
+                  borderRadius: "9999px",
+                }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#3AAFA9",
+                  borderRadius: "9999px",
+                }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-[#2A7A78] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#2A7A78",
+                  borderRadius: "9999px",
+                }}
+              ></div>
             </div>
-          </h2>
+          </div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="w-full">
+        <div className="overflow-hidden rounded-lg border border-gray-200 z-50">
+          <table className="w-full border-collapse text-xs">
             <tbody>
               {specifications.map((section, sectionIndex) => (
                 <React.Fragment key={sectionIndex}>
                   {section.items.map((item, itemIndex) => (
-                    <tr
-                      key={`${sectionIndex}-${itemIndex}`}
-                      className="border-b border-gray-200"
-                    >
+                    <tr key={`${sectionIndex}-${itemIndex}`}>
                       {itemIndex === 0 && (
                         <td
                           rowSpan={section.items.length}
-                          className="py-2.5 px-6 text-gray-600 border-r border-gray-200 align-middle"
+                          className="py-2.5 px-6 w-52 text-gray-700 font-medium border border-gray-200 align-middle bg-gray-50"
                         >
                           {section.category}
                         </td>
                       )}
-                      <td className="py-2.5 px-6 text-gray-600 border-r border-gray-200">
+                      <td className="py-2.5 px-6 w-52 text-gray-600 border border-gray-200 align-middle">
                         {item.label}
                       </td>
-                      <td className="py-2.5 px-6 text-gray-600">
+                      <td className="py-2.5 px-6 w-52 text-gray-700 border border-gray-200 align-middle">
                         {item.value}
                       </td>
                     </tr>
@@ -88,21 +221,33 @@ export const IndoorOutdoorConfig = () => {
           </table>
         </div>
       </div>
+
       {/* Footer */}
-      <div className="absolute bottom-6 left-8 text-xs space-y-2 text-gray-600">
+      <div className="absolute bottom-6 left-8 text-[10px] space-y-2 text-gray-600">
         <div className="font-semibold">MJ Solution Indonesia</div>
-        <div>
+        <p>
           The Mansion Bougenville Kemayoran Tower Fontana Zona I Lantai 50
           Kemayoran Jakarta Utara
-        </div>
+        </p>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-1">
-            <img src="/icons/icon-web.svg" className="w-4 h-4" alt="web" />
-            <span>mjsolution.co.id</span>
+          {/* Website */}
+          <div className="inline-flex items-center space-x-1">
+            <img
+              src="/icons/icon-web.svg"
+              className="w-4 h-4 relative top-[1px]"
+              alt="web"
+            />
+            <span className="leading-[1]">mjsolution.co.id</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <img src="/icons/icon-call.svg" className="w-4 h-4" alt="call" />
-            <span>(+62) 811-1122-492</span>
+
+          {/* Phone */}
+          <div className="inline-flex items-center space-x-1">
+            <img
+              src="/icons/icon-call.svg"
+              className="w-4 h-4 relative top-[1px]"
+              alt="phone"
+            />
+            <span className="leading-[1]">(+62) 811-1122-492</span>
           </div>
         </div>
       </div>

@@ -4,10 +4,18 @@ import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseModalStore } from "../store/UseModalStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
 import { UseHeaderStore } from "../store/UseHeaderStore";
-import { UseCalculatorStore } from "../store/UseCalculatorStore";
 import { ConfigurationModal } from "./ConfigurationModal";
+import { CanvasUtils } from "./utils/CanvasUtils"; // Import utility functions
 
 export const Canvas = () => {
+  // Store hooks
+  const canvasStore = UseCanvasStore();
+  const { openModal } = UseModalStore();
+  const { selectedModel, selectedContent, customImageUrl, roomImageUrl } =
+    UseNavbarStore();
+  const headerStore = UseHeaderStore();
+
+  // Destructure canvas store
   const {
     canvasWidth,
     canvasHeight,
@@ -24,11 +32,9 @@ export const Canvas = () => {
     updateModelData,
     isConfigured,
     setScreenSize,
-  } = UseCanvasStore();
+  } = canvasStore;
 
-  const { openModal } = UseModalStore();
-  const { selectedModel, selectedContent, customImageUrl, roomImageUrl } =
-    UseNavbarStore();
+  // Destructure header store
   const {
     syncWithCanvas,
     incrementScreenWidth,
@@ -38,14 +44,13 @@ export const Canvas = () => {
     initializeDefaults,
     resolution,
     getResolutionInfo,
-  } = UseHeaderStore();
+  } = headerStore;
 
-  // Update canvas store when model is selected and initialize defaults
+  // Initialize model data when selected
   useEffect(() => {
-    if (selectedModel && selectedModel.modelData) {
+    if (selectedModel?.modelData) {
       updateModelData(selectedModel.modelData, selectedModel.name);
 
-      // Initialize defaults first, then sync
       setTimeout(() => {
         initializeDefaults();
         syncWithCanvas();
@@ -56,11 +61,10 @@ export const Canvas = () => {
   // Calculate display values
   const cabinetCount = getCabinetCount();
   const actualScreenSize = getActualScreenSize();
-  const imageScale = getImageScale();
   const configured = isConfigured();
   const resolutionInfo = getResolutionInfo();
 
-  // Get validation from header store for consistent button states
+  // Validation for control buttons
   const canIncreaseScreenWidth =
     actualScreenSize.width + baseWidth <= wallWidth;
   const canDecreaseScreenWidth = actualScreenSize.width > baseWidth;
@@ -68,7 +72,7 @@ export const Canvas = () => {
     actualScreenSize.height + baseHeight <= wallHeight;
   const canDecreaseScreenHeight = actualScreenSize.height > baseHeight;
 
-  // Handle control button actions using header store methods for consistency
+  // Control button handlers
   const handleWidthIncrement = () => {
     if (!configured || !canIncreaseScreenWidth || resolution !== "Custom")
       return;
@@ -93,457 +97,250 @@ export const Canvas = () => {
     decrementScreenHeight();
   };
 
-  // Calculate dynamic image and canvas dimensions
-  const canvasContainerWidth = 550;
-  const canvasContainerHeight = 300;
+  // Use utility functions for calculations
+  const { effectiveCanvasWidth, effectiveCanvasHeight } =
+    CanvasUtils.getCanvasDimensions(wallWidth, wallHeight);
 
-  // Calculate wall scale (how much of the canvas the wall occupies)
-  const maxWallWidth = 10; // maximum wall width in meters for scaling reference
-  const maxWallHeight = 5.5; // increased from 6 to 8 for better scaling sensitivity
-
-  const wallScaleX = Math.min(1, wallWidth / maxWallWidth);
-  const wallScaleY = Math.min(1, wallHeight / maxWallHeight);
-
-  // Wall takes up portion of canvas based on its size
-  const effectiveCanvasWidth = canvasContainerWidth * wallScaleX;
-  const effectiveCanvasHeight = canvasContainerHeight * wallScaleY;
-
-  // Calculate screen scale relative to wall
-  const screenToWallRatioX = actualScreenSize.width / wallWidth;
-  const screenToWallRatioY = actualScreenSize.height / wallHeight;
-
-  const imageWidth = Math.min(
-    effectiveCanvasWidth * screenToWallRatioX,
-    effectiveCanvasWidth * 1.5
-  );
-  const imageHeight = Math.min(
-    effectiveCanvasHeight * screenToWallRatioY,
-    effectiveCanvasHeight * 1.5
+  const { imageWidth, imageHeight } = CanvasUtils.getImageDimensions(
+    actualScreenSize,
+    wallWidth,
+    wallHeight,
+    effectiveCanvasWidth,
+    effectiveCanvasHeight
   );
 
-  // Calculate measurement line lengths based on proportions
-  const horizontalMeasureLength = Math.min(imageWidth, effectiveCanvasWidth);
-  const verticalMeasureLength = Math.min(imageHeight, effectiveCanvasHeight);
+  const {
+    horizontalMeasureLength,
+    verticalMeasureLength,
+    remainingWallHeight,
+    remainingWallWidth,
+  } = CanvasUtils.getMeasurementValues(
+    actualScreenSize,
+    wallWidth,
+    wallHeight,
+    imageWidth,
+    imageHeight,
+    effectiveCanvasWidth,
+    effectiveCanvasHeight
+  );
 
-  // Calculate remaining space for measures (NEW FORMULAS)
-  const remainingWallHeight = (wallHeight - actualScreenSize.height) / 2;
-  const remainingWallWidth = (wallWidth - actualScreenSize.width) / 2;
+  const { finalHumanHeight, humanToWallRatio } =
+    CanvasUtils.getHumanDimensions(wallHeight);
 
-  // Calculate realistic human silhouette height based on wall height
-  const humanRealHeight = 1.7; // 170 cm in meters (standard Indonesian height)
-
-  // Use fixed canvas height for consistent calculation
-  const baseCanvasHeight = canvasContainerHeight; // Always use full 300px canvas height
-
-  // Calculate human height relative to wall height, then scale to canvas
-  const humanToWallRatio = humanRealHeight / wallHeight;
-  const humanDisplayHeight = baseCanvasHeight * humanToWallRatio;
-
-  // Only minimal minimum size constraint
-  const minHumanHeight = 8; // minimum 8px for very tall walls
-  const finalHumanHeight = Math.max(minHumanHeight, humanDisplayHeight);
-
-  // Get content source based on selected content
-  const getContentSource = () => {
-    switch (selectedContent) {
-      case "Default Image":
-        return "/canvas/canvas-bg.webp";
-      case "Default Video":
-        return "/canvas/ringroad-bg.mp4";
-      case "No Content":
-        return "/canvas/no-content.png";
-      case "Custom":
-        return customImageUrl || "/canvas/canvas-bg.webp";
-      default:
-        return "/canvas/canvas-bg.webp";
-    }
-  };
-
-  const contentSource = getContentSource();
+  const contentSource = CanvasUtils.getContentSource(
+    selectedContent,
+    customImageUrl
+  );
   const isVideo = selectedContent === "Default Video";
 
-  // Format resolution display string
   const getResolutionDisplayString = () => {
-    if (!resolutionInfo) {
-      return "";
-    }
+    if (!resolutionInfo) return "No Resolution Data";
 
     const { actual } = resolutionInfo;
+
     return `${actual.width} × ${actual.height} px`;
   };
 
+  // Component render helpers
+  const renderResetButton = () => (
+    <div className="absolute top-4 right-4 z-10">
+      <button
+        onClick={reset}
+        className="w-20 lg:w-[144px] cursor-pointer px-4 py-2 text-xs bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
+      >
+        Reset
+      </button>
+    </div>
+  );
+
+  const renderVideoContent = () => (
+    <div className="relative inline-block">
+      <video
+        src={contentSource}
+        autoPlay
+        loop
+        muted
+        style={{
+          width: `${imageWidth}px`,
+          height: `${imageHeight}px`,
+          maxWidth: "100%",
+          maxHeight: "100%",
+        }}
+        className="object-cover z-20"
+      />
+      {CanvasUtils.renderMeasurementLines(
+        horizontalMeasureLength,
+        verticalMeasureLength
+      )}
+    </div>
+  );
+
+  const renderImageContent = () => (
+    <div className="relative inline-block">
+      <div
+        className="relative"
+        style={{
+          width: `${imageWidth}px`,
+          height: `${imageHeight}px`,
+        }}
+      >
+        <img
+          src={contentSource}
+          alt="Canvas Preview"
+          className="object-fill w-full h-full z-20"
+        />
+        {CanvasUtils.renderBezelOverlay(cabinetCount)}
+      </div>
+      {CanvasUtils.renderMeasurementLines(
+        horizontalMeasureLength,
+        verticalMeasureLength
+      )}
+    </div>
+  );
+
+  const renderControlButton = (
+    onClick,
+    disabled,
+    icon,
+    additionalClasses = ""
+  ) => {
+    const baseClasses =
+      "flex items-center justify-center text-sm w-5 h-5 border rounded";
+    const enabledClasses =
+      "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600 cursor-pointer";
+    const disabledClasses = "text-gray-300 border-gray-200 cursor-not-allowed";
+
+    return (
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className={`${baseClasses} ${
+          disabled ? disabledClasses : enabledClasses
+        } ${additionalClasses}`}
+      >
+        {icon}
+      </button>
+    );
+  };
+
+  const renderWidthControls = () => (
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden lg:flex items-center space-x-2 z-50">
+      {renderControlButton(
+        handleWidthDecrement,
+        !configured || !canDecreaseScreenWidth || resolution !== "Custom",
+        <Minus size={12} />
+      )}
+      <span className="text-xs text-gray-700">
+        {actualScreenSize.width.toFixed(2)} m
+      </span>
+      {renderControlButton(
+        handleWidthIncrement,
+        !configured || !canIncreaseScreenWidth || resolution !== "Custom",
+        <Plus size={12} />
+      )}
+    </div>
+  );
+
+  const renderHeightControls = () => (
+    <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center justify-center space-y-2 z-50 ">
+      {renderControlButton(
+        handleHeightIncrement,
+        !configured || !canIncreaseScreenHeight || resolution !== "Custom",
+        <Plus size={12} />
+      )}
+      <div className="flex items-center justify-center min-h-[40px]">
+        <span
+          className="text-xs text-gray-700 text-center rotate-180"
+          style={{ writingMode: "vertical-lr" }}
+        >
+          {actualScreenSize.height.toFixed(2)} m
+        </span>
+      </div>
+      {renderControlButton(
+        handleHeightDecrement,
+        !configured || !canDecreaseScreenHeight || resolution !== "Custom",
+        <Minus size={12} className="rotate-90" />
+      )}
+    </div>
+  );
+
+  const renderCanvasBackground = () => {
+    const backgroundStyle = roomImageUrl
+      ? {
+          backgroundImage: `url(${roomImageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }
+      : {};
+
+    return (
+      <div
+        className={`w-[330px] h-[180px] max-h-[300px] lg:w-[550px] lg:h-[300px] ${
+          roomImageUrl ? "bg-transparent" : "bg-white"
+        } p-5 flex items-center justify-center z-20`}
+        style={backgroundStyle}
+      >
+        {isVideo ? renderVideoContent() : renderImageContent()}
+      </div>
+    );
+  };
+
+  const renderCanvasPreview = () => (
+    <div className="relative w-full max-w-[650px] h-[250px] lg:w-[650px] lg:h-[370px] rounded-lg flex items-center justify-center overflow-hidden">
+      {renderCanvasBackground()}
+
+      {/* Canvas to Wall Measurements */}
+      {CanvasUtils.renderCanvasToWallMeasurements(
+        effectiveCanvasWidth,
+        effectiveCanvasHeight
+      )}
+
+      {/* Wall Measurements - Centered */}
+      {CanvasUtils.renderWallMeasurements(
+        remainingWallHeight,
+        remainingWallWidth
+      )}
+
+      {/* Info Displays */}
+      {CanvasUtils.renderInfoDisplays(getResolutionDisplayString())}
+
+      {/* Screen Controls */}
+      {renderWidthControls()}
+      {renderHeightControls()}
+
+      {/* Human Silhouette */}
+      {CanvasUtils.renderHumanSilhouette(finalHumanHeight, humanToWallRatio)}
+    </div>
+  );
+
+  const renderEmptyCanvas = () => (
+    <div className="w-[330px] h-[180px] max-h-[300px] lg:w-[550px] lg:h-[300px] bg-white text-center flex flex-col items-center justify-center px-4">
+      <p className="text-gray-500 text-sm lg:text-base">
+        Start your configuration by choosing the model that suits your needs.
+      </p>
+      <button
+        onClick={openModal}
+        className="mt-6 flex items-center justify-center space-x-2 w-full max-w-[200px] lg:w-1/2 h-10 text-white bg-[#3AAFA9] hover:bg-teal-600 transition-colors"
+      >
+        <CirclePlus size={20} className="shrink-0" />
+        <span className="text-base">Configuration</span>
+      </button>
+    </div>
+  );
+
   return (
     <>
-      <div className="flex-1 bg-gray-100 h-full p-4 flex items-center justify-center">
-        {/* Reset Button */}
-        <div className="absolute top-4 right-4 z-10">
-          <button
-            onClick={reset}
-            className="w-[144px] px-4 py-2 text-xs bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            Reset
-          </button>
-        </div>
+      <div className="flex-1 bg-gray-100 h-96 lg:h-full p-2 lg:p-4 flex items-center justify-center">
+        {renderResetButton()}
 
         {/* Canvas Container */}
-        <div className="relative m-auto flex justify-center items-center">
-          {configured && selectedModel ? (
-            /* Canvas Preview */
-            <div className="relative w-[650px] h-[370px] rounded-lg flex items-center justify-center overflow-hidden">
-              <div
-                className={`w-[550px] h-[300px] ${
-                  roomImageUrl ? "bg-transparent" : "bg-white"
-                } p-5 flex items-center justify-center z-20`}
-                style={{
-                  backgroundImage: roomImageUrl
-                    ? `url(${roomImageUrl})`
-                    : "none",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                {isVideo ? (
-                  <div className="relative inline-block">
-                    <video
-                      src={contentSource}
-                      autoPlay
-                      loop
-                      muted
-                      style={{
-                        width: `${imageWidth}px`,
-                        height: `${imageHeight}px`,
-                        maxWidth: "100%",
-                        maxHeight: "100%",
-                      }}
-                      className="object-cover z-20"
-                    />
-                    {/* Dynamic Video Measurements */}
-                    {/* V Top Right Measure Video */}
-                    <div
-                      className="absolute top-0 right-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
-                      style={{
-                        transform: "translateX(80%) translateY(-100%)",
-                        height: `${verticalMeasureLength + 180}px`,
-                      }}
-                    ></div>
-
-                    {/* V Top Left Measure Video */}
-                    <div
-                      className="absolute top-0 left-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
-                      style={{
-                        transform: "translateX(-80%) translateY(-100%)",
-                        height: `${verticalMeasureLength + 180}px`,
-                      }}
-                    ></div>
-
-                    {/* H Bottom Right Measure Video */}
-                    <div
-                      className="absolute top-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
-                      style={{
-                        transform: "translateY(100%) translateX(-100%)",
-                        width: `${horizontalMeasureLength + 250}px`,
-                      }}
-                    ></div>
-
-                    {/* H Bottom Left Measure Video */}
-                    <div
-                      className="absolute bottom-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
-                      style={{
-                        transform: "translateY(100%) translateX(-100%)",
-                        width: `${horizontalMeasureLength + 250}px`,
-                      }}
-                    ></div>
-                  </div>
-                ) : (
-                  <div className="relative inline-block">
-                    <div
-                      className="relative"
-                      style={{
-                        width: `${imageWidth}px`,
-                        height: `${imageHeight}px`,
-                      }}
-                    >
-                      <img
-                        src={contentSource}
-                        alt="Canvas Preview"
-                        className="object-fill w-full h-full z-20"
-                      />
-
-                      {/* Dynamic Overlay Grid - Bezel Simulation */}
-                      {(cabinetCount.horizontal > 1 ||
-                        cabinetCount.vertical > 1) && (
-                        <div className="absolute inset-0 z-30 pointer-events-none border-1 border-[#D9D9D9]/40">
-                          {/* Vertical bezel lines */}
-                          {cabinetCount.horizontal > 1 &&
-                            Array.from(
-                              { length: cabinetCount.horizontal - 1 },
-                              (_, i) => (
-                                <div
-                                  key={`vertical-${i}`}
-                                  className="absolute top-0 bottom-0 border-l-1 border-[#D9D9D9]/40"
-                                  style={{
-                                    left: `${
-                                      ((i + 1) / cabinetCount.horizontal) * 100
-                                    }%`,
-                                  }}
-                                ></div>
-                              )
-                            )}
-
-                          {/* Horizontal bezel lines */}
-                          {cabinetCount.vertical > 1 &&
-                            Array.from(
-                              { length: cabinetCount.vertical - 1 },
-                              (_, i) => (
-                                <div
-                                  key={`horizontal-${i}`}
-                                  className="absolute left-0 right-0 border-t-1 border-[#D9D9D9]/40"
-                                  style={{
-                                    top: `${
-                                      ((i + 1) / cabinetCount.vertical) * 100
-                                    }%`,
-                                  }}
-                                ></div>
-                              )
-                            )}
-                        </div>
-                      )}
-                    </div>
-                    {/* Dynamic Image Measurements */}
-                    {/* V Top Right Measure Image */}
-                    <div
-                      className="absolute top-0 right-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
-                      style={{
-                        transform: "translateX(80%) translateY(-100%)",
-                        height: `${verticalMeasureLength + 180}px`,
-                      }}
-                    ></div>
-
-                    {/* V Top Left Measure Image */}
-                    <div
-                      className="absolute top-0 left-[1px] border-l border-dashed z-10 border-teal-400 pointer-events-none"
-                      style={{
-                        transform: "translateX(-80%) translateY(-100%)",
-                        height: `${verticalMeasureLength + 180}px`,
-                      }}
-                    ></div>
-
-                    {/* H Bottom Right Measure Image */}
-                    <div
-                      className="absolute top-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
-                      style={{
-                        transform: "translateY(100%) translateX(-100%)",
-                        width: `${horizontalMeasureLength + 250}px`,
-                      }}
-                    ></div>
-
-                    {/* H Bottom Left Measure Image */}
-                    <div
-                      className="absolute bottom-0 left-0 border-t border-dashed z-10 border-teal-400 pointer-events-none"
-                      style={{
-                        transform: "translateY(100%) translateX(-100%)",
-                        width: `${horizontalMeasureLength + 250}px`,
-                      }}
-                    ></div>
-                  </div>
-                )}
-              </div>
-
-              {/* Canvas to Wall Measurement Lines */}
-              {/* H Bottom Measure Canvas to Wall */}
-              <div
-                className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
-                style={{
-                  bottom: "36px",
-                  transform: "translateX(-75%) translateY(100%)",
-                  width: `${effectiveCanvasWidth + 100}px`,
-                }}
-              ></div>
-
-              {/* V Right Measure Canvas to Wall */}
-              <div
-                className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
-                style={{
-                  right: "52px",
-                  transform: "translateX(100%) translateY(-75%)",
-                  height: `${effectiveCanvasHeight + 100}px`,
-                }}
-              ></div>
-
-              {/* Start Measure of Height */}
-              <div className="absolute left-4 top-[25%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
-                <span
-                  className="text-xs text-gray-700 text-center rotate-180"
-                  style={{ writingMode: "vertical-lr" }}
-                >
-                  {remainingWallHeight.toFixed(2)} m
-                </span>
-              </div>
-
-              <div className="absolute left-4 top-[75%] -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
-                <span
-                  className="text-xs text-gray-700 text-center rotate-180"
-                  style={{ writingMode: "vertical-lr" }}
-                >
-                  {remainingWallHeight.toFixed(2)} m
-                </span>
-              </div>
-              {/* End Measure of Height*/}
-
-              {/* Start Measure of Width */}
-              <div className="absolute top-0 left-1/4 -translate-x-1/2 flex flex-col items-center justify-center space-y-2 z-50">
-                <span className="text-xs text-gray-700 text-center">
-                  {remainingWallWidth.toFixed(2)} m
-                </span>
-              </div>
-
-              <div className="absolute top-0 right-1/4 translate-x-1/2 flex flex-col items-center justify-center space-y-2 z-50">
-                <span className="text-xs text-gray-700 text-center">
-                  {remainingWallWidth.toFixed(2)} m
-                </span>
-              </div>
-              {/* End Measure of Width */}
-
-              {/* Resolution Info Display */}
-              <div className="absolute bottom-1 left-13 flex flex-col items-start justify-center z-50">
-                <span className="text-xs text-gray-700">
-                  Resolution: {getResolutionDisplayString()}
-                </span>
-              </div>
-
-              {/* Width controls with proper validation */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-50">
-                <button
-                  onClick={handleWidthDecrement}
-                  disabled={
-                    !configured ||
-                    !canDecreaseScreenWidth ||
-                    resolution !== "Custom"
-                  }
-                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured &&
-                    canDecreaseScreenWidth &&
-                    resolution === "Custom"
-                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
-                      : "text-gray-300 border-gray-200 cursor-not-allowed"
-                  }`}
-                >
-                  <Minus size={12} />
-                </button>
-                <span className="text-xs text-gray-700">
-                  {actualScreenSize.width.toFixed(2)} m
-                </span>
-                <button
-                  onClick={handleWidthIncrement}
-                  disabled={
-                    !configured ||
-                    !canIncreaseScreenWidth ||
-                    resolution !== "Custom"
-                  }
-                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured &&
-                    canIncreaseScreenWidth &&
-                    resolution === "Custom"
-                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
-                      : "text-gray-300 border-gray-200 cursor-not-allowed"
-                  }`}
-                >
-                  <Plus size={12} />
-                </button>
-              </div>
-
-              {/* Height controls with proper validation */}
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center space-y-2 z-50">
-                <button
-                  onClick={handleHeightIncrement}
-                  disabled={
-                    !configured ||
-                    !canIncreaseScreenHeight ||
-                    resolution !== "Custom"
-                  }
-                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured &&
-                    canIncreaseScreenHeight &&
-                    resolution === "Custom"
-                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
-                      : "text-gray-300 border-gray-200 cursor-not-allowed"
-                  }`}
-                >
-                  <Plus size={12} />
-                </button>
-                <div className="flex items-center justify-center min-h-[40px]">
-                  <span
-                    className="text-xs text-gray-700 text-center rotate-180"
-                    style={{ writingMode: "vertical-lr" }}
-                  >
-                    {actualScreenSize.height.toFixed(2)} m
-                  </span>
-                </div>
-                <button
-                  onClick={handleHeightDecrement}
-                  disabled={
-                    !configured ||
-                    !canDecreaseScreenHeight ||
-                    resolution !== "Custom"
-                  }
-                  className={`flex items-center justify-center text-sm w-5 h-5 border rounded ${
-                    configured &&
-                    canDecreaseScreenHeight &&
-                    resolution === "Custom"
-                      ? "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600"
-                      : "text-gray-300 border-gray-200 cursor-not-allowed"
-                  }`}
-                >
-                  <Minus size={12} />
-                </button>
-              </div>
-
-              {/* Human silhouette container with fixed position */}
-              <div
-                className="absolute -right-21 bottom-8 z-50"
-                style={{
-                  width: "150px", // Fixed width container
-                  height: "auto", // Fixed height container
-                  alignItems: "flex-end", // Human selalu di bottom container
-                }}
-              >
-                {/* Human silhouette with dynamic height only */}
-                <div className="relative flex flex-col">
-                  <img
-                    src="/human.webp"
-                    alt={`Human Scale Reference (1.7m) - ${(
-                      humanToWallRatio * 100
-                    ).toFixed(1)}% of wall`}
-                    style={{
-                      height: `${finalHumanHeight}px`,
-                      width: "auto",
-                      objectFit: "contain",
-                      maxWidth: "80px", // Ensure width doesn't get too wide
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* Canvas Empty */
-            <div className="w-[600px] h-[320px] bg-white text-center flex flex-col items-center justify-center">
-              <p className="text-gray-500 text-base">
-                Start your configuration by choosing the model that suits your
-                needs.
-              </p>
-              <button
-                onClick={openModal}
-                className="mt-6 flex items-center justify-center space-x-2 w-1/2 h-10 text-white bg-[#3AAFA9] hover:bg-teal-600 transition-colors"
-              >
-                <CirclePlus size={20} className="shrink-0" />
-                <span className="text-base">Configuration</span>
-              </button>
-            </div>
-          )}
+        <div className="relative m-auto flex justify-center items-center w-full">
+          {configured && selectedModel
+            ? renderCanvasPreview()
+            : renderEmptyCanvas()}
         </div>
       </div>
 
-      {/* Configuration Modal */}
       <ConfigurationModal />
     </>
   );

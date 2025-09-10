@@ -1,8 +1,11 @@
 import { BasePage } from "../BasePage";
 
-export const Outdoor = () => {
+export const Outdoor = ({ data }) => {
   const specs = [
-    { label: "Pixel Pitch", value: "P 3.0" },
+    {
+      label: "Pixel Pitch",
+      value: data?.pixelPitch ? `${data.pixelPitch}` : "P 3.0",
+    },
     { label: "Refresh Rate", value: "1920Hz / 3840Hz / 7680Hz" },
     { label: "Brightness", value: "5500 - 6000 Nits" },
   ];
@@ -42,70 +45,157 @@ export const Outdoor = () => {
       </div>
       {/* Main Content */}
       <div className="px-16 py-20">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl font-light text-gray-700 flex items-center justify-center space-x-4">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-[#2A7A78] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#E0F2F0] rounded-full"></div>
+        <div className="text-center mb-10 mt-20">
+          <div
+            className="text-gray-700 flex items-center justify-center space-x-4 h-10 p-2"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "1rem", // fallback untuk space-x-4
+              height: "2.5rem", // fallback h-10
+              padding: "0.5rem", // fallback p-2
+              color: "#374151", // fallback text-gray-700
+            }}
+          >
+            {/* Dots kiri */}
+            <div
+              className="flex space-x-1"
+              style={{ display: "flex", gap: "0.25rem" }}
+            >
+              <div
+                className="w-2 h-2 bg-[#2A7A78] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#2A7A78",
+                  borderRadius: "9999px",
+                }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#3AAFA9",
+                  borderRadius: "9999px",
+                }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#E0F2F0",
+                  borderRadius: "9999px",
+                }}
+              ></div>
             </div>
-            <span className="font-medium">Product Specification</span>
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-[#E0F2F0] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#3AAFA9] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#2A7A78] rounded-full"></div>
+
+            {/* Title */}
+            <p
+              className="font-medium text-lg leading-none flex items-center"
+              style={{
+                fontWeight: 500,
+                fontSize: "1.125rem",
+                lineHeight: 1,
+                display: "flex",
+                alignItems: "center",
+                margin: 0,
+              }}
+            >
+              Product Specification
+            </p>
+
+            {/* Dots kanan */}
+            <div
+              className="flex space-x-1"
+              style={{ display: "flex", gap: "0.25rem" }}
+            >
+              <div
+                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#E0F2F0",
+                  borderRadius: "9999px",
+                }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#3AAFA9",
+                  borderRadius: "9999px",
+                }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-[#2A7A78] rounded-full"
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  backgroundColor: "#2A7A78",
+                  borderRadius: "9999px",
+                }}
+              ></div>
             </div>
-          </h2>
+          </div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-gray-200">
-          <table className="w-full">
+        <div className="overflow-hidden rounded-lg border border-gray-200 z-50">
+          <table className="w-full border-collapse text-xs">
             <tbody>
               {specs.map((spec, index) => (
-                <tr key={index} className="border-b border-gray-200">
-                  <td className="py-1.5 px-3 text-gray-700 border-r border-gray-200 w-1/3">
+                <tr key={index} className="border border-gray-200">
+                  <td className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle">
                     {spec.label}
                   </td>
-                  <td className="py-1.5 px-3 text-gray-700" colSpan="2">
+                  <td
+                    className="py-1.5 px-3 text-gray-700 align-middle"
+                    colSpan="2"
+                  >
                     {spec.value}
                   </td>
                 </tr>
               ))}
 
-              <tr className="border-b border-gray-200">
+              <tr className="border border-gray-200">
                 <td
-                  className="py-1.5 px-3 text-gray-700 border-r border-gray-200 w-1/3"
+                  className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle"
                   rowSpan={moduleSpecs.length}
                 >
                   Module
                 </td>
-                <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
+                <td className="py-1.5 px-3 text-gray-600 border border-gray-200 align-middle">
                   {moduleSpecs[0].label}
                 </td>
-                <td className="py-1.5 px-3 text-gray-700">
+                <td className="py-1.5 px-3 text-gray-700 align-middle">
                   {moduleSpecs[0].value}
                 </td>
               </tr>
               {moduleSpecs.slice(1).map((spec, index) => (
-                <tr key={index} className="border-b border-gray-200">
-                  <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
+                <tr key={index} className="border border-gray-200">
+                  <td className="py-1.5 px-3 text-gray-600 border border-gray-200 align-middle">
                     {spec.label}
                   </td>
-                  <td className="py-1.5 px-3 text-gray-700">{spec.value}</td>
+                  <td className="py-1.5 px-3 text-gray-700 align-middle">
+                    {spec.value}
+                  </td>
                 </tr>
               ))}
 
-              <tr className="border-b border-gray-200">
+              <tr className="border border-gray-200">
                 <td
-                  className="py-1.5 px-3 text-gray-700 border-r border-gray-200 w-1/3"
+                  className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle"
                   rowSpan={cabinetSpecs.length}
                 >
                   Cabinet
                 </td>
-                <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
+                <td className="py-1.5 px-3 text-gray-600 border border-gray-200 align-middle">
                   {cabinetSpecs[0].label}
                 </td>
-                <td className="py-1.5 px-3 text-gray-700">
+                <td className="py-1.5 px-3 text-gray-700 align-middle">
                   {cabinetSpecs[0].value}
                 </td>
               </tr>
@@ -115,13 +205,15 @@ export const Outdoor = () => {
                   className={
                     index === cabinetSpecs.length - 2
                       ? ""
-                      : "border-b border-gray-200"
+                      : "border border-gray-200"
                   }
                 >
-                  <td className="py-1.5 px-3 text-gray-600 border-r border-gray-200">
+                  <td className="py-1.5 px-3 text-gray-600 border border-gray-200 align-middle">
                     {spec.label}
                   </td>
-                  <td className="py-1.5 px-3 text-gray-700">{spec.value}</td>
+                  <td className="py-1.5 px-3 text-gray-700 align-middle">
+                    {spec.value}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -129,20 +221,31 @@ export const Outdoor = () => {
         </div>
       </div>
       {/* Footer */}
-      <div className="absolute bottom-6 left-8 text-xs space-y-2 text-gray-600">
+      <div className="absolute bottom-6 left-8 text-[10px] space-y-2 text-gray-600">
         <div className="font-semibold">MJ Solution Indonesia</div>
-        <div>
+        <p>
           The Mansion Bougenville Kemayoran Tower Fontana Zona I Lantai 50
           Kemayoran Jakarta Utara
-        </div>
+        </p>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-1">
-            <img src="/icons/icon-web.svg" className="w-4 h-4" alt="web" />
-            <span>mjsolution.co.id</span>
+          {/* Website */}
+          <div className="inline-flex items-center space-x-1">
+            <img
+              src="/icons/icon-web.svg"
+              className="w-4 h-4 relative top-[1px]"
+              alt="web"
+            />
+            <span className="leading-[1]">mjsolution.co.id</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <img src="/icons/icon-call.svg" className="w-4 h-4" alt="call" />
-            <span>(+62) 811-1122-492</span>
+
+          {/* Phone */}
+          <div className="inline-flex items-center space-x-1">
+            <img
+              src="/icons/icon-call.svg"
+              className="w-4 h-4 relative top-[1px]"
+              alt="phone"
+            />
+            <span className="leading-[1]">(+62) 811-1122-492</span>
           </div>
         </div>
       </div>

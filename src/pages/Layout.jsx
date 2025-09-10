@@ -41,13 +41,9 @@ const Layout = () => {
   }, [selectedModel, updateModelData, syncWithCanvas]);
 
   return (
-    <div className="sm:h-auto  max-h-screen bg-gray-100 flex">
-      {/* Sidebar Navigation */}
-      <div className="flex-shrink-0">
-        <Navbar />
-      </div>
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex flex-col lg:flex-row">
+      {/* Mobile: Main Content First */}
+      <div className="flex-1 flex flex-col lg:order-2">
         {/* Header Controls */}
         <Header />
 
@@ -56,6 +52,12 @@ const Layout = () => {
           <Canvas />
         </div>
       </div>
+
+      {/* Mobile: Sidebar at Bottom, Desktop: Sidebar at Left */}
+      <div className="flex-shrink-0 lg:order-1 order-2">
+        <Navbar />
+      </div>
+
       {/* Modal - renders at root level */}
       <ConfigurationModal />
       <ExportModal />

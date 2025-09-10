@@ -68,9 +68,46 @@ export const UseHeaderStore = create((set, get) => ({
     const { resolution } = get();
     const { modelData, displayType } = get().getCurrentModelData();
 
-    if (resolution === "Custom" || !modelData) return null;
+    if (!modelData) return null;
 
     const calculator = UseCalculatorStore.getState();
+
+    if (resolution === "Custom") {
+      // Untuk mode Custom, hitung resolusi berdasarkan ukuran layar saat ini
+      const currentState = get();
+      const canvasStore = UseCanvasStore.getState();
+
+      // Dapatkan unit count berdasarkan ukuran layar saat ini
+      const unitCount = calculator.calculateUnitCount(
+        currentState.screenWidth,
+        currentState.screenHeight,
+        canvasStore.baseWidth,
+        canvasStore.baseHeight
+      );
+
+      // Dapatkan resolusi per unit
+      const modelResolutionField = calculator.getResolutionField(
+        modelData,
+        displayType
+      );
+      const modelResolution = calculator.parseResolution(modelResolutionField);
+
+      // Hitung total resolusi aktual
+      const actualResolution = {
+        width: unitCount.horizontal * modelResolution.width,
+        height: unitCount.vertical * modelResolution.height,
+      };
+
+      return {
+        target: { width: "Custom", height: "Custom" }, // Atau bisa pakai actualResolution
+        actual: actualResolution,
+        units: unitCount,
+        modelResolution: modelResolution,
+        isCustom: true,
+      };
+    }
+
+    // Untuk mode preset (FHD, UHD)
     return calculator.getTargetResolutionInfo(
       modelData,
       displayType,
@@ -84,7 +121,6 @@ export const UseHeaderStore = create((set, get) => ({
   setResolution: (resolution) => {
     set({ resolution });
 
-    // If not custom, calculate and set screen size based on resolution
     if (resolution !== "Custom") {
       const screenSize = get().calculateScreenSizeFromResolution(resolution);
       const canvasStore = UseCanvasStore.getState();
@@ -98,10 +134,59 @@ export const UseHeaderStore = create((set, get) => ({
       // Update canvas store
       canvasStore.setScreenSize(screenSize.width, screenSize.height);
 
-      // Auto-adjust wall size to accommodate new screen size with margin
+      // PERBAIKAN: Auto-adjust wall size dengan validasi ketat
       const currentState = get();
-      const minWallWidth = Math.max(5, screenSize.width + 2); // 2m margin minimum
-      const minWallHeight = Math.max(3, screenSize.height + 1.5); // 1.5m margin minimum
+      const minWallWidth = Math.max(5, screenSize.width + 2);
+      const minWallHeight = Math.max(3, screenSize.height + 1.5);
+
+      // VALIDASI: Pastikan wall selalu lebih besar dari screen
+      let newWallWidth = currentState.wallWidth;
+      let newWallHeight = currentState.wallHeight;
+
+      if (currentState.wallWidth < minWallWidth) {
+        newWallWidth = minWallWidth;
+        console.warn(
+          `Wall width adjusted from ${currentState.wallWidth}m to ${newWallWidth}m`
+        );
+      }
+
+      if (currentState.wallHeight < minWallHeight) {
+        newWallHeight = minWallHeight;
+        console.warn(
+          `Wall height adjusted from ${currentState.wallHeight}m to ${newWallHeight}m`
+        );
+      }
+
+      if (
+        newWallWidth !== currentState.wallWidth ||
+        newWallHeight !== currentState.wallHeight
+      ) {
+        set({
+          wallWidth: newWallWidth,
+          wallHeight: newWallHeight,
+        });
+        canvasStore.setWallSize(newWallWidth, newWallHeight);
+      }
+    } else {
+      // Mode Custom - validasi dan sync ulang
+      const currentState = get();
+      const canvasStore = UseCanvasStore.getState();
+      const actualScreenSize = canvasStore.getActualScreenSize();
+
+      // SINKRONISASI: Pastikan header menggunakan actual size dari canvas
+      if (
+        currentState.screenWidth !== actualScreenSize.width ||
+        currentState.screenHeight !== actualScreenSize.height
+      ) {
+        set({
+          screenWidth: actualScreenSize.width,
+          screenHeight: actualScreenSize.height,
+        });
+      }
+
+      // VALIDASI: Pastikan wall cukup besar
+      const minWallWidth = Math.max(5, actualScreenSize.width + 1);
+      const minWallHeight = Math.max(3, actualScreenSize.height + 1);
 
       if (
         currentState.wallWidth < minWallWidth ||
@@ -114,7 +199,6 @@ export const UseHeaderStore = create((set, get) => ({
           wallWidth: newWallWidth,
           wallHeight: newWallHeight,
         });
-
         canvasStore.setWallSize(newWallWidth, newWallHeight);
       }
     }
@@ -132,23 +216,54 @@ export const UseHeaderStore = create((set, get) => ({
     canvasStore.setScreenSize(width, get().screenHeight);
   },
 
-  // Wall dimension actions with minimum limits
-  setWallHeight: (height) => {
-    const canvasStore = UseCanvasStore.getState();
-    const minHeight = 3; // Minimum 3m height
-    const finalHeight = Math.max(minHeight, height);
-
-    set({ wallHeight: finalHeight });
-    canvasStore.setWallSize(get().wallWidth, finalHeight);
-  },
-
   setWallWidth: (width) => {
     const canvasStore = UseCanvasStore.getState();
-    const minWidth = 5; // Minimum 5m width
+    const currentState = get();
+    const actualScreenSize = canvasStore.getActualScreenSize();
+
+    // VALIDASI KETAT: Wall harus lebih besar dari actual screen size + margin
+    const minWidth = Math.max(5, actualScreenSize.width + 1); // minimum 1m margin
     const finalWidth = Math.max(minWidth, width);
 
+    // Jika input lebih kecil dari minimum, beri peringatan
+    if (width < minWidth) {
+      console.warn(
+        `Wall width cannot be smaller than ${minWidth}m (screen width: ${actualScreenSize.width}m + 1m margin)`
+      );
+    }
+
     set({ wallWidth: finalWidth });
-    canvasStore.setWallSize(finalWidth, get().wallHeight);
+    canvasStore.setWallSize(finalWidth, currentState.wallHeight);
+
+    // Force sync untuk memastikan konsistensi
+    setTimeout(() => {
+      get().syncWithCanvas();
+    }, 10);
+  },
+
+  setWallHeight: (height) => {
+    const canvasStore = UseCanvasStore.getState();
+    const currentState = get();
+    const actualScreenSize = canvasStore.getActualScreenSize();
+
+    // VALIDASI KETAT: Wall harus lebih besar dari actual screen size + margin
+    const minHeight = Math.max(3, actualScreenSize.height + 1); // minimum 1m margin
+    const finalHeight = Math.max(minHeight, height);
+
+    // Jika input lebih kecil dari minimum, beri peringatan
+    if (height < minHeight) {
+      console.warn(
+        `Wall height cannot be smaller than ${minHeight}m (screen height: ${actualScreenSize.height}m + 1m margin)`
+      );
+    }
+
+    set({ wallHeight: finalHeight });
+    canvasStore.setWallSize(currentState.wallWidth, finalHeight);
+
+    // Force sync untuk memastikan konsistensi
+    setTimeout(() => {
+      get().syncWithCanvas();
+    }, 10);
   },
 
   // Screen increment/decrement utilities
@@ -299,9 +414,12 @@ export const UseHeaderStore = create((set, get) => ({
     // Initialize defaults first if needed
     get().initializeDefaults();
 
+    // PENTING: Gunakan getActualScreenSize dari canvas, bukan property langsung
+    const actualScreenSize = canvasStore.getActualScreenSize();
+
     set({
-      screenWidth: canvasStore.screenWidth,
-      screenHeight: canvasStore.screenHeight,
+      screenWidth: actualScreenSize.width, // Gunakan actual size dari canvas
+      screenHeight: actualScreenSize.height, // Gunakan actual size dari canvas
       wallWidth: canvasStore.wallWidth,
       wallHeight: canvasStore.wallHeight,
     });

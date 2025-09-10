@@ -257,13 +257,14 @@ export const UseCalculatorStore = create((set, get) => ({
     return { width: 0, height: 0 };
   },
 
-  // Calculate cabinet/module count
   calculateUnitCount: (screenWidth, screenHeight, baseWidth, baseHeight) => {
-    if (baseWidth === 0 || baseHeight === 0)
-      return { horizontal: 0, vertical: 0 };
+    if (baseWidth === 0 || baseHeight === 0) {
+      return { horizontal: 1, vertical: 1 };
+    }
 
-    const horizontal = Math.ceil(screenWidth / baseWidth);
-    const vertical = Math.ceil(screenHeight / baseHeight);
+    const horizontal = Math.max(1, Math.ceil(screenWidth / baseWidth));
+    const vertical = Math.max(1, Math.ceil(screenHeight / baseHeight));
+
     return { horizontal, vertical };
   },
 

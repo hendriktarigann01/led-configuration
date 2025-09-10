@@ -94,9 +94,9 @@ export const Navbar = () => {
   };
 
   return (
-    <div className="w-[350px] h-screen bg-white">
-      {/* Header with Logo */}
-      <div className="p-6">
+    <div className="w-full lg:w-[350px] lg:h-screen bg-white">
+      {/* Header with Logo - Hide on mobile */}
+      <div className="hidden lg:block p-6">
         <div className="flex items-center justify-center">
           <img
             src="/logo/mjs_logo_text.png"
@@ -106,14 +106,14 @@ export const Navbar = () => {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex">
+      {/* Tab Navigation - Desktop only (hidden on mobile as it's moved to Header) */}
+      <div className="hidden lg:flex">
         <button
           onClick={() => setActiveTab("LED Setup")}
           className={`flex-1 py-3 px-4 text-xs font-medium ${
             activeTab === "LED Setup"
               ? "bg-[#3AAFA9] text-white"
-              : "bg-white text-gray-500 hover:bg-gray-200"
+              : "bg-white text-gray-500 hover:bg-gray-200 cursor-pointer"
           }`}
         >
           LED Setup
@@ -123,7 +123,7 @@ export const Navbar = () => {
           className={`flex-1 py-3 px-4 text-xs font-medium ${
             activeTab === "Room Setup"
               ? "bg-[#3AAFA9] text-white"
-              : "bg-white text-gray-500 hover:bg-gray-200"
+              : "bg-white text-gray-500 hover:bg-gray-200 cursor-pointer"
           }`}
         >
           Room Setup
@@ -131,7 +131,11 @@ export const Navbar = () => {
       </div>
 
       {/* Content */}
-      <div className="p-5 space-y-6">
+      <div className="p-5 space-y-6 max-h-96 lg:max-h-none overflow-y-auto">
+        {/* Swipe Up */}
+        <div className="absolute inset-x-0 -mt-3 flex items-center justify-center">
+          <div className="lg:hidden w-10 h-1 rounded-full bg-gray-200"></div>
+        </div>
         {activeTab === "LED Setup" ? (
           <>
             {/* Application Section */}

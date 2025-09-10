@@ -23,6 +23,7 @@ export const UseModalStore = create((set, get) => ({
     return model.map((item) => ({
       id: item.id,
       name: item.name,
+      description: item.description,
       data: item.data,
     }));
   },

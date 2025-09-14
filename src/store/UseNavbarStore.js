@@ -19,6 +19,9 @@ export const UseNavbarStore = create((set) => ({
   // Room image URL for room setup
   roomImageUrl: null,
 
+  // Crop settings for room image positioning
+  cropSettings: null, // { x, y, width, height, scale, rotate }
+
   // Actions
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedApplication: (application) =>
@@ -27,6 +30,7 @@ export const UseNavbarStore = create((set) => ({
   setSelectedContent: (content) => set({ selectedContent: content }),
   setCustomImageUrl: (url) => set({ customImageUrl: url }),
   setRoomImageUrl: (url) => set({ roomImageUrl: url }),
+  setCropSettings: (settings) => set({ cropSettings: settings }),
 
   // Clear selected model (back to empty state)
   clearSelectedModel: () => set({ selectedModel: null }),
@@ -40,5 +44,6 @@ export const UseNavbarStore = create((set) => ({
       selectedContent: "Default Image",
       customImageUrl: null,
       roomImageUrl: null,
+      cropSettings: null,
     }),
 }));

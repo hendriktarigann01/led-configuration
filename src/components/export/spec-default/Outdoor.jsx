@@ -1,254 +1,344 @@
+import React from "react";
+import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { BasePage } from "../BasePage";
 
+const styles = StyleSheet.create({
+  header: {
+    position: "absolute",
+    top: 24,
+    right: 32,
+    zIndex: 10,
+  },
+  logo: {
+    width: "auto",
+    height: 40,
+  },
+  content: {
+    paddingHorizontal: 64,
+    paddingVertical: 80,
+    flex: 1,
+  },
+  titleContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+    marginTop: 80,
+  },
+  titleWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    height: 40,
+    padding: 8,
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    gap: 4,
+  },
+  dot1: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#2A7A78",
+    borderRadius: 4,
+  },
+  dot2: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#3AAFA9",
+    borderRadius: 4,
+  },
+  dot3: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#E0F2F0",
+    borderRadius: 4,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "medium",
+    color: "#374151",
+    lineHeight: 1,
+    margin: 0,
+  },
+  tableContainer: {
+    border: "1px solid #E5E7EB",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  table: {
+    width: "100%",
+  },
+  sectionContainer: {
+    position: "relative",
+  },
+  tableRow: {
+    flexDirection: "row",
+    height: 40,
+    borderBottom: "1px solid #E5E7EB",
+  },
+  categoryCell: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: "33.333%",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    backgroundColor: "#F9FAFB",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    borderRight: "1px solid #E5E7EB",
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: "medium",
+    color: "#374151",
+    textAlign: "left",
+  },
+  labelCell: {
+    width: "33.333%",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    borderRight: "1px solid #E5E7EB",
+    marginLeft: "33.333%",
+  },
+  labelCellOffset: {
+    backgroundColor: "transparent",
+  },
+  labelText: {
+    fontSize: 10,
+    color: "#6B7280",
+    textAlign: "left",
+  },
+  valueCell: {
+    width: "33.333%",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    alignItems: "flex-start",
+    justifyContent: "center",
+  },
+  valueText: {
+    fontSize: 10,
+    color: "#374151",
+    textAlign: "left",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 24,
+    left: 32,
+    fontSize: 10,
+    color: "#666",
+  },
+  footerTitle: {
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  footerText: {
+    marginBottom: 8,
+  },
+  footerContact: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  icon: {
+    width: 16,
+    height: 16,
+  },
+});
+
 export const Outdoor = ({ data }) => {
-  const specs = [
+  const specifications = [
     {
-      label: "Pixel Pitch",
-      value: data?.pixelPitch ? `${data.pixelPitch}` : "P 3.0",
+      category: "Basic Specifications",
+      items: [
+        {
+          label: "Pixel Pitch",
+          value: data?.pixelPitch ? `${data.pixelPitch}` : "P 3.0",
+        },
+        {
+          label: "Refresh Rate",
+          value: data?.refreshRate || "1920Hz / 3840Hz / 7680Hz",
+        },
+        {
+          label: "Brightness",
+          value: data?.brightness || "5500 - 6000 Nits",
+        },
+      ],
     },
-    { label: "Refresh Rate", value: "1920Hz / 3840Hz / 7680Hz" },
-    { label: "Brightness", value: "5500 - 6000 Nits" },
-  ];
-
-  const moduleSpecs = [
-    { label: "Module Size", value: "320mm x 160mm" },
-    { label: "LED lamp", value: "SMD1415" },
-    { label: "Pixel Resolution", value: "104*52 dots" },
-    { label: "Module thickness", value: "17MM" },
-    { label: "Module weight", value: "0.45KG" },
-    { label: "Drive type", value: "Constant drive" },
-    { label: "Aplication", value: "Outdoor Fixed Installation" },
-  ];
-
-  const cabinetSpecs = [
-    { label: "Cabinet size (WH)", value: "960*960mm" },
-    { label: "Cabinet resolution", value: "312*312 dots" },
-    { label: "Pixel density", value: "105625 dots/m²" },
-    { label: "Power Consumption", value: "Max: 800W/m², Average: 300W/m²" },
-    { label: "Cabinet material", value: "Die-casting Magnesium Cabinet" },
-    { label: "Life span", value: "≥100,000 Hours" },
-    { label: "Cabinet weight", value: "25Kg/pc" },
-    { label: "Working voltage", value: "AC220v+-10%" },
-    { label: "Humidity", value: "10%-75%" },
-    { label: "Best viewing distance", value: "3-10M" },
+    {
+      category: "Module",
+      items: [
+        { label: "Module Size", value: data?.moduleSize || "320mm x 160mm" },
+        { label: "LED lamp", value: data?.ledLamp || "SMD1921" },
+        {
+          label: "Pixel Resolution",
+          value: data?.pixelResolution || "106 x 53",
+        },
+        {
+          label: "Module thickness",
+          value: "17MM",
+        },
+        { label: "Module weight", value: data?.moduleWeight || "0.45KG" },
+        { label: "Drive type", value: "Constant drive" },
+        {
+          label: "Application",
+          value: "Outdoor Fixed Installation",
+        },
+      ],
+    },
+    {
+      category: "Cabinet",
+      items: [
+        {
+          label: "Cabinet size (WH)",
+          value: "960*960mm",
+        },
+        {
+          label: "Cabinet resolution",
+          value: data?.cabinetResolution || "320 x 320",
+        },
+        {
+          label: "Pixel density",
+          value: data?.pixelDensity || "111,111/m²",
+        },
+        {
+          label: "Power Consumption",
+          value: "Max: 800W/m², Average: 300W/m²",
+        },
+        {
+          label: "Cabinet material",
+          value: "Die-casting Magnesium Cabinet",
+        },
+        {
+          label: "Life span",
+          value: "≥ 100,000 Hours",
+        },
+        {
+          label: "Cabinet weight",
+          value: "25Kg/pcs",
+        },
+        {
+          label: "Working voltage",
+          value: "AC220v+-10%",
+        },
+        { label: "Humidity", value: "10%-75%" },
+        {
+          label: "Best viewing distance",
+          value: data?.viewingDistance || "3-30m",
+        },
+      ],
+    },
   ];
 
   return (
     <BasePage>
-      {/* Logo */}
-      <div className="absolute top-6 right-8">
-        <img
-          src="/logo/mjs_logo_text.png"
-          alt="logo-mjs"
-          className="w-auto h-10"
-        />
-      </div>
-      {/* Main Content */}
-      <div className="px-16 py-20">
-        <div className="text-center mb-10 mt-20">
-          <div
-            className="text-gray-700 flex items-center justify-center space-x-4 h-10 p-2"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "1rem", // fallback untuk space-x-4
-              height: "2.5rem", // fallback h-10
-              padding: "0.5rem", // fallback p-2
-              color: "#374151", // fallback text-gray-700
-            }}
-          >
+      <View style={styles.header}>
+        <Image style={styles.logo} src="/logo/mjs_logo_text.png" />
+      </View>
+
+      <View style={styles.content}>
+        <View style={styles.titleContainer}>
+          <View style={styles.titleWrapper}>
             {/* Dots kiri */}
-            <div
-              className="flex space-x-1"
-              style={{ display: "flex", gap: "0.25rem" }}
-            >
-              <div
-                className="w-2 h-2 bg-[#2A7A78] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#2A7A78",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#3AAFA9",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#E0F2F0",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-            </div>
+            <View style={styles.dotsContainer}>
+              <View style={styles.dot1} />
+              <View style={styles.dot2} />
+              <View style={styles.dot3} />
+            </View>
 
             {/* Title */}
-            <p
-              className="font-medium text-lg leading-none flex items-center"
-              style={{
-                fontWeight: 500,
-                fontSize: "1.125rem",
-                lineHeight: 1,
-                display: "flex",
-                alignItems: "center",
-                margin: 0,
-              }}
-            >
-              Product Specification
-            </p>
+            <Text style={styles.sectionTitle}>Product Specification</Text>
 
             {/* Dots kanan */}
-            <div
-              className="flex space-x-1"
-              style={{ display: "flex", gap: "0.25rem" }}
-            >
-              <div
-                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#E0F2F0",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#3AAFA9",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#2A7A78] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#2A7A78",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-            </div>
-          </div>
-        </div>
+            <View style={styles.dotsContainer}>
+              <View style={styles.dot3} />
+              <View style={styles.dot2} />
+              <View style={styles.dot1} />
+            </View>
+          </View>
+        </View>
 
-        <div className="overflow-hidden rounded-lg border border-gray-200 z-50">
-          <table className="w-full border-collapse text-xs">
-            <tbody>
-              {specs.map((spec, index) => (
-                <tr key={index} className="border border-gray-200">
-                  <td className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle">
-                    {spec.label}
-                  </td>
-                  <td
-                    className="py-1.5 px-3 text-gray-700 align-middle"
-                    colSpan="2"
+        <View style={styles.tableContainer}>
+          <View style={styles.table}>
+            {specifications.map((section, sectionIndex) => (
+              <React.Fragment key={sectionIndex}>
+                {section.items.map((item, itemIndex) => (
+                  <View
+                    key={`${sectionIndex}-${itemIndex}`}
+                    style={[
+                      styles.tableRow,
+                      { minHeight: 40 },
+                      // Remove border bottom for last item in each section (except last section)
+                      itemIndex === section.items.length - 1 &&
+                        sectionIndex < specifications.length - 1 && {
+                          borderBottom: "1px solid #E5E7EB",
+                        },
+                      // Remove border bottom for last item in last section
+                      sectionIndex === specifications.length - 1 &&
+                        itemIndex === section.items.length - 1 && {
+                          borderBottom: "none",
+                        },
+                      // Remove border bottom for middle items in each section
+                      itemIndex > 0 &&
+                        itemIndex < section.items.length - 1 && {
+                          borderBottom: "none",
+                        },
+                    ]}
                   >
-                    {spec.value}
-                  </td>
-                </tr>
-              ))}
+                    {itemIndex === 0 && (
+                      <View
+                        style={[
+                          styles.categoryCell,
+                          {
+                            height: section.items.length * 40,
+                          },
+                        ]}
+                      >
+                        <Text style={styles.categoryText}>
+                          {section.category}
+                        </Text>
+                      </View>
+                    )}
 
-              <tr className="border border-gray-200">
-                <td
-                  className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle"
-                  rowSpan={moduleSpecs.length}
-                >
-                  Module
-                </td>
-                <td className="py-1.5 px-3 text-gray-600 border border-gray-200 align-middle">
-                  {moduleSpecs[0].label}
-                </td>
-                <td className="py-1.5 px-3 text-gray-700 align-middle">
-                  {moduleSpecs[0].value}
-                </td>
-              </tr>
-              {moduleSpecs.slice(1).map((spec, index) => (
-                <tr key={index} className="border border-gray-200">
-                  <td className="py-1.5 px-3 text-gray-600 border border-gray-200 align-middle">
-                    {spec.label}
-                  </td>
-                  <td className="py-1.5 px-3 text-gray-700 align-middle">
-                    {spec.value}
-                  </td>
-                </tr>
-              ))}
+                    <View style={styles.labelCell}>
+                      <Text style={styles.labelText}>{item.label}</Text>
+                    </View>
 
-              <tr className="border border-gray-200">
-                <td
-                  className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle"
-                  rowSpan={cabinetSpecs.length}
-                >
-                  Cabinet
-                </td>
-                <td className="py-1.5 px-3 text-gray-600 border border-gray-200 align-middle">
-                  {cabinetSpecs[0].label}
-                </td>
-                <td className="py-1.5 px-3 text-gray-700 align-middle">
-                  {cabinetSpecs[0].value}
-                </td>
-              </tr>
-              {cabinetSpecs.slice(1).map((spec, index) => (
-                <tr
-                  key={index}
-                  className={
-                    index === cabinetSpecs.length - 2
-                      ? ""
-                      : "border border-gray-200"
-                  }
-                >
-                  <td className="py-1.5 px-3 text-gray-600 border border-gray-200 align-middle">
-                    {spec.label}
-                  </td>
-                  <td className="py-1.5 px-3 text-gray-700 align-middle">
-                    {spec.value}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {/* Footer */}
-      <div className="absolute bottom-6 left-8 text-[10px] space-y-2 text-gray-600">
-        <div className="font-semibold">MJ Solution Indonesia</div>
-        <p>
+                    <View style={styles.valueCell}>
+                      <Text style={styles.valueText}>{item.value}</Text>
+                    </View>
+                  </View>
+                ))}
+              </React.Fragment>
+            ))}
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerTitle}>MJ Solution Indonesia</Text>
+        <Text style={styles.footerText}>
           The Mansion Bougenville Kemayoran Tower Fontana Zona I Lantai 50
           Kemayoran Jakarta Utara
-        </p>
-        <div className="flex items-center space-x-4">
-          {/* Website */}
-          <div className="inline-flex items-center space-x-1">
-            <img
-              src="/icons/icon-web.svg"
-              className="w-4 h-4 relative top-[1px]"
-              alt="web"
-            />
-            <span className="leading-[1]">mjsolution.co.id</span>
-          </div>
-
-          {/* Phone */}
-          <div className="inline-flex items-center space-x-1">
-            <img
-              src="/icons/icon-call.svg"
-              className="w-4 h-4 relative top-[1px]"
-              alt="phone"
-            />
-            <span className="leading-[1]">(+62) 811-1122-492</span>
-          </div>
-        </div>
-      </div>
+        </Text>
+        <View style={styles.footerContact}>
+          <View style={styles.contactItem}>
+            <Image src="/icons/icon-web.png" style={styles.icon} />
+            <Text>mjsolution.co.id</Text>
+          </View>
+          <View style={styles.contactItem}>
+            <Image src="/icons/icon-call.png" style={styles.icon} />
+            <Text>(+62) 811-1122-492</Text>
+          </View>
+        </View>
+      </View>
     </BasePage>
   );
 };

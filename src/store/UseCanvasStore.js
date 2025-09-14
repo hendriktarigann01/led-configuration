@@ -7,8 +7,8 @@ export const UseCanvasStore = create((set, get) => ({
   canvasHeight: 600,
 
   // LED Screen basic properties
-  screenWidth: 0, // meters 
-  screenHeight: 0, // meters 
+  screenWidth: 0, // meters
+  screenHeight: 0, // meters
 
   // Default wall size (5m width, 3m height)
   wallWidth: 5,
@@ -80,28 +80,19 @@ export const UseCanvasStore = create((set, get) => ({
     );
   },
 
-  // Get image scale based on wall size
-  getImageScale: () => {
-    const { wallWidth, wallHeight, screenWidth, screenHeight } = get();
-    const calculator = UseCalculatorStore.getState();
-    return calculator.calculateImageScale(
-      wallWidth,
-      wallHeight,
-      screenWidth,
-      screenHeight
-    );
-  },
-
-  // Reset to defaults (keep default wall size)
-  reset: () =>
+  // Complete reset - clears ALL state including model data
+  reset: () => {
     set({
+      canvasWidth: 800,
+      canvasHeight: 600,
       screenWidth: 0,
       screenHeight: 0,
-      wallWidth: 5, // Keep default 5m width
-      wallHeight: 3, // Keep default 3m height
+      wallWidth: 5, // Reset to default 5m width
+      wallHeight: 3, // Reset to default 3m height
       baseWidth: 0,
       baseHeight: 0,
-    }),
+    });
+  },
 
   // Update model data and recalculate base size
   updateModelData: (modelData, displayType) => {
@@ -114,9 +105,9 @@ export const UseCanvasStore = create((set, get) => ({
       // Initialize screen size to one unit
       screenWidth: dimensions.width,
       screenHeight: dimensions.height,
-      // Ensure wall defaults are maintained (wall controls should be enabled after model selection)
-      wallWidth: Math.max(5, get().wallWidth), // Keep existing or set to 5m minimum
-      wallHeight: Math.max(3, get().wallHeight), // Keep existing or set to 3m minimum
+      // Ensure wall defaults are maintained
+      wallWidth: Math.max(5, get().wallWidth),
+      wallHeight: Math.max(3, get().wallHeight),
     });
   },
 

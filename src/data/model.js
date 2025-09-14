@@ -1,7 +1,7 @@
 export const model = [
   {
     id: 1,
-    name: "Indoor LED Fixed (Cabinet)",
+    name: "Indoor LED Fixed", // Indoor LED Fixed (Cabinet)
     description: "Suitable for indoor use with a modular and flexible design.",
     data: [
       {
@@ -86,7 +86,7 @@ export const model = [
   },
   {
     id: 2,
-    name: "Indoor LED Fixed (Module)",
+    name: "Indoor LED Fixed", // Indoor LED Fixed (Module)
     description: "Suitable for indoor use with a modular and flexible design.",
     data: [
       {
@@ -472,7 +472,7 @@ export const model = [
       {
         inch: '65"',
         b2b: "3.5 mm",
-        unit_size_mm: "1.432.58 (W) x 807.62 (H)",
+        unit_size_mm: "1,432,58 (W) x 807,62 (H)",
         brightness: "500 cd/m",
         resolution: "FHD 1920 x 1080",
         contrast_ratio: "4000 : 1",

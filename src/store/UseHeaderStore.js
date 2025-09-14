@@ -20,7 +20,6 @@ export const UseHeaderStore = create((set, get) => ({
     const canvasStore = UseCanvasStore.getState();
     const { wallWidth, wallHeight } = get();
 
-    // Only set if canvas store doesn't have proper wall dimensions
     if (
       canvasStore.wallWidth !== wallWidth ||
       canvasStore.wallHeight !== wallHeight
@@ -53,7 +52,6 @@ export const UseHeaderStore = create((set, get) => ({
       return { width: 0, height: 0 };
     }
 
-    // Use calculator to determine screen size based on resolution
     return calculator.calculateScreenSizeFromResolution(
       modelData,
       displayType,
@@ -73,11 +71,9 @@ export const UseHeaderStore = create((set, get) => ({
     const calculator = UseCalculatorStore.getState();
 
     if (resolution === "Custom") {
-      // Untuk mode Custom, hitung resolusi berdasarkan ukuran layar saat ini
       const currentState = get();
       const canvasStore = UseCanvasStore.getState();
 
-      // Dapatkan unit count berdasarkan ukuran layar saat ini
       const unitCount = calculator.calculateUnitCount(
         currentState.screenWidth,
         currentState.screenHeight,
@@ -85,21 +81,19 @@ export const UseHeaderStore = create((set, get) => ({
         canvasStore.baseHeight
       );
 
-      // Dapatkan resolusi per unit
       const modelResolutionField = calculator.getResolutionField(
         modelData,
         displayType
       );
       const modelResolution = calculator.parseResolution(modelResolutionField);
 
-      // Hitung total resolusi aktual
       const actualResolution = {
         width: unitCount.horizontal * modelResolution.width,
         height: unitCount.vertical * modelResolution.height,
       };
 
       return {
-        target: { width: "Custom", height: "Custom" }, // Atau bisa pakai actualResolution
+        target: { width: "Custom", height: "Custom" },
         actual: actualResolution,
         units: unitCount,
         modelResolution: modelResolution,
@@ -107,7 +101,6 @@ export const UseHeaderStore = create((set, get) => ({
       };
     }
 
-    // Untuk mode preset (FHD, UHD)
     return calculator.getTargetResolutionInfo(
       modelData,
       displayType,
@@ -115,7 +108,7 @@ export const UseHeaderStore = create((set, get) => ({
     );
   },
 
-  // Screen dimension actions
+  // Basic setters
   setScreenSize: (size) => set({ screenSize: size }),
 
   setResolution: (resolution) => {
@@ -125,36 +118,27 @@ export const UseHeaderStore = create((set, get) => ({
       const screenSize = get().calculateScreenSizeFromResolution(resolution);
       const canvasStore = UseCanvasStore.getState();
 
-      // Update header store values
       set({
         screenWidth: screenSize.width,
         screenHeight: screenSize.height,
       });
 
-      // Update canvas store
       canvasStore.setScreenSize(screenSize.width, screenSize.height);
 
-      // PERBAIKAN: Auto-adjust wall size dengan validasi ketat
+      // Auto-adjust wall size if needed
       const currentState = get();
       const minWallWidth = Math.max(5, screenSize.width + 2);
       const minWallHeight = Math.max(3, screenSize.height + 1.5);
 
-      // VALIDASI: Pastikan wall selalu lebih besar dari screen
       let newWallWidth = currentState.wallWidth;
       let newWallHeight = currentState.wallHeight;
 
       if (currentState.wallWidth < minWallWidth) {
         newWallWidth = minWallWidth;
-        console.warn(
-          `Wall width adjusted from ${currentState.wallWidth}m to ${newWallWidth}m`
-        );
       }
 
       if (currentState.wallHeight < minWallHeight) {
         newWallHeight = minWallHeight;
-        console.warn(
-          `Wall height adjusted from ${currentState.wallHeight}m to ${newWallHeight}m`
-        );
       }
 
       if (
@@ -168,12 +152,11 @@ export const UseHeaderStore = create((set, get) => ({
         canvasStore.setWallSize(newWallWidth, newWallHeight);
       }
     } else {
-      // Mode Custom - validasi dan sync ulang
-      const currentState = get();
+      // Custom mode - sync with canvas
       const canvasStore = UseCanvasStore.getState();
       const actualScreenSize = canvasStore.getActualScreenSize();
+      const currentState = get();
 
-      // SINKRONISASI: Pastikan header menggunakan actual size dari canvas
       if (
         currentState.screenWidth !== actualScreenSize.width ||
         currentState.screenHeight !== actualScreenSize.height
@@ -184,7 +167,7 @@ export const UseHeaderStore = create((set, get) => ({
         });
       }
 
-      // VALIDASI: Pastikan wall cukup besar
+      // Validate wall size
       const minWallWidth = Math.max(5, actualScreenSize.width + 1);
       const minWallHeight = Math.max(3, actualScreenSize.height + 1);
 
@@ -221,24 +204,11 @@ export const UseHeaderStore = create((set, get) => ({
     const currentState = get();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    // VALIDASI KETAT: Wall harus lebih besar dari actual screen size + margin
-    const minWidth = Math.max(5, actualScreenSize.width + 1); // minimum 1m margin
+    const minWidth = Math.max(5, actualScreenSize.width + 1);
     const finalWidth = Math.max(minWidth, width);
-
-    // Jika input lebih kecil dari minimum, beri peringatan
-    if (width < minWidth) {
-      console.warn(
-        `Wall width cannot be smaller than ${minWidth}m (screen width: ${actualScreenSize.width}m + 1m margin)`
-      );
-    }
 
     set({ wallWidth: finalWidth });
     canvasStore.setWallSize(finalWidth, currentState.wallHeight);
-
-    // Force sync untuk memastikan konsistensi
-    setTimeout(() => {
-      get().syncWithCanvas();
-    }, 10);
   },
 
   setWallHeight: (height) => {
@@ -246,29 +216,15 @@ export const UseHeaderStore = create((set, get) => ({
     const currentState = get();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    // VALIDASI KETAT: Wall harus lebih besar dari actual screen size + margin
-    const minHeight = Math.max(3, actualScreenSize.height + 1); // minimum 1m margin
+    const minHeight = Math.max(3, actualScreenSize.height + 1);
     const finalHeight = Math.max(minHeight, height);
-
-    // Jika input lebih kecil dari minimum, beri peringatan
-    if (height < minHeight) {
-      console.warn(
-        `Wall height cannot be smaller than ${minHeight}m (screen height: ${actualScreenSize.height}m + 1m margin)`
-      );
-    }
 
     set({ wallHeight: finalHeight });
     canvasStore.setWallSize(currentState.wallWidth, finalHeight);
-
-    // Force sync untuk memastikan konsistensi
-    setTimeout(() => {
-      get().syncWithCanvas();
-    }, 10);
   },
 
   // Screen increment/decrement utilities
   incrementScreenHeight: () => {
-    // Only allow manual adjustments in Custom mode
     if (get().resolution !== "Custom") return;
 
     const canvasStore = UseCanvasStore.getState();
@@ -282,7 +238,6 @@ export const UseHeaderStore = create((set, get) => ({
   },
 
   decrementScreenHeight: () => {
-    // Only allow manual adjustments in Custom mode
     if (get().resolution !== "Custom") return;
 
     const canvasStore = UseCanvasStore.getState();
@@ -299,7 +254,6 @@ export const UseHeaderStore = create((set, get) => ({
   },
 
   incrementScreenWidth: () => {
-    // Only allow manual adjustments in Custom mode
     if (get().resolution !== "Custom") return;
 
     const canvasStore = UseCanvasStore.getState();
@@ -313,7 +267,6 @@ export const UseHeaderStore = create((set, get) => ({
   },
 
   decrementScreenWidth: () => {
-    // Only allow manual adjustments in Custom mode
     if (get().resolution !== "Custom") return;
 
     const canvasStore = UseCanvasStore.getState();
@@ -329,32 +282,13 @@ export const UseHeaderStore = create((set, get) => ({
     state.setScreenWidth(newWidth);
   },
 
-  // New Cabinet increment/decrement methods
-  incrementCabinetHeight: () => {
-    // Only allow manual adjustments in Custom mode
-    if (get().resolution !== "Custom") return;
-    get().incrementScreenHeight();
-  },
+  // Cabinet increment/decrement methods (aliases)
+  incrementCabinetHeight: () => get().incrementScreenHeight(),
+  decrementCabinetHeight: () => get().decrementScreenHeight(),
+  incrementCabinetWidth: () => get().incrementScreenWidth(),
+  decrementCabinetWidth: () => get().decrementScreenWidth(),
 
-  decrementCabinetHeight: () => {
-    // Only allow manual adjustments in Custom mode
-    if (get().resolution !== "Custom") return;
-    get().decrementScreenHeight();
-  },
-
-  incrementCabinetWidth: () => {
-    // Only allow manual adjustments in Custom mode
-    if (get().resolution !== "Custom") return;
-    get().incrementScreenWidth();
-  },
-
-  decrementCabinetWidth: () => {
-    // Only allow manual adjustments in Custom mode
-    if (get().resolution !== "Custom") return;
-    get().decrementScreenWidth();
-  },
-
-  // Wall increment/decrement utilities (by 1 unit) with minimum limits
+  // Wall increment/decrement utilities
   incrementWallHeight: () => {
     const state = get();
     const newHeight = Number((state.wallHeight + 1).toFixed(1));
@@ -363,7 +297,7 @@ export const UseHeaderStore = create((set, get) => ({
 
   decrementWallHeight: () => {
     const state = get();
-    const minHeight = 3; // Minimum 3m height
+    const minHeight = 3;
     const newHeight = Math.max(
       minHeight,
       Number((state.wallHeight - 1).toFixed(1))
@@ -379,7 +313,7 @@ export const UseHeaderStore = create((set, get) => ({
 
   decrementWallWidth: () => {
     const state = get();
-    const minWidth = 5; // Minimum 5m width
+    const minWidth = 5;
     const newWidth = Math.max(
       minWidth,
       Number((state.wallWidth - 1).toFixed(1))
@@ -395,74 +329,35 @@ export const UseHeaderStore = create((set, get) => ({
 
   isWallControlsEnabled: () => {
     const canvasStore = UseCanvasStore.getState();
-    // Wall controls are enabled when model is configured
     return canvasStore.isConfigured();
   },
 
-  // Check if screen controls should be interactive (only in Custom mode)
-  isScreenControlsInteractive: () => {
-    return get().resolution === "Custom" && get().isScreenControlsEnabled();
-  },
-
-  // Canvas integration methods
-  syncScreenDimensions: (width, height) =>
-    set({ screenWidth: width, screenHeight: height }),
-
+  // Canvas sync method
   syncWithCanvas: () => {
     const canvasStore = UseCanvasStore.getState();
 
-    // Initialize defaults first if needed
     get().initializeDefaults();
 
-    // PENTING: Gunakan getActualScreenSize dari canvas, bukan property langsung
     const actualScreenSize = canvasStore.getActualScreenSize();
 
     set({
-      screenWidth: actualScreenSize.width, // Gunakan actual size dari canvas
-      screenHeight: actualScreenSize.height, // Gunakan actual size dari canvas
+      screenWidth: actualScreenSize.width,
+      screenHeight: actualScreenSize.height,
       wallWidth: canvasStore.wallWidth,
       wallHeight: canvasStore.wallHeight,
     });
   },
 
-  // Screen boundary validation
-  canIncrementScreenWidth: () => {
-    const state = get();
-    const canvasStore = UseCanvasStore.getState();
-
-    if (!canvasStore.isConfigured() || state.resolution !== "Custom")
-      return false;
-
-    return canvasStore.getActualScreenSize().width < state.wallWidth;
-  },
-
-  canDecrementScreenWidth: () => {
-    const state = get();
-    const canvasStore = UseCanvasStore.getState();
-
-    if (!canvasStore.isConfigured() || state.resolution !== "Custom")
-      return false;
-
-    return canvasStore.getActualScreenSize().width > canvasStore.baseWidth;
-  },
-
-  canIncrementScreenHeight: () => {
-    const state = get();
-    const canvasStore = UseCanvasStore.getState();
-
-    if (!canvasStore.isConfigured() || state.resolution !== "Custom")
-      return false;
-
-    return canvasStore.getActualScreenSize().height < state.wallHeight;
-  },
-
-  canDecrementScreenHeight: () => {
-    const state = get();
-    const canvasStore = UseCanvasStore.getState();
-
-    if (!canvasStore.isConfigured() || state.resolution !== "Custom")
-      return false;
-
-    return canvasStore.getActualScreenSize().height > canvasStore.baseHeight;
+  // Complete reset method - resets to defaults
+  resetToDefaults: () => {
+    set({
+      screenSize: "Area",
+      resolution: "Custom",
+      screenHeight: 0,
+      screenWidth: 0,
+      unit: "Meter",
+      wallHeight: 3,
+      wallWidth: 5,
+    });
   },
 }));

@@ -1,92 +1,114 @@
+import React from "react";
+import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { BasePage } from "./BasePage";
 
-export const LastPage = () => {
-    const containerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '2rem',
-    color: '#4B5563',
-    fontFamily: 'Arial, sans-serif',
-    fontSize: '14px',
-    fontWeight: '500',
-    padding: '1rem 0'
-  };
+const styles = StyleSheet.create({
+  header: {
+    position: "absolute",
+    top: 24,
+    right: 32,
+    zIndex: 10,
+  },
+  logo: {
+    width: "auto",
+    height: 25,
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  companyLogo: {
+    width: "auto",
+    height: 64,
+    marginBottom: 30,
+  },
+  companyName: {
+    fontSize: 32,
+    fontWeight: 300,
+    color: "#374151",
+    marginBottom: 30,
+    textAlign: "center",
+  },
+  tagline: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20,
+  },
+  taglineText: {
+    fontSize: 12,
+    color: "#4B5563",
+  },
+  taglineDot: {
+    width: 6,
+    height: 6,
+    backgroundColor: "#000",
+    borderRadius: 3,
+  },
+  footer: {
+    position: "absolute",
+    bottom: 20,
+    left: 30,
+    fontSize: 8,
+    color: "#666",
+  },
+  footerTitle: {
+    fontWeight: "bold",
+    marginBottom: 5,
+  },
+  footerText: {
+    marginBottom: 5,
+  },
+  footerContact: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  icon: {
+    width: 10,
+    height: 10,
+    marginRight: 2,
+  },
+  iconTeks: {
+    marginRight: 6,
+  },
+});
 
-  const textStyle = {
-    lineHeight: '1',
-    whiteSpace: 'nowrap'
-  };
+export const LastPage = ({ data }) => (
+  <BasePage>
+    <View style={styles.header}>
+      <Image style={styles.logo} src="/logo/mjs_logo_text.png" />
+    </View>
 
-  const dotStyle = {
-    width: '0.5rem',
-    height: '0.5rem',
-    backgroundColor: '#000',
-    borderRadius: '50%',
-    flexShrink: 0
-  };
+    <View style={styles.centerContent}>
+      <View style={{ alignItems: "center" }}>
+        <Image style={styles.companyLogo} src="/logo/mjs_logo.png" />
+        <Text style={styles.companyName}>MJ Solution Indonesia</Text>
 
-  return (
-    <BasePage>
-      <div className="flex flex-col items-center justify-center h-full">
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-8">
-            <img
-              src="/logo/mjs_logo.png"
-              alt="logo-mjs"
-              className="w-auto h-16"
-            />
-          </div>
-          <p
-            className="text-5xl font-light text-gray-700 mb-8"
-            style={{
-              fontSize: "3rem",
-              fontWeight: 300,
-              color: "#374151",
-              marginBottom: "2rem",
-              lineHeight: "1.2",
-            }}
-          >
-            MJ Solution Indonesia
-          </p>
-          <div style={containerStyle}>
-            <span style={textStyle}>EXPLORE</span>
-            <div style={dotStyle}></div>
-            <span style={textStyle}>CREATE</span>
-            <div style={dotStyle}></div>
-            <span style={textStyle}>INSPIRE</span>
-          </div>
-        </div>
-      </div>
-      {/* Footer */}
-      <div className="absolute bottom-6 left-8 text-[10px] space-y-2 text-gray-600">
-        <h1 className="font-semibold">MJ Solution Indonesia</h1>
-        <p>
-          The Mansion Bougenville Kemayoran Tower Fontana Zona I Lantai 50
-          Kemayoran Jakarta Utara
-        </p>
-        <div className="flex items-center space-x-4">
-          {/* Website */}
-          <div className="inline-flex items-center space-x-1">
-            <img
-              src="/icons/icon-web.svg"
-              className="w-4 h-4 relative top-[1px]"
-              alt="web"
-            />
-            <span className="leading-[1]">mjsolution.co.id</span>
-          </div>
+        <View style={styles.tagline}>
+          <Text style={styles.taglineText}>EXPLORE</Text>
+          <View style={styles.taglineDot} />
+          <Text style={styles.taglineText}>CREATE</Text>
+          <View style={styles.taglineDot} />
+          <Text style={styles.taglineText}>INSPIRE</Text>
+        </View>
+      </View>
+    </View>
 
-          {/* Phone */}
-          <div className="inline-flex items-center space-x-1">
-            <img
-              src="/icons/icon-call.svg"
-              className="w-4 h-4 relative top-[1px]"
-              alt="phone"
-            />
-            <span className="leading-[1]">(+62) 811-1122-492</span>
-          </div>
-        </div>
-      </div>
-    </BasePage>
-  );
-};
+    <View style={styles.footer}>
+      <Text style={styles.footerTitle}>MJ Solution Indonesia</Text>
+      <Text style={styles.footerText}>
+        The Mansion Bougenville Kemayoran Tower Fontana Zona I Lantai 50
+        Kemayoran Jakarta Utara
+      </Text>
+      <View style={styles.footerContact}>
+        <Image src="/icons/icon-web.png" style={styles.icon} />
+        <Text style={styles.iconTeks}>mjsolution.co.id</Text>
+        <Image src="/icons/icon-call.png" style={styles.icon} />
+        <Text style={styles.iconTeks}>(+62) 811-1122-492</Text>
+      </View>
+    </View>
+  </BasePage>
+);

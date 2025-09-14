@@ -1,313 +1,343 @@
+import React from "react";
+import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { BasePage } from "../BasePage";
 
+const styles = StyleSheet.create({
+  header: {
+    position: "absolute",
+    top: 24,
+    right: 32,
+    zIndex: 10,
+  },
+  logo: {
+    width: "auto",
+    height: 40,
+  },
+  content: {
+    paddingHorizontal: 64,
+    paddingVertical: 80,
+    flex: 1,
+  },
+  titleContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+    marginTop: 80,
+  },
+  titleWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    height: 40,
+    padding: 8,
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    gap: 4,
+  },
+  dot1: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#2A7A78",
+    borderRadius: 4,
+  },
+  dot2: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#3AAFA9",
+    borderRadius: 4,
+  },
+  dot3: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#E0F2F0",
+    borderRadius: 4,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "medium",
+    color: "#374151",
+    lineHeight: 1,
+    margin: 0,
+  },
+  tableContainer: {
+    border: "1px solid #E5E7EB",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  table: {
+    width: "100%",
+  },
+  sectionContainer: {
+    position: "relative",
+  },
+  tableRow: {
+    flexDirection: "row",
+    height: 40,
+    borderBottom: "1px solid #E5E7EB",
+  },
+  categoryCell: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: "33.333%",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    backgroundColor: "#F9FAFB",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    borderRight: "1px solid #E5E7EB",
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: "medium",
+    color: "#374151",
+    textAlign: "left",
+  },
+  labelCell: {
+    width: "33.333%",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    borderRight: "1px solid #E5E7EB",
+    marginLeft: "33.333%",
+  },
+  labelCellOffset: {
+    backgroundColor: "transparent",
+  },
+  labelText: {
+    fontSize: 10,
+    color: "#6B7280",
+    textAlign: "left",
+  },
+  valueCell: {
+    width: "33.333%",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    alignItems: "flex-start",
+    justifyContent: "center",
+  },
+  valueText: {
+    fontSize: 10,
+    color: "#374151",
+    textAlign: "left",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 24,
+    left: 32,
+    fontSize: 10,
+    color: "#666",
+  },
+  footerTitle: {
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  footerText: {
+    marginBottom: 8,
+  },
+  footerContact: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  icon: {
+    width: 16,
+    height: 16,
+  },
+});
+
 export const VideoWall = ({ data }) => {
-  const specs = [
-    { label: "Inch", value: data?.inch ? `${data.inch}"` : '46"' },
-    { label: "Unit Size (mm)", value: "1,075 (W) x 606 (H) x 54 (D)" },
-    { label: "B2B", value: "1,8 mm" },
-    { label: "Brightness", value: "500 cd/m2" },
-  ];
-
-  const moduleSpecs = [
-    { label: "Resolution", value: "FHD 1920 x 1080)" },
-    { label: "Contrast Ratio", value: "4000" },
-    { label: "Aspect Ratio", value: "16 : 9" },
-    { label: "Display Color", value: "8 bit / 16.7 M" },
-    { label: "Color Gamut", value: "72%" },
-    { label: "Response Time", value: "8 ms" },
-    { label: "Viewing Angle", value: "178 (H) / 178 (V)" },
-    { label: "H. Scanning Frequency", value: "30 kHz ~ 81 kHz" },
-    { label: "V. Scanning Frequency", value: "48Hz ~ 75Hz" },
-  ];
-
-  const connectivitySpecs = [
-    { label: "Audio in/Out", value: "Stereo Mini Jack" },
-    { label: "Video In", value: "HDMI1, HDMI2" },
-  ];
-
-  const powerSpecs = [
-    { label: "Power Supply", value: "AC 100 - 240 V / 50 - 60 Hz" },
-    { label: "Power Consumption (W)", value: "≤180 W" },
-    { label: "Standby Power", value: "3W" },
-  ];
-
-  const environmentSpecs = [
-    { label: "Operation Temperature", value: "0 ~ 50 ℃" },
-    { label: "Storage Temperature", value: "-20 ~ 65 ℃" },
-    { label: "Operation", value: "24/7" },
+  const specifications = [
+    {
+      category: "Basic Specifications",
+      items: [
+        { label: "Inch", value: data?.inch ? `${data.inch}"` : '46"' },
+        {
+          label: "Unit Size (mm)",
+          value: data?.unitSize || "1020 x 574 x 65",
+        },
+        { label: "B2B", value: data?.b2b || "0.88mm" },
+        { label: "Brightness", value: data?.brightness || "500 cd/m²" },
+      ],
+    },
+    {
+      category: "Panel",
+      items: [
+        {
+          label: "Resolution",
+          value: "FHD 1920 x 1080",
+        },
+        { label: "Contrast Ratio", value: data?.contrastRatio || "4000:1" },
+        { label: "Aspect Ratio", value: "16:9" },
+        {
+          label: "Display Color",
+          value: "8 bit / 16.7 M",
+        },
+        { label: "Color Gamut", value: "72%" },
+        { label: "Response Time", value: "8 ms" },
+        {
+          label: "Viewing Angle",
+          value: "178° (H) / 178° (V)",
+        },
+        {
+          label: "H. Scanning Frequency",
+          value: "30 kHz ~ 81 kHz",
+        },
+        {
+          label: "V. Scanning Frequency",
+          value: "48Hz ~ 75Hz",
+        },
+      ],
+    },
+    {
+      category: "Connectivity",
+      items: [
+        {
+          label: "Audio in/Out",
+          value: "Stereo Mini Jack",
+        },
+        { label: "Video In", value: "HDMI1, HDMI2" },
+      ],
+    },
+    {
+      category: "Power",
+      items: [
+        {
+          label: "Power Supply",
+          value: "AC 100 - 240 V / 50 - 60 Hz",
+        },
+        {
+          label: "Power Consumption (W)",
+          value: "≤180 W",
+        },
+        { label: "Standby Power", value: "3W" },
+      ],
+    },
+    {
+      category: "Environment",
+      items: [
+        {
+          label: "Operation Temperature",
+          value: "0 ~ 50°C",
+        },
+        {
+          label: "Storage Temperature",
+          value: "-20 ~ 65°C",
+        },
+        { label: "Operation", value: "24/7" },
+      ],
+    },
   ];
 
   return (
     <BasePage>
-      {/* Logo */}
-      <div className="absolute top-6 right-8">
-        <img
-          src="/logo/mjs_logo_text.png"
-          alt="logo-mjs"
-          className="w-auto h-10"
-        />
-      </div>
-      {/* Main Content */}
-      <div className="px-16 py-20">
-        <div className="text-center mb-10 mt-20">
-          <div
-            className="text-gray-700 flex items-center justify-center space-x-4 h-10 p-2"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "1rem", // fallback untuk space-x-4
-              height: "2.5rem", // fallback h-10
-              padding: "0.5rem", // fallback p-2
-              color: "#374151", // fallback text-gray-700
-            }}
-          >
+      <View style={styles.header}>
+        <Image style={styles.logo} src="/logo/mjs_logo_text.png" />
+      </View>
+
+      <View style={styles.content}>
+        <View style={styles.titleContainer}>
+          <View style={styles.titleWrapper}>
             {/* Dots kiri */}
-            <div
-              className="flex space-x-1"
-              style={{ display: "flex", gap: "0.25rem" }}
-            >
-              <div
-                className="w-2 h-2 bg-[#2A7A78] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#2A7A78",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#3AAFA9",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#E0F2F0",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-            </div>
+            <View style={styles.dotsContainer}>
+              <View style={styles.dot1} />
+              <View style={styles.dot2} />
+              <View style={styles.dot3} />
+            </View>
 
             {/* Title */}
-            <p
-              className="font-medium text-lg leading-none flex items-center"
-              style={{
-                fontWeight: 500,
-                fontSize: "1.125rem",
-                lineHeight: 1,
-                display: "flex",
-                alignItems: "center",
-                margin: 0,
-              }}
-            >
-              Product Specification
-            </p>
+            <Text style={styles.sectionTitle}>Product Specification</Text>
 
             {/* Dots kanan */}
-            <div
-              className="flex space-x-1"
-              style={{ display: "flex", gap: "0.25rem" }}
-            >
-              <div
-                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#E0F2F0",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#3AAFA9",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#2A7A78] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#2A7A78",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-            </div>
-          </div>
-        </div>
+            <View style={styles.dotsContainer}>
+              <View style={styles.dot3} />
+              <View style={styles.dot2} />
+              <View style={styles.dot1} />
+            </View>
+          </View>
+        </View>
 
-        <div className="overflow-hidden rounded-lg border border-gray-200 z-50">
-          <table className="w-full border-collapse text-xs">
-            <tbody>
-              {/* Basic specs without category */}
-              {specs.map((spec, index) => (
-                <tr key={index} className="border border-gray-200">
-                  <td className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle">
-                    {spec.label}
-                  </td>
-                  <td
-                    className="py-1.5 px-3 text-gray-700 align-middle"
-                    colSpan="2"
+        <View style={styles.tableContainer}>
+          <View style={styles.table}>
+            {specifications.map((section, sectionIndex) => (
+              <React.Fragment key={sectionIndex}>
+                {section.items.map((item, itemIndex) => (
+                  <View
+                    key={`${sectionIndex}-${itemIndex}`}
+                    style={[
+                      styles.tableRow,
+                      { minHeight: 40 },
+                      // Remove border bottom for last item in each section (except last section)
+                      itemIndex === section.items.length - 1 &&
+                        sectionIndex < specifications.length - 1 && {
+                          borderBottom: "1px solid #E5E7EB",
+                        },
+                      // Remove border bottom for last item in last section
+                      sectionIndex === specifications.length - 1 &&
+                        itemIndex === section.items.length - 1 && {
+                          borderBottom: "none",
+                        },
+                      // Remove border bottom for middle items in each section
+                      itemIndex > 0 &&
+                        itemIndex < section.items.length - 1 && {
+                          borderBottom: "none",
+                        },
+                    ]}
                   >
-                    {spec.value}
-                  </td>
-                </tr>
-              ))}
+                    {itemIndex === 0 && (
+                      <View
+                        style={[
+                          styles.categoryCell,
+                          {
+                            height: section.items.length * 40,
+                          },
+                        ]}
+                      >
+                        <Text style={styles.categoryText}>
+                          {section.category}
+                        </Text>
+                      </View>
+                    )}
 
-              {/* Panel section */}
-              <tr className="border border-gray-200">
-                <td
-                  className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle"
-                  rowSpan={moduleSpecs.length}
-                >
-                  Panel
-                </td>
-                <td className="py-1.5 px-3 text-gray-600 border border-gray-200">
-                  {moduleSpecs[0].label}
-                </td>
-                <td className="py-1.5 px-3 text-gray-700 align-middle">
-                  {moduleSpecs[0].value}
-                </td>
-              </tr>
-              {moduleSpecs.slice(1).map((spec, index) => (
-                <tr key={index} className="border border-gray-200">
-                  <td className="py-1.5 px-3 text-gray-600 border border-gray-200">
-                    {spec.label}
-                  </td>
-                  <td className="py-1.5 px-3 text-gray-700 align-middle">
-                    {spec.value}
-                  </td>
-                </tr>
-              ))}
+                    <View style={styles.labelCell}>
+                      <Text style={styles.labelText}>{item.label}</Text>
+                    </View>
 
-              {/* Connectivity section */}
-              <tr className="border border-gray-200">
-                <td
-                  className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle"
-                  rowSpan={connectivitySpecs.length}
-                >
-                  Connectivity
-                </td>
-                <td className="py-1.5 px-3 text-gray-600 border border-gray-200">
-                  {connectivitySpecs[0].label}
-                </td>
-                <td className="py-1.5 px-3 text-gray-700 align-middle">
-                  {connectivitySpecs[0].value}
-                </td>
-              </tr>
-              {connectivitySpecs.slice(1).map((spec, index) => (
-                <tr key={index} className="border border-gray-200">
-                  <td className="py-1.5 px-3 text-gray-600 border border-gray-200">
-                    {spec.label}
-                  </td>
-                  <td className="py-1.5 px-3 text-gray-700 align-middle">
-                    {spec.value}
-                  </td>
-                </tr>
-              ))}
+                    <View style={styles.valueCell}>
+                      <Text style={styles.valueText}>{item.value}</Text>
+                    </View>
+                  </View>
+                ))}
+              </React.Fragment>
+            ))}
+          </View>
+        </View>
+      </View>
 
-              {/* Power section */}
-              <tr className="border border-gray-200">
-                <td
-                  className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle"
-                  rowSpan={powerSpecs.length}
-                >
-                  Power
-                </td>
-                <td className="py-1.5 px-3 text-gray-600 border border-gray-200">
-                  {powerSpecs[0].label}
-                </td>
-                <td className="py-1.5 px-3 text-gray-700 align-middle">
-                  {powerSpecs[0].value}
-                </td>
-              </tr>
-              {powerSpecs.slice(1).map((spec, index) => (
-                <tr key={index} className="border border-gray-200">
-                  <td className="py-1.5 px-3 text-gray-600 border border-gray-200">
-                    {spec.label}
-                  </td>
-                  <td className="py-1.5 px-3 text-gray-700 align-middle">
-                    {spec.value}
-                  </td>
-                </tr>
-              ))}
-
-              {/* Environment section */}
-              <tr className="border border-gray-200">
-                <td
-                  className="py-1.5 px-3 w-44 text-gray-700 border border-gray-200 align-middle"
-                  rowSpan={environmentSpecs.length}
-                >
-                  Environment
-                </td>
-                <td className="py-1.5 px-3 text-gray-600 border border-gray-200">
-                  {environmentSpecs[0].label}
-                </td>
-                <td className="py-1.5 px-3 text-gray-700 align-middle">
-                  {environmentSpecs[0].value}
-                </td>
-              </tr>
-              {environmentSpecs.slice(1).map((spec, index) => (
-                <tr
-                  key={index}
-                  className={
-                    index === environmentSpecs.length - 2
-                      ? ""
-                      : "border border-gray-200"
-                  }
-                >
-                  <td className="py-1.5 px-3 text-gray-600 border border-gray-200">
-                    {spec.label}
-                  </td>
-                  <td className="py-1.5 px-3 text-gray-700 align-middle">
-                    {spec.value}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {/* Footer */}
-      <div className="absolute bottom-6 left-8 text-[10px] space-y-2 text-gray-600">
-        <div className="font-semibold">MJ Solution Indonesia</div>
-        <p>
+      <View style={styles.footer}>
+        <Text style={styles.footerTitle}>MJ Solution Indonesia</Text>
+        <Text style={styles.footerText}>
           The Mansion Bougenville Kemayoran Tower Fontana Zona I Lantai 50
           Kemayoran Jakarta Utara
-        </p>
-        <div className="flex items-center space-x-4">
-          {/* Website */}
-          <div className="inline-flex items-center space-x-1">
-            <img
-              src="/icons/icon-web.svg"
-              className="w-4 h-4 relative top-[1px]"
-              alt="web"
-            />
-            <span className="leading-[1]">mjsolution.co.id</span>
-          </div>
-
-          {/* Phone */}
-          <div className="inline-flex items-center space-x-1">
-            <img
-              src="/icons/icon-call.svg"
-              className="w-4 h-4 relative top-[1px]"
-              alt="phone"
-            />
-            <span className="leading-[1]">(+62) 811-1122-492</span>
-          </div>
-        </div>
-      </div>
+        </Text>
+        <View style={styles.footerContact}>
+          <View style={styles.contactItem}>
+            <Image src="/icons/icon-web.png" style={styles.icon} />
+            <Text>mjsolution.co.id</Text>
+          </View>
+          <View style={styles.contactItem}>
+            <Image src="/icons/icon-call.png" style={styles.icon} />
+            <Text>(+62) 811-1122-492</Text>
+          </View>
+        </View>
+      </View>
     </BasePage>
   );
 };

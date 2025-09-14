@@ -1,96 +1,101 @@
+import React from "react";
+import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { BasePage } from "./BasePage";
 
-export const FirstPage = ({ data }) => {
-  return (
-    <BasePage>
-      <div className="flex flex-col items-center justify-center h-full space-y-60 px-16">
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-8">
-            <img
-              src="/logo/mjs_logo_text.png"
-              alt="logo-mjs-center"
-              className="w-auto h-16"
-            />
-          </div>
-          <p
-            className="text-5xl font-light text-gray-700 mb-8"
-            style={{
-              fontSize: "3rem",
-              fontWeight: 300,
-              color: "#374151",
-              marginBottom: "2rem",
-              lineHeight: "1.2",
-            }}
-          >
-            MJ Solution Indonesia
-          </p>
+const styles = StyleSheet.create({
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+  },
+  companyLogo: {
+    width: "auto",
+    height: 40,
+    marginBottom: 30,
+  },
+  companyName: {
+    fontSize: 32,
+    fontWeight: 300,
+    color: "#374151",
+    marginBottom: 30,
+    textAlign: "center",
+  },
+  tagline: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20,
+    marginBottom: 80,
+  },
+  taglineText: {
+    fontSize: 12,
+    color: "#4B5563",
+  },
+  taglineDot: {
+    width: 6,
+    height: 6,
+    backgroundColor: "#000",
+    borderRadius: 3,
+  },
+  userInfo: {
+    alignItems: "center",
+    gap: 20,
+    width: 300,
+  },
+  userName: {
+    fontSize: 20,
+    fontWeight: 300,
+    color: "#374151",
+    textAlign: "center",
+  },
+  configDate: {
+    fontSize: 12,
+    color: "#666",
+    textAlign: "center",
+  },
+  divider: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#999",
+    marginVertical: 15,
+  },
+  displayType: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+  },
+});
 
-          <div
-            className="flex items-center justify-center text-gray-600"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "2rem",
-              color: "#4B5563",
-            }}
-          >
-            <span className="leading-none" style={{ lineHeight: 1 }}>
-              EXPLORE
-            </span>
-            <div
-              className="w-2 h-2 bg-black rounded-full flex-shrink-0"
-              style={{
-                width: "0.5rem",
-                height: "0.5rem",
-                backgroundColor: "#000",
-                borderRadius: "9999px",
-                flexShrink: 0,
-                position: "relative",
-                top: "1px",
-              }}
-            ></div>
-            <span className="leading-none" style={{ lineHeight: 1 }}>
-              CREATE
-            </span>
-            <div
-              className="w-2 h-2 bg-black rounded-full flex-shrink-0"
-              style={{
-                width: "0.5rem",
-                height: "0.5rem",
-                backgroundColor: "#000",
-                borderRadius: "9999px",
-                flexShrink: 0,
-                position: "relative",
-                top: "1px",
-              }}
-            ></div>
-            <span className="leading-none" style={{ lineHeight: 1 }}>
-              INSPIRE
-            </span>
-          </div>
-        </div>
+export const FirstPage = ({ data }) => (
+  <BasePage>
+    <View style={styles.centerContent}>
+      <View style={{ alignItems: "center" }}>
+        <Image style={styles.companyLogo} src="/logo/mjs_logo_text.png" />
+        <Text style={styles.companyName}>MJ Solution Indonesia</Text>
 
-        <div className="text-center space-y-6 w-[350px]">
-          <p
-            className="text-gray-700 font-light"
-            style={{ fontWeight: 300, fontSize: "2rem", lineHeight: "1.2" }}
-          >
-            {data?.userName || "Muhammad Faris"}
-          </p>
+        <View style={styles.tagline}>
+          <Text style={styles.taglineText}>EXPLORE</Text>
+          <View style={styles.taglineDot} />
+          <Text style={styles.taglineText}>CREATE</Text>
+          <View style={styles.taglineDot} />
+          <Text style={styles.taglineText}>INSPIRE</Text>
+        </View>
+      </View>
 
-          <div className="text-sm text-gray-600">
-            Date of Configuration {data?.exportDate || "16-03-2025"}
-          </div>
-
-          <div className="border-b border-gray-400"></div>
-
-          <p className="text-base text-gray-600 font-medium">
-            {data?.displayType || "Indoor LED Fixed"}{" "}
-            {data?.pixelPitch ? `${data.pixelPitch}` : "P 1.86"}
-          </p>
-        </div>
-      </div>
-    </BasePage>
-  );
-};
+      <View style={styles.userInfo}>
+        <Text style={styles.userName}>
+          {data?.userName || "Muhammad Faris"}
+        </Text>
+        <Text style={styles.configDate}>
+          Date of Configuration {data?.exportDate || "16-03-2025"}
+        </Text>
+        <View style={styles.divider} />
+        <Text style={styles.displayType}>
+          {data?.displayType || "Indoor LED Fixed"}{" "}
+          {data?.pixelPitch ? `${data.pixelPitch}` : "P 1.86"}
+        </Text>
+      </View>
+    </View>
+  </BasePage>
+);

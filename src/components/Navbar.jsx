@@ -244,7 +244,6 @@ export const Navbar = () => {
               className="hidden"
             />
 
-            {/* File Upload Note */}
             <p className="text-[10px] text-gray-500 mt-3">
               * JPG or PNG only, Max 3mb
             </p>
@@ -263,6 +262,9 @@ export const Navbar = () => {
           </p>
 
           <DragDropUpload onFileSelect={handleRoomImageUpload} />
+          <p className="text-[10px] text-gray-500 mt-3">
+            * JPG or PNG only, Max 3mb
+          </p>
         </div>
       )}
     </>
@@ -357,7 +359,7 @@ export const Navbar = () => {
           {/* Content - Mobile */}
           <div className="px-5 pb-5 space-y-6 overflow-y-auto h-full">
             <NavbarContent />
-          </div>  
+          </div>
         </motion.div>
       </div>
     </>

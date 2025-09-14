@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { UseCanvasStore } from "./UseCanvasStore";
 import { UseCalculatorStore } from "./UseCalculatorStore";
 import { UseNavbarStore } from "./UseNavbarStore";
+import { model as allModels, model } from "../data/model";
 
 export const UseExportStore = create((set, get) => ({
   isOpen: false,
@@ -56,6 +57,21 @@ export const UseExportStore = create((set, get) => ({
 
     const modelData = navbarStore.selectedModel.modelData;
     const displayType = navbarStore.selectedModel.name;
+
+    let partnerData = null;
+
+    if (
+      navbarStore.selectedModel?.displayTypeId === 1 &&
+      navbarStore.selectedModel?.subTypeId
+    ) {
+      const partnerId = navbarStore.selectedModel.subTypeId === 1 ? 2 : 1;
+      const partnerModel = allModels.find((m) => m.id === partnerId);
+      if (partnerModel) {
+        partnerData = partnerModel.data.find(
+          (d) => d.pixel_pitch === modelData.pixel_pitch
+        );
+      }
+    }
 
     // Get calculation results
     const results = calculatorStore.getCalculationResults(
@@ -140,7 +156,32 @@ export const UseExportStore = create((set, get) => ({
       inch: modelData.inch || "N/A",
       pixelPitch: modelData.pixel_pitch || "N/A",
       brightness: modelData.brightness || "N/A",
-      refreshRate: modelData.refresh_rate || "N/A",
+
+      // Indoor
+      moduleResolution:
+        modelData.module_resolution || partnerData?.module_resolution || "N/A",
+      modulePixels:
+        modelData.module_pixels || partnerData?.module_pixels || "N/A",
+      cabinetResolution:
+        modelData.cabinet_resolution ||
+        partnerData?.cabinet_resolution ||
+        "N/A",
+      cabinetPixels:
+        modelData.cabinet_pixels || partnerData?.cabinet_pixels || "N/A",
+      pixelDensity:
+        modelData.pixel_density || partnerData?.pixel_density || "N/A",
+
+      // Outdoor
+      ledLamp: modelData.led_lamp || "N/A",
+      pixelResolution: modelData.pixel_resolution || "N/A",
+      moduleWeight: modelData.module_weight || "N/A",
+      viewingDistance: modelData.best_viewing_distance || "N/A",
+
+      // Video Wall
+      unitSize: modelData.unit_size_mm || "N/A",
+      b2b: modelData.b2b || "N/A",
+      resolution: modelData.resolution || "N/A",
+      contrastRatio: modelData.contrast_ratio || "N/A",
     };
   },
 

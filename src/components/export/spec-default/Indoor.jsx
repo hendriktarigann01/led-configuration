@@ -1,517 +1,335 @@
 import React from "react";
+import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { BasePage } from "../BasePage";
 
+const styles = StyleSheet.create({
+  header: {
+    position: "absolute",
+    top: 24,
+    right: 32,
+    zIndex: 10,
+  },
+  logo: {
+    width: "auto",
+    height: 40,
+  },
+  content: {
+    paddingHorizontal: 64,
+    paddingVertical: 80,
+    flex: 1,
+  },
+  titleContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+    marginTop: 80,
+  },
+  titleWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    height: 40,
+    padding: 8,
+  },
+  dotsContainer: {
+    flexDirection: "row",
+    gap: 4,
+  },
+  dot1: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#2A7A78",
+    borderRadius: 4,
+  },
+  dot2: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#3AAFA9",
+    borderRadius: 4,
+  },
+  dot3: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#E0F2F0",
+    borderRadius: 4,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "medium",
+    color: "#374151",
+    lineHeight: 1,
+    margin: 0,
+  },
+  tableContainer: {
+    border: "1px solid #E5E7EB",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  table: {
+    width: "100%",
+  },
+  sectionContainer: {
+    position: "relative",
+  },
+  tableRow: {
+    flexDirection: "row",
+    height: 40,
+    borderBottom: "1px solid #E5E7EB",
+  },
+  categoryCell: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: "33.333%",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    backgroundColor: "#F9FAFB",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    borderRight: "1px solid #E5E7EB",
+    borderBottom: "1px solid #E5E7EB",
+  },
+  categoryText: {
+    fontSize: 10,
+    fontWeight: "medium",
+    color: "#374151",
+    textAlign: "left",
+  },
+  labelCell: {
+    width: "33.333%",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    borderRight: "1px solid #E5E7EB",
+    borderBottom: "1px solid #E5E7EB",
+    marginLeft: "33.333%",
+  },
+  labelCellOffset: {
+    backgroundColor: "transparent",
+  },
+  labelText: {
+    fontSize: 10,
+    color: "#6B7280",
+    textAlign: "left",
+  },
+  valueCell: {
+    width: "33.333%",
+    paddingVertical: 2,
+    paddingHorizontal: 12,
+    alignItems: "flex-start",
+    justifyContent: "center",
+  },
+  valueText: {
+    fontSize: 10,
+    color: "#374151",
+    textAlign: "left",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 24,
+    left: 32,
+    fontSize: 10,
+    color: "#666",
+  },
+  footerTitle: {
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  footerText: {
+    marginBottom: 8,
+  },
+  footerContact: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  icon: {
+    width: 16,
+    height: 16,
+  },
+});
+
 export const Indoor = ({ data }) => {
-  // Helper function to get specifications with default values
-  const getSpecifications = () => {
-    const specifications = [
-      {
-        label: "Pixel Pitch",
-        value: data?.pixelPitch ? `${data.pixelPitch}` : "P 1.8",
-        category: "General Specs",
-      },
-      {
-        label: "Refresh Rate",
-        value: "1920 Hz / 2400 Hz / 3840 Hz",
-        category: "",
-      },
-      {
-        label: "Brightness",
-        value: "500 nits - 1.000 nits",
-        category: "",
-      },
-      {
-        label: "Module Size",
-        value: "320mm x 160mm",
-        category: "Module",
-      },
-      {
-        label: "Module Resolution",
-        value: "172 x 86 dots",
-        category: "",
-      },
-      {
-        label: "Module Pixels",
-        value: "14792 dots",
-        category: "",
-      },
-      {
-        label: "IC",
-        value: "ICN2153",
-        category: "",
-      },
-      {
-        label: "Led Configuration",
-        value: "3 in 1",
-        category: "",
-      },
-      {
-        label: "Weight",
-        value: "0.48 KG",
-        category: "",
-      },
-      {
-        label: "Cabinet size (WH)",
-        value: "640 X 480mm",
-        category: "Cabinet",
-      },
-      {
-        label: "Cabinet resolution",
-        value: "344 X 258 dots",
-        category: "",
-      },
-      {
-        label: "Cabinet pixels",
-        value: "88752 dots",
-        category: "",
-      },
-      {
-        label: "Pixel density",
-        value: "288906 dots/m²",
-        category: "",
-      },
-      {
-        label: "Cabinet material",
-        value: "Die-casting aluminum",
-        category: "",
-      },
-      {
-        label: "Weight",
-        value: "7.8KG",
-        category: "",
-      },
-      {
-        label: "Power consumption",
-        value: "Max: 650W/m², Average: 300W/m²",
-        category: "",
-      },
-      {
-        label: "Life span",
-        value: "0→10,000 hours",
-        category: "",
-      },
-    ];
-
-    return specifications;
-  };
-
-  const specifications = getSpecifications();
+  const specifications = [
+    {
+      category: "Basic Specifications",
+      items: [
+        {
+          label: "Pixel Pitch",
+          value: data?.pixelPitch ? `${data.pixelPitch}` : "P2.5",
+        },
+        {
+          label: "Refresh Rate",
+          value: data?.refreshRate || "1920 Hz / 2400 Hz / 3840 Hz",
+        },
+        {
+          label: "Brightness",
+          value: data?.brightness || "500 nits - 1.000 nits",
+        },
+      ],
+    },
+    {
+      category: "Module",
+      items: [
+        { label: "Module Size", value: "320mm x 160mm" },
+        {
+          label: "Module Resolution",
+          value: data?.moduleResolution || "128 x 64",
+        },
+        { label: "Module Pixels", value: data?.modulePixels || "8,192" },
+        { label: "IC", value: "ICN2153" },
+        {
+          label: "Led Configuration",
+          value: "3 in 1",
+        },
+        { label: "Weight", value: "0.48 KG" },
+        { label: "Application", value: "Indoor Fixed Installation" },
+      ],
+    },
+    {
+      category: "Cabinet",
+      items: [
+        {
+          label: "Cabinet size (WH)",
+          value: "640 X 480mm",
+        },
+        {
+          label: "Cabinet resolution",
+          value: data?.cabinetResolution || "256 x 192",
+        },
+        {
+          label: "Cabinet pixels",
+          value: data?.cabinetPixels || "49,152",
+        },
+        {
+          label: "Pixel density",
+          value: data?.pixelDensity || "160,000/m²",
+        },
+        {
+          label: "Cabinet material",
+          value: "Die-casting aluminum",
+        },
+        { label: "Weight", value: "7.8KG" },
+        {
+          label: "Power consumption",
+          value: "Max.: 650W/m², Average; 300W/m²",
+        },
+        {
+          label: "Life span",
+          value: ">10,000 hours",
+        },
+      ],
+    },
+  ];
 
   return (
     <BasePage>
-      {/* Logo */}
-      <div className="absolute top-6 right-8">
-        <img
-          src="/logo/mjs_logo_text.png"
-          alt="logo-mjs"
-          className="w-auto h-10"
-        />
-      </div>
+      <View style={styles.header}>
+        <Image style={styles.logo} src="/logo/mjs_logo_text.png" />
+      </View>
 
-      {/* Main Content */}
-      <div className="px-16 py-20">
-        <div className="text-center mb-10 mt-20">
-          <div
-            className="text-gray-700 flex items-center justify-center h-10 p-2"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "2.5rem",
-              padding: "0.5rem",
-              color: "#374151",
-            }}
-          >
+      <View style={styles.content}>
+        <View style={styles.titleContainer}>
+          <View style={styles.titleWrapper}>
             {/* Dots kiri */}
-            <div style={{ display: "flex", gap: "0.25rem" }}>
-              <div
-                className="w-2 h-2 bg-[#2A7A78] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#2A7A78",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#3AAFA9",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#E0F2F0",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-            </div>
+            <View style={styles.dotsContainer}>
+              <View style={styles.dot1} />
+              <View style={styles.dot2} />
+              <View style={styles.dot3} />
+            </View>
 
             {/* Title */}
-            <p
-              className="font-medium text-lg mx-5 leading-none flex items-center"
-              style={{
-                fontWeight: 500,
-                fontSize: "1.125rem",
-                lineHeight: 1,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              Product Specification
-            </p>
+            <Text style={styles.sectionTitle}>Product Specification</Text>
 
             {/* Dots kanan */}
-            <div style={{ display: "flex", gap: "0.25rem" }}>
-              <div
-                className="w-2 h-2 bg-[#E0F2F0] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#E0F2F0",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#3AAFA9] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#3AAFA9",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-[#2A7A78] rounded-full"
-                style={{
-                  width: "0.5rem",
-                  height: "0.5rem",
-                  backgroundColor: "#2A7A78",
-                  borderRadius: "9999px",
-                }}
-              ></div>
-            </div>
-          </div>
-        </div>
+            <View style={styles.dotsContainer}>
+              <View style={styles.dot3} />
+              <View style={styles.dot2} />
+              <View style={styles.dot1} />
+            </View>
+          </View>
+        </View>
 
-        <div className="overflow-hidden z-1">
-          <table className="w-full border-1 border-gray-200 border-collapse text-xs">
-            <tbody>
-              {/* General Specs - 3 rows */}
-              <tr>
-                <td
-                  className="px-4 w-40 text-gray-700 font-medium border-1 border-gray-200 bg-white whitespace-nowrap"
-                  style={{
-                    verticalAlign: "middle",
-                    fontWeight: "600",
-                  }}
-                >
-                  Pixel Pitch
-                </td>
-                <td
-                  colSpan={2}
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  {data?.pixelPitch ? `${data.pixelPitch}` : "P 1.8"}
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="px-4 w-40 text-gray-700 font-medium border-1 border-gray-200 bg-white whitespace-nowrap"
-                  style={{
-                    verticalAlign: "middle",
-                    fontWeight: "600",
-                  }}
-                >
-                  Refresh Rate
-                </td>
-                <td
-                  colSpan={2}
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  1920 Hz / 2400 Hz / 3840 Hz
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="px-4 w-40 text-gray-700 font-medium border-1 border-gray-200 bg-white whitespace-nowrap"
-                  style={{
-                    verticalAlign: "middle",
-                    fontWeight: "600",
-                  }}
-                >
-                  Brightness
-                </td>
-                <td
-                  colSpan={2}
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  500 nits - 1.000 nits
-                </td>
-              </tr>
+        <View style={styles.tableContainer}>
+          <View style={styles.table}>
+            {specifications.map((section, sectionIndex) => (
+              <React.Fragment key={sectionIndex}>
+                {section.items.map((item, itemIndex) => (
+                  <View
+                    key={`${sectionIndex}-${itemIndex}`}
+                    style={[
+                      styles.tableRow,
+                      { minHeight: 40 },
+                      // Remove border bottom for last item in each section (except last section)
+                      itemIndex === section.items.length - 1 &&
+                        sectionIndex < specifications.length - 1 && {
+                          borderBottom: "1px solid #E5E7EB",
+                        },
+                      // Remove border bottom for last item in last section
+                      sectionIndex === specifications.length - 1 &&
+                        itemIndex === section.items.length - 1 && {
+                          borderBottom: "none",
+                        },
+                      // Remove border bottom for middle items in each section
+                      itemIndex > 0 &&
+                        itemIndex < section.items.length - 1 && {
+                          borderBottom: "none",
+                        },
+                    ]}
+                  >
+                    {itemIndex === 0 && (
+                      <View
+                        style={[
+                          styles.categoryCell,
+                          {
+                            height: section.items.length * 40,
+                          },
+                        ]}
+                      >
+                        <Text style={styles.categoryText}>
+                          {section.category}
+                        </Text>
+                      </View>
+                    )}
 
-              {/* Module Section - 6 rows */}
-              <tr>
-                <td
-                  rowSpan="6"
-                  className="px-4 w-40 text-gray-700 font-medium border-1 border-gray-200 bg-white"
-                  style={{
-                    fontWeight: "600",
-                    verticalAlign: "middle",
-                  }}
-                >
-                  Module
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Module Size
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  320mm x 160mm
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Module Resolution
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  172 x 86 dots
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Module Pixels
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  14792 dots
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  IC
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  ICN2153
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Led Configuration
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  3 in 1
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Weight
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  0.48 KG
-                </td>
-              </tr>
+                    <View style={styles.labelCell}>
+                      <Text style={styles.labelText}>{item.label}</Text>
+                    </View>
 
-              {/* Cabinet Section - 8 rows */}
-              <tr>
-                <td
-                  rowSpan="8"
-                  className="px-4 w-40 text-gray-700 font-medium border-1 border-gray-200 bg-white"
-                  style={{
-                    fontWeight: "600",
-                    verticalAlign: "middle",
-                  }}
-                >
-                  Cabinet
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Cabinet size (WH)
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  640 X 480mm
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Cabinet resolution
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  344 X 258 dots
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Cabinet pixels
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  88752 dots
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Pixel density
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  288906 dots/m²
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Cabinet material
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Die-casting aluminum
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Weight
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  7.8KG
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Power consumption
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Max: 650W/m², Average: 300W/m²
-                </td>
-              </tr>
-              <tr>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  Life span
-                </td>
-                <td
-                  className="py-2.5 px-4 text-gray-600 border-1 border-gray-200 whitespace-nowrap"
-                  style={{ verticalAlign: "middle" }}
-                >
-                  0→10,000 hours
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+                    <View style={styles.valueCell}>
+                      <Text style={styles.valueText}>{item.value}</Text>
+                    </View>
+                  </View>
+                ))}
+              </React.Fragment>
+            ))}
+          </View>
+        </View>
+      </View>
 
-      {/* Footer */}
-      <div className="absolute bottom-6 left-8 text-[10px] space-y-2 text-gray-600">
-        <div className="font-semibold">MJ Solution Indonesia</div>
-        <p>
+      <View style={styles.footer}>
+        <Text style={styles.footerTitle}>MJ Solution Indonesia</Text>
+        <Text style={styles.footerText}>
           The Mansion Bougenville Kemayoran Tower Fontana Zona I Lantai 50
           Kemayoran Jakarta Utara
-        </p>
-        <div className="flex items-center space-x-4">
-          {/* Website */}
-          <div className="inline-flex items-center space-x-1">
-            <img
-              src="/icons/icon-web.svg"
-              className="w-4 h-4 relative top-[1px]"
-              alt="web"
-            />
-            <span className="leading-[1]">mjsolution.co.id</span>
-          </div>
-
-          {/* Phone */}
-          <div className="inline-flex items-center space-x-1">
-            <img
-              src="/icons/icon-call.svg"
-              className="w-4 h-4 relative top-[1px]"
-              alt="phone"
-            />
-            <span className="leading-[1]">(+62) 811-1122-492</span>
-          </div>
-        </div>
-      </div>
+        </Text>
+        <View style={styles.footerContact}>
+          <View style={styles.contactItem}>
+            <Image src="/icons/icon-web.png" style={styles.icon} />
+            <Text>mjsolution.co.id</Text>
+          </View>
+          <View style={styles.contactItem}>
+            <Image src="/icons/icon-call.png" style={styles.icon} />
+            <Text>(+62) 811-1122-492</Text>
+          </View>
+        </View>
+      </View>
     </BasePage>
   );
 };

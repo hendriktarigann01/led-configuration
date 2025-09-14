@@ -140,8 +140,8 @@ export const ResultModal = ({ isOpen, onClose }) => {
                       Dimensions
                     </h4>
                     <p className="text-sm lg:text-base text-gray-600 font-medium">
-                      {screenWidth.toFixed(3)} ({baseWidth.toFixed(2)}) x{" "}
-                      {screenHeight.toFixed(3)} ({baseHeight.toFixed(2)})
+                      {screenWidth.toFixed(3)} ({baseWidth.toFixed(3)}) x{" "}
+                      {screenHeight.toFixed(3)} ({baseHeight.toFixed(3)})
                     </p>
                   </div>
                   <div>

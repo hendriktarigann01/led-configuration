@@ -8,9 +8,9 @@ export const UseExportStore = create((set, get) => ({
   isOpen: false,
 
   // Form
-  pdfTitle: "",
   projectName: "",
   userName: "",
+  phoneNumber: "", // Added phone number field
   email: "",
 
   isExporting: false,
@@ -24,25 +24,44 @@ export const UseExportStore = create((set, get) => ({
     set({
       isOpen: false,
       // Optionally reset form when closing
-      // pdfTitle: "",
       // projectName: "",
       // userName: "",
+      // phoneNumber: "",
       // email: "",
     }),
 
   // Form field setters
-  setPdfTitle: (pdfTitle) => set({ pdfTitle }),
   setProjectName: (projectName) => set({ projectName }),
   setUserName: (userName) => set({ userName }),
+  setPhoneNumber: (phoneNumber) => set({ phoneNumber }), // Added phone number setter
   setEmail: (email) => set({ email }),
 
   resetForm: () =>
     set({
-      pdfTitle: "",
       projectName: "",
       userName: "",
+      phoneNumber: "",
       email: "",
     }),
+
+  // Generate automatic PDF title
+  generatePdfTitle: () => {
+    const navbarStore = UseNavbarStore.getState();
+
+    if (!navbarStore.selectedModel) {
+      return "MJS-LED-Display";
+    }
+
+    const displayType = navbarStore.selectedModel.name
+      .replace(/\s+/g, "") // Remove spaces
+      .replace(/[^a-zA-Z0-9]/g, ""); // Remove special characters
+
+    const pixelPitch = navbarStore.selectedModel.modelData?.pixel_pitch
+      ? `${navbarStore.selectedModel.modelData.pixel_pitch}`
+      : "P1.8";
+
+    return `MJS-${displayType}-${pixelPitch}`;
+  },
 
   // Get comprehensive data for PDF export
   getPdfExportData: () => {
@@ -110,9 +129,10 @@ export const UseExportStore = create((set, get) => ({
 
     return {
       // Form data
-      pdfTitle: state.pdfTitle,
+      pdfTitle: state.generatePdfTitle(), // Auto-generated PDF title
       projectName: state.projectName,
       userName: state.userName,
+      phoneNumber: state.phoneNumber, // Added phone number to export data
       email: state.email,
       exportDate: new Date().toLocaleDateString("id-ID"),
       exportTime: new Date().toLocaleTimeString("id-ID"),
@@ -197,30 +217,36 @@ export const UseExportStore = create((set, get) => ({
         return { success: true }; // Continue without Google Sheets
       }
 
+      // Only send the fields that your Google Apps Script expects
+      const payload = {
+        pdfTitle: data.pdfTitle || "",
+        projectName: data.projectName || "",
+        userName: data.userName || "",
+        phoneNumber: data.phoneNumber || "", // Make sure this is included
+        email: data.email || "",
+      };
+
+      console.log("Sending to Google Sheets:", payload); // Debug log
+
       const response = await fetch(webAppUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: new URLSearchParams({
-          pdfTitle: data.pdfTitle,
-          projectName: data.projectName,
-          userName: data.userName,
-          email: data.email,
-          displayType: data.displayType || "",
-          screenSize: `${data.screenConfig?.width || 0} x ${
-            data.screenConfig?.height || 0
-          } m`,
-          totalUnits: data.calculations?.totalUnits || 0,
-          timestamp: new Date().toISOString(),
-        }),
+        body: new URLSearchParams(payload),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send data to Google Sheets");
+        const errorText = await response.text();
+        console.error("Google Sheets response error:", errorText);
+        throw new Error(
+          `Failed to send data to Google Sheets: ${response.status}`
+        );
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log("Google Sheets response:", result); // Debug log
+      return result;
     } catch (error) {
       console.error("Google Sheets error:", error);
       throw error;
@@ -287,29 +313,31 @@ export const UseExportStore = create((set, get) => ({
   getFormData: () => {
     const state = get();
     return {
-      pdfTitle: state.pdfTitle,
       projectName: state.projectName,
       userName: state.userName,
+      phoneNumber: state.phoneNumber, // Added phone number to form data
       email: state.email,
     };
   },
 
   setFormData: (data) =>
     set({
-      pdfTitle: data.pdfTitle || "",
       projectName: data.projectName || "",
       userName: data.userName || "",
+      phoneNumber: data.phoneNumber || "", // Added phone number to form data setter
       email: data.email || "",
     }),
 
   isFormValid: () => {
     const state = get();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9+\-\s()]{8,15}$/; // Simple phone validation
 
     return (
-      state.pdfTitle.trim() !== "" &&
       state.projectName.trim() !== "" &&
       state.userName.trim() !== "" &&
+      state.phoneNumber.trim() !== "" &&
+      phoneRegex.test(state.phoneNumber.trim()) &&
       state.email.trim() !== "" &&
       emailRegex.test(state.email)
     );

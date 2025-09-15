@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 5,
     marginTop: 80,
   },
   titleWrapper: {
@@ -58,11 +58,11 @@ const styles = StyleSheet.create({
     fontWeight: "medium",
     color: "#374151",
     lineHeight: 1,
-    margin: 0,
+    margin: 5,
   },
   tableContainer: {
     border: "1px solid #E5E7EB",
-    borderRadius: 8,
+
     overflow: "hidden",
   },
   table: {
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   },
   tableRow: {
     flexDirection: "row",
-    height: 40,
+    height: 25,
     borderBottom: "1px solid #E5E7EB",
   },
   categoryCell: {
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     left: 0,
     top: 0,
     width: "33.333%",
-    paddingVertical: 2,
+    paddingVertical: 1,
     paddingHorizontal: 12,
     backgroundColor: "#F9FAFB",
     alignItems: "flex-start",
@@ -96,12 +96,12 @@ const styles = StyleSheet.create({
   },
   labelCell: {
     width: "33.333%",
-    paddingVertical: 2,
+    paddingVertical: 1,
     paddingHorizontal: 12,
     alignItems: "flex-start",
     justifyContent: "center",
     borderRight: "1px solid #E5E7EB",
-    borderBottom: "1px solid #E5E7EB",
+
     marginLeft: "33.333%",
   },
   labelCellOffset: {
@@ -114,11 +114,10 @@ const styles = StyleSheet.create({
   },
   valueCell: {
     width: "33.333%",
-    paddingVertical: 2,
+    paddingVertical: 1,
     paddingHorizontal: 12,
     alignItems: "flex-start",
     justifyContent: "center",
-    borderBottom: "1px solid #E5E7EB",
   },
   valueText: {
     fontSize: 10,
@@ -267,7 +266,7 @@ export const IndoorOutdoorConfig = ({ data }) => {
                     key={`${sectionIndex}-${itemIndex}`}
                     style={[
                       styles.tableRow,
-                      { minHeight: 40 },
+                      { minHeight: 25 },
                       // Remove border bottom for last item in each section (except last section)
                       itemIndex === section.items.length - 1 &&
                         sectionIndex < specifications.length - 1 && {
@@ -278,7 +277,7 @@ export const IndoorOutdoorConfig = ({ data }) => {
                         itemIndex === section.items.length - 1 && {
                           borderBottom: "none",
                         },
-                      // Remove border bottom for middle items in each section
+                      // KEMBALIKAN INI - ini tidak menghilangkan border, tapi mencegah double border
                       itemIndex > 0 &&
                         itemIndex < section.items.length - 1 && {
                           borderBottom: "none",
@@ -291,7 +290,7 @@ export const IndoorOutdoorConfig = ({ data }) => {
                           styles.categoryCell,
                           {
                             height: section.items.length * 40,
-                            borderBottom: "none",
+                            borderBottom: "none", // INI YANG PENTING
                           },
                         ]}
                       >

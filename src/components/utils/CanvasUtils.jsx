@@ -88,7 +88,7 @@ export const CanvasUtils = {
   // Calculate human dimensions for scale reference with responsive sizing
   getHumanDimensions: (wallHeight) => {
     const deviceType = CanvasUtils.getDeviceType();
-    const humanRealHeight = 1.7; // 170 cm in meters
+    const humanRealHeight = 1.7;
     const humanToWallRatio = humanRealHeight / wallHeight;
 
     // Different base canvas heights for different devices
@@ -130,7 +130,7 @@ export const CanvasUtils = {
       case "Default Image":
         return "/canvas/canvas-bg.png";
       case "Default Video":
-        return "/canvas/canvas-bg-video.mp4";
+        return "/canvas/BumperMJSolution.mp4";
       case "No Content":
         return "/canvas/no-content.png";
       case "Custom":
@@ -310,7 +310,7 @@ export const CanvasUtils = {
         ? "top-1"
         : deviceType === "tablet"
         ? "top-1.5"
-        : "top-2 lg:top-0";
+        : "top-2 lg:top-2";
 
     return (
       <>
@@ -364,7 +364,7 @@ export const CanvasUtils = {
   },
 
   // Render info displays with responsive positioning
-  renderInfoDisplays: (resolutionString, humanHeight = "170 cm") => {
+  renderInfoDisplays: (resolutionString, humanHeight = "1,70 m") => {
     const deviceType = CanvasUtils.getDeviceType();
 
     // Adjust positioning and spacing based on device

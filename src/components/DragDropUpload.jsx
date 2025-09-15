@@ -102,14 +102,7 @@ export const DragDropUpload = ({
             />
 
             {/* Action buttons */}
-            <div className="absolute top-2 right-2 flex space-x-1">
-              <button
-                onClick={handleEditImage}
-                className="w-6 h-6 bg-blue-500 text-white z-50 rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors"
-                title="Change image"
-              >
-                <Edit3 size={12} />
-              </button>
+            <div className="absolute top-2 right-2 flex space-x-1 cursor-pointer">
               <button
                 onClick={handleRemoveImage}
                 className="w-6 h-6 bg-red-500 text-white z-50 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"

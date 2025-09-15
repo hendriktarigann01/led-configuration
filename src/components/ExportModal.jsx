@@ -1,22 +1,21 @@
-import React, { useState } from "react";
-import { X, Download } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Download, CircleAlert } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import { UseExportStore } from "../store/UseExportStore";
 import { PDFDocument } from "./export/PDFDocument";
 
 export const ExportModal = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [debugInfo, setDebugInfo] = useState("");
 
   const {
     isOpen,
-    pdfTitle,
     projectName,
     userName,
+    phoneNumber,
     email,
-    setPdfTitle,
     setProjectName,
     setUserName,
+    setPhoneNumber,
     setEmail,
     closeModal,
     exportToPdf,
@@ -24,48 +23,58 @@ export const ExportModal = () => {
     isExporting,
     isFormValid,
     isExportReady,
-    pdfData,
+    generatePdfTitle,
   } = UseExportStore();
 
-  const generatePDFManually = async (data) => {
-    console.log(">>> Starting manual PDF generation with data:", data);
+  const waitForDataReady = (timeoutMs = 10000) => {
+    return Promise.race([
+      new Promise((resolve) => {
+        const checkData = () => {
+          const state = UseExportStore.getState();
+          if (state.pdfData?.displays) {
+            resolve(state.pdfData);
+          } else {
+            setTimeout(checkData, 100);
+          }
+        };
+        checkData();
+      }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Data loading timeout")), timeoutMs)
+      ),
+    ]);
+  };
 
-    try {
-      // Generate PDF blob using @react-pdf/renderer
-      const blob = await pdf(<PDFDocument data={data} />).toBlob();
-      console.log(">>> PDF blob generated:", blob);
+  const generatePDF = async (data) => {
+    const blob = await pdf(<PDFDocument data={data} />).toBlob();
+    const url = URL.createObjectURL(blob);
 
-      // Create download link
-      const url = URL.createObjectURL(blob);
+    const timestamp = new Date()
+      .toLocaleDateString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\//g, "-");
 
-      // Generate filename
-      const timestamp = new Date()
-        .toLocaleDateString("id-ID", {
-          timeZone: "Asia/Jakarta",
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        })
-        .replace(/\//g, "-");
+    // Use auto-generated PDF title instead of user input
+    const filename = `${generatePdfTitle()}_${timestamp}.pdf`;
 
-      const filename = `${pdfTitle || "LED-Configuration"}_${timestamp}.pdf`;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
-      // Trigger download
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    return { success: true, filename };
+  };
 
-      // Cleanup
-      URL.revokeObjectURL(url);
-
-      return { success: true, filename };
-    } catch (error) {
-      console.error(">>> Manual PDF generation error:", error);
-      throw error;
-    }
+  const getFallbackData = () => {
+    const state = UseExportStore.getState();
+    return state.getPdfExportData?.() || null;
   };
 
   const handleSubmit = async () => {
@@ -77,77 +86,39 @@ export const ExportModal = () => {
     }
 
     setIsGenerating(true);
-    setDebugInfo("Preparing export data...");
 
     try {
-      console.log(">>> Starting PDF export process...");
-
-      // Step 1: Prepare data (sama seperti ExportModalOld)
       const result = await exportToPdf();
-      console.log(">>> exportToPdf result:", result);
-
       if (!result?.success) {
-        alert("Failed to prepare export data");
-        return;
+        throw new Error("Failed to prepare export data");
       }
 
-      setDebugInfo("Waiting for data to be ready...");
-
-      // Step 2: Wait for data to be ready (sama seperti ExportModalOld)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Step 3: Get final data from store
-      const currentState = UseExportStore.getState();
-      const finalData = currentState.pdfData;
-
-      console.log(">>> Final pdfData:", finalData);
-
-      if (!finalData) {
-        // Try direct data as fallback
-        const directData = currentState.getPdfExportData();
-        console.log(">>> Fallback to direct data:", directData);
-
-        if (!directData) {
-          alert(
+      let finalData;
+      try {
+        finalData = await waitForDataReady();
+      } catch (waitError) {
+        finalData = getFallbackData();
+        if (!finalData) {
+          throw new Error(
             "No data available for export. Please configure your display first."
           );
-          completeExport();
-          return;
         }
-
-        // Use direct data
-        setDebugInfo("Generating PDF...");
-        const pdfResult = await generatePDFManually(directData);
-
-        if (pdfResult.success) {
-          alert(`PDF successfully generated: ${pdfResult.filename}`);
-          setDebugInfo("✅ PDF generated successfully!");
-          completeExport();
-        }
-        return;
       }
 
-      // Step 4: Generate PDF with store data
-      setDebugInfo("Generating PDF...");
-      const pdfResult = await generatePDFManually(finalData);
+      const pdfResult = await generatePDF(finalData);
 
       if (pdfResult.success) {
         alert(`PDF successfully generated: ${pdfResult.filename}`);
-        setDebugInfo("✅ PDF generated successfully!");
-        completeExport();
       }
     } catch (error) {
-      console.error("Export failed:", error);
-      alert("Failed to export PDF. Please try again.");
-      setDebugInfo(`❌ Error: ${error.message}`);
-      completeExport();
+      alert(`Failed to export PDF: ${error.message}`);
     } finally {
       setIsGenerating(false);
+      completeExport();
     }
   };
 
   const handleCloseModal = () => {
-    setDebugInfo("");
     setIsGenerating(false);
     completeExport();
     closeModal();
@@ -160,7 +131,7 @@ export const ExportModal = () => {
 
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-50 overflow-hidden">
-      <div className="bg-white rounded-xl shadow-2xl w-[380px] lg:w-full max-w-xl h-[90vh] max-h-[600px] overflow-hidden">
+      <div className="bg-white rounded-xl shadow-2xl w-[380px] lg:w-full max-w-xl max-h-[90vh] overflow-y-auto">
         <div className="p-6 h-full">
           {/* Header */}
           <div className="flex justify-end">
@@ -173,7 +144,7 @@ export const ExportModal = () => {
             </button>
           </div>
 
-          <div className="flex mb-8 justify-center lg:justify-start">
+          <div className="flex mb-3 lg:mb-6 justify-center lg:justify-start">
             <h2 className="text-md lg:text-xl font-normal lg:font-medium text-gray-800">
               Export Calculator Simulation
             </h2>
@@ -181,37 +152,16 @@ export const ExportModal = () => {
 
           {/* Export Ready Status */}
           {!isExportReady() && (
-            <div className="mb-6 p-3 bg-orange-50 border border-orange-200 rounded-md">
-              <p className="text-sm text-orange-700">
+            <div className="mb-3 lg:mb-6 p-3 flex gap-2 bg-orange-50 border border-orange-200 rounded-md">
+              <CircleAlert className="text-sm  text-orange-700" />
+              <p className="text-sm font-medium my-auto text-orange-700">
                 Please configure your display settings before exporting.
               </p>
             </div>
           )}
 
-          {/* Debug Info */}
-          {debugInfo && (
-            <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-700">{debugInfo}</p>
-            </div>
-          )}
-
           {/* Form */}
-          <div className="space-y-6">
-            {/* PDF Title */}
-            <div>
-              <label className="block font-xs lg:text-sm font-normal lg:font-medium text-gray-700 mb-2">
-                PDF Title<span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={pdfTitle}
-                onChange={(e) => setPdfTitle(e.target.value)}
-                placeholder="ex. Calculator LED P 1.8"
-                disabled={isProcessing}
-                className="w-full px-3 py-3 border border-gray-300 text-sm font-light lg:font-light rounded-md focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] focus:border-transparent placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              />
-            </div>
-
+          <div className="space-y-2 lg:space-y-5">
             {/* Project Name */}
             <div>
               <label className="block font-xs lg:text-sm font-normal lg:font-medium text-gray-700 mb-2">
@@ -242,6 +192,21 @@ export const ExportModal = () => {
               />
             </div>
 
+            {/* Phone Number */}
+            <div>
+              <label className="block font-xs lg:text-sm font-normal lg:font-medium text-gray-700 mb-2">
+                Phone Number<span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="ex. 0867xxxxxxxx"
+                disabled={isProcessing}
+                className="w-full px-3 py-3 border border-gray-300 text-sm font-light lg:font-light rounded-md focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] focus:border-transparent placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              />
+            </div>
+
             {/* Email */}
             <div>
               <label className="block font-xs lg:text-sm font-normal lg:font-medium text-gray-700 mb-2">
@@ -258,7 +223,7 @@ export const ExportModal = () => {
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4 flex justify-center">
+            <div className="pt-4  lg:pt-1 flex justify-center">
               <button
                 onClick={handleSubmit}
                 disabled={!isFormComplete || isProcessing}

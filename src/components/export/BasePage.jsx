@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: 150,
     height: "auto",
-    zIndex: 1,
+    zIndex: 6,
   },
   bottomDecoration: {
     position: "absolute",
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     right: 0,
     width: 150,
     height: "auto",
-    zIndex: 1,
+    zIndex: 6,
   },
   content: {
     flex: 1,

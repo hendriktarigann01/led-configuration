@@ -38,17 +38,26 @@ const styles = StyleSheet.create({
   },
   dotGroup: {
     flexDirection: "row",
-    marginHorizontal: 16,
+    gap: 4,
   },
-  dot: {
+  dot1: {
     width: 8,
     height: 8,
+    backgroundColor: "#2A7A78",
     borderRadius: 4,
-    marginHorizontal: 2,
   },
-  dot1: { backgroundColor: "#2A7A78" },
-  dot2: { backgroundColor: "#3AAFA9" },
-  dot3: { backgroundColor: "#E0F2F0" },
+  dot2: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#3AAFA9",
+    borderRadius: 4,
+  },
+  dot3: {
+    width: 8,
+    height: 8,
+    backgroundColor: "#E0F2F0",
+    borderRadius: 4,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "medium",
@@ -65,11 +74,10 @@ const styles = StyleSheet.create({
     width: 487.5,
     height: 277.5,
     alignSelf: "center",
-    marginBottom: 20,
+    marginBottom: 5,
     gap: 20,
   },
   productImageContainer: {
-    borderRadius: 8,
     margin: 32,
     alignItems: "center",
     justifyContent: "center",
@@ -95,18 +103,17 @@ const styles = StyleSheet.create({
 
   // Canvas section
   canvasSection: {
-    marginBottom: 10,
+    marginBottom: 5,
   },
   canvasOuterWrapper: {
     position: "relative",
     width: 487.5,
     height: 277.5,
     alignSelf: "center",
-    marginVertical: 5,
     marginHorizontal: 40,
     alignItems: "center",
     justifyContent: "center",
-    overflow: "visible",
+    overflow: "hidden",
   },
   canvasMainContainer: {
     width: 390, // 487.5pt -20%
@@ -145,50 +152,51 @@ const styles = StyleSheet.create({
     position: "absolute",
     borderColor: "#5EEAD4",
     borderStyle: "dashed",
-    zIndex: 100, // Increased z-index
+    zIndex: 150, // Increased z-index
   },
 
   // Text styles - increased z-index
   measurementText: {
     position: "absolute",
-    fontSize: 10,
+    fontSize: 9,
     color: "#374151",
     fontFamily: "Helvetica",
-    zIndex: 100, // Increased z-index
+    zIndex: 200, // Increased z-index
   },
 
-  // Bezel styles - increased z-index
+  // Bezel styles - increased z-index and improved visibility
   bezelOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 999, // Increased z-index
+    zIndex: 50, // Proper z-index layering
   },
   bezelLine: {
     position: "absolute",
-    borderColor: "#D9D9D9",
-    opacity: 0.8, // Increased opacity from 0.4 to make more visible
+    borderColor: "#666666", // Changed to darker color for better visibility
+    borderStyle: "solid", // Changed from default to solid
+    opacity: 0.9, // Increased opacity for better visibility
   },
 
   // Info displays - increased z-index
   infoText: {
     position: "absolute",
-    fontSize: 12,
+    fontSize: 9,
     color: "#374151",
     fontFamily: "Helvetica",
-    zIndex: 100, // Increased z-index
+    zIndex: 200, // Increased z-index
   },
 
-  // Human silhouette - increased z-index
+  // Human silhouette - highest z-index
   humanContainer: {
     position: "absolute",
     right: -5,
     bottom: 24,
     width: 110,
     alignItems: "flex-end",
-    zIndex: 999, // Increased z-index
+    zIndex: 1000, // Highest z-index to ensure visibility
   },
   humanImage: {
     width: "auto",
@@ -425,9 +433,10 @@ export const ModelPage = ({ data }) => {
               {
                 left: leftPosition,
                 top: 0,
-                width: 1,
+                width: 2, // Increased width for better visibility
                 height: "100%",
-                borderLeftWidth: 2, // Increased thickness
+                backgroundColor: "#666666", // Added solid background color
+                borderLeftWidth: 0, // Remove border since we're using backgroundColor
               },
             ]}
           />
@@ -447,9 +456,10 @@ export const ModelPage = ({ data }) => {
               {
                 top: topPosition,
                 left: 0,
-                height: 1,
+                height: 2, // Increased height for better visibility
                 width: "100%",
-                borderTopWidth: 2, // Increased thickness
+                backgroundColor: "#666666", // Added solid background color
+                borderTopWidth: 0, // Remove border since we're using backgroundColor
               },
             ]}
           />
@@ -502,7 +512,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementText,
             {
-              left: 4,
+              left: 2,
               top: "20%",
               transform: [{ rotate: "-180deg" }],
             },
@@ -515,7 +525,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementText,
             {
-              left: 4,
+              left: 2,
               top: "70%",
               transform: [{ rotate: "-180deg" }],
             },
@@ -553,40 +563,19 @@ export const ModelPage = ({ data }) => {
   };
 
   const renderInfoDisplays = () => {
-    const resolutionString = `${Math.round(
-      imageWidth *
-        ((canvasData.actualScreenSize.width / canvasData.wallWidth) * 10)
-    )} × ${Math.round(
-      imageHeight *
-        ((canvasData.actualScreenSize.height / canvasData.wallHeight) * 10)
-    )} px`;
-
     return (
       <>
-        {/* Resolution Info Display */}
-        {/* <Text
-          style={[
-            styles.infoText,
-            {
-              bottom: -20,
-              left: 0,
-            },
-          ]}
-        >
-          Resolution: {resolutionString}
-        </Text> */}
-
         {/* Human Info Height */}
         <Text
           style={[
             styles.infoText,
             {
-              bottom: 20,
+              bottom: 15,
               right: -5,
             },
           ]}
         >
-          170 cm
+          1,70 m
         </Text>
       </>
     );
@@ -612,15 +601,15 @@ export const ModelPage = ({ data }) => {
     <View style={styles.sectionHeader}>
       <View style={styles.decorativeContainer}>
         <View style={styles.dotGroup}>
-          <View style={[styles.dot, styles.dotColor1]} />
-          <View style={[styles.dot, styles.dotColor2]} />
-          <View style={[styles.dot, styles.dotColor3]} />
+          <View style={styles.dot1} />
+          <View style={styles.dot2} />
+          <View style={styles.dot3} />
         </View>
         <Text style={styles.sectionTitle}>{label}</Text>
         <View style={styles.dotGroup}>
-          <View style={[styles.dot, styles.dotColor3]} />
-          <View style={[styles.dot, styles.dotColor2]} />
-          <View style={[styles.dot, styles.dotColor1]} />
+          <View style={styles.dot3} />
+          <View style={styles.dot2} />
+          <View style={styles.dot1} />
         </View>
       </View>
     </View>

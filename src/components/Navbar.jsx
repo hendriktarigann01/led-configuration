@@ -166,20 +166,18 @@ export const Navbar = () => {
             <h3 className="text-sm font-normal text-gray-700 mb-3">Model</h3>
 
             {/* Model Display */}
-            <div className="border-2 border-gray-100 h-36 lg:h-[140px] rounded-lg mb-4 flex items-center justify-center">
+            <div
+              onClick={!selectedModel ? openModal : handleChangeModel}
+              className="border border-gray-300 hover:border-gray-400 h-36 lg:h-[140px] rounded-xs mb-4 flex items-center justify-center cursor-pointer"
+            >
               {!selectedModel ? (
                 /* Empty Model */
-                <button
-                  onClick={openModal}
-                  className="w-full h-full cursor-pointer"
-                >
-                  <div className="flex items-center justify-center">
-                    <div className="space-y-1 ">
-                      <CirclePlus className="w-4 h-4 mx-auto text-gray-500" />
-                      <p className="text-xs text-gray-700">Select Model</p>
-                    </div>
+                <div className="flex items-center justify-center w-full h-full">
+                  <div className="space-y-1">
+                    <CirclePlus className="w-4 h-4 mx-auto text-gray-500" />
+                    <p className="text-xs text-gray-700">Select Model</p>
                   </div>
-                </button>
+                </div>
               ) : (
                 /* Fill Model */
                 <div className="flex items-center justify-between w-full m-3">
@@ -190,13 +188,12 @@ export const Navbar = () => {
                     <p className="text-sm font-semibold text-gray-700">
                       {selectedModel.code}
                     </p>
-                    <button
-                      onClick={handleChangeModel}
-                      className="flex items-center mt-4 space-x-2 text-gray-500 hover:text-gray-700 cursor-pointer transition-colors"
-                    >
-                      <span className="text-xs">Change Model</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center mt-4 space-x-2 text-gray-500 group">
+                      <span className="text-xs gxtext-gray-700">
+                        Change Model
+                      </span>
+                      <ArrowRight className="w-4 h-4 text-gray-700" />
+                    </div>
                   </div>
                   <div className="w-20 h-20 bg-white flex items-center justify-center">
                     <img
@@ -225,7 +222,7 @@ export const Navbar = () => {
                     className={`flex items-center justify-center h-10 border space-x-2 transition-colors ${
                       selectedContent === option.id
                         ? "bg-[#3AAFA9] text-white border-[#3AAFA9]"
-                        : "bg-white text-gray-500 border-gray-300 hover:border-gray-400"
+                        : "bg-white text-gray-500 border-gray-300 hover:border-gray-400 cursor-pointer"
                     }`}
                   >
                     <IconComponent className="w-4 h-4" />

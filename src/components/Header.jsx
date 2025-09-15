@@ -15,7 +15,6 @@ export const Header = () => {
     resolution,
     screenHeight,
     screenWidth,
-
     wallHeight,
     wallWidth,
     setScreenSize,

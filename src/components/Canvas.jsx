@@ -8,8 +8,7 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCw,
-  Lock,
-  Unlock,
+  X,
 } from "lucide-react";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseModalStore } from "../store/UseModalStore";
@@ -564,13 +563,13 @@ export const Canvas = () => {
   };
 
   const renderWidthControls = () => (
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 hidden lg:flex items-center space-x-2 z-30">
+    <div className="absolute top-1 left-1/2 -translate-x-1/2 hidden lg:flex items-center space-x-2 z-30">
       {renderControlButton(
         handleWidthDecrement,
         !configured || !canDecreaseScreenWidth || resolution !== "Custom",
         <Minus size={12} />
       )}
-      <span className="text-xs text-gray-700 bg-white/80 px-2 py-1 rounded">
+      <span className="text-xs text-gray-700 px-2 py-1 rounded">
         {actualScreenSize.width.toFixed(2)} m
       </span>
       {renderControlButton(
@@ -582,7 +581,7 @@ export const Canvas = () => {
   );
 
   const renderHeightControls = () => (
-    <div className="absolute left-4 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center justify-center space-y-2 z-30">
+    <div className="absolute left-3 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center justify-center space-y-2 z-30">
       {renderControlButton(
         handleHeightIncrement,
         !configured || !canIncreaseScreenHeight || resolution !== "Custom",
@@ -590,7 +589,7 @@ export const Canvas = () => {
       )}
       <div className="flex items-center justify-center min-h-[40px]">
         <span
-          className="text-xs text-gray-700 text-center rotate-180 bg-white/80 px-2 py-1 rounded"
+          className="text-xs text-gray-700 text-center rotate-180 px-2 py-1 rounded"
           style={{ writingMode: "vertical-lr" }}
         >
           {actualScreenSize.height.toFixed(2)} m
@@ -714,9 +713,33 @@ export const Canvas = () => {
 
         {/* Canvas Container */}
         <div className="relative m-auto flex justify-center items-center w-full">
+          {/* <div className="absolute top-[41.5%] left-[11%] -translate-x-1/2 w-52 p-3 text-xs text-white rounded-lg bg-black/40">
+            <X className="absolute top-2 right-2 w-5 h-5 cursor-pointer" />
+            <p>1. Scroll to Zoom</p>
+            <p>2. Click & Drag to Move Image</p>
+          </div> */}
+
+          {/* Total Wall Width */}
+          <div className="absolute -top-3 left-[26%] w-[300px] md:w-[450px] lg:w-[550px] border-t z-50 border-teal-400 pointer-events-none">
+            <span className="absolute left-1/2 -translate-x-1/2 -top-5 bg-white px-1 text-xs text-teal-600">
+              {wallWidth} m
+            </span>
+          </div>
+
+          {/* Total Wall Height */}
+          <div className="absolute top-[9%] left-[20%] h-[180px] md:h-[250px] lg:h-[300px] border-l z-50 border-teal-400 pointer-events-none">
+            <span className="absolute top-1/2 -translate-y-1/2 -left-8 bg-white px-1 text-xs text-teal-600 whitespace-nowrap">
+              {wallHeight} m
+            </span>
+          </div>
+
           {configured && selectedModel
             ? renderCanvasPreview()
             : renderEmptyCanvas()}
+        </div>
+
+        <div className="absolute bottom-2 right-2 w-auto p-3 text-xs text-white rounded-lg bg-black/40">
+          <p>© 2025 MJ Solution Indonesia</p>
         </div>
       </div>
 

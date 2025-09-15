@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import Layout from "./pages/Layout";
-import ModelPageWeb from "./components/export/ModelPageWeb"; // Import komponen web yang baru
+import LayoutPDF from "./pages/LayoutPDF";
 
 function App() {
   // Sample data untuk testing - ganti dengan data sebenarnya
@@ -35,10 +35,9 @@ function App() {
             <Layout />
           </div>
         }
-      />
+      />  
 
-      {/* Route untuk ModelPage web version */}
-      <Route path="/page-pdf" element={<ModelPageWeb data={sampleData} />} />
+      <Route path="/page-pdf" element={<LayoutPDF />} />
     </Routes>
   );
 }

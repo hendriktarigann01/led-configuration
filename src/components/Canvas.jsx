@@ -105,6 +105,50 @@ export const Canvas = () => {
     }
   }, [roomImageUrl]);
 
+  // Dynamic Canvas Size Calculator
+  const getDynamicCanvasSize = () => {
+    const maxWidth =
+      window.innerWidth < 768 ? 300 : window.innerWidth < 1024 ? 450 : 550;
+    const maxHeight =
+      window.innerWidth < 768 ? 180 : window.innerWidth < 1024 ? 250 : 300;
+
+    // Calculate aspect ratio from wall dimensions
+    const wallAspectRatio = wallWidth / wallHeight;
+
+    // Calculate canvas size maintaining wall aspect ratio
+    let canvasW, canvasH;
+
+    if (wallAspectRatio >= 1) {
+      // Landscape or square - limit by width
+      canvasW = Math.min(maxWidth, maxWidth);
+      canvasH = canvasW / wallAspectRatio;
+
+      // If height exceeds max, scale down
+      if (canvasH > maxHeight) {
+        canvasH = maxHeight;
+        canvasW = canvasH * wallAspectRatio;
+      }
+    } else {
+      // Portrait - limit by height
+      canvasH = Math.min(maxHeight, maxHeight);
+      canvasW = canvasH * wallAspectRatio;
+
+      // If width exceeds max, scale down
+      if (canvasW > maxWidth) {
+        canvasW = maxWidth;
+        canvasH = canvasW / wallAspectRatio;
+      }
+    }
+
+    return {
+      width: Math.round(canvasW),
+      height: Math.round(canvasH),
+    };
+  };
+
+  // Get dynamic canvas dimensions
+  const dynamicCanvas = getDynamicCanvasSize();
+
   // Image interaction handlers
   const handleImageMouseDown = (e) => {
     if (!roomImageUrl) return;
@@ -281,9 +325,14 @@ export const Canvas = () => {
     decrementScreenHeight();
   };
 
-  // Use utility functions for calculations
+  // Use utility functions for calculations with dynamic canvas size
   const { effectiveCanvasWidth, effectiveCanvasHeight } =
-    CanvasUtils.getCanvasDimensions(wallWidth, wallHeight);
+    CanvasUtils.getCanvasDimensions(
+      wallWidth,
+      wallHeight,
+      dynamicCanvas.width,
+      dynamicCanvas.height
+    );
   const { imageWidth, imageHeight } = CanvasUtils.getImageDimensions(
     actualScreenSize,
     wallWidth,
@@ -325,8 +374,13 @@ export const Canvas = () => {
   const renderResetButton = () => (
     <div className="absolute top-4 right-4 z-10">
       <button
+        disabled={!isConfigured()}
         onClick={handleCompleteReset}
-        className="w-20 lg:w-[144px] cursor-pointer px-4 py-2 text-xs bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
+        className={`w-20 lg:w-[144px] flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+          isConfigured()
+            ? "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+            : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
+        }`}
       >
         Reset
       </button>
@@ -526,7 +580,7 @@ export const Canvas = () => {
         <img
           src={contentSource}
           alt="Canvas Preview"
-          className="object-fill w-full h-full z-20"
+          className="object-cover w-full h-full z-20"
         />
         {CanvasUtils.renderBezelOverlay(cabinetCount)}
       </div>
@@ -570,7 +624,7 @@ export const Canvas = () => {
         <Minus size={12} />
       )}
       <span className="text-xs text-gray-700 px-2 py-1 rounded">
-        {actualScreenSize.width.toFixed(2)} m
+        {parseFloat(actualScreenSize.width.toFixed(3)).toString()} m
       </span>
       {renderControlButton(
         handleWidthIncrement,
@@ -592,7 +646,7 @@ export const Canvas = () => {
           className="text-xs text-gray-700 text-center rotate-180 px-2 py-1 rounded"
           style={{ writingMode: "vertical-lr" }}
         >
-          {actualScreenSize.height.toFixed(2)} m
+          {parseFloat(actualScreenSize.height.toFixed(3)).toString()} m
         </span>
       </div>
       {renderControlButton(
@@ -625,10 +679,15 @@ export const Canvas = () => {
     return (
       <div
         ref={canvasRef}
-        className={`w-[300px] h-[180px] max-h-[300px] md:w-[450px] md:h-[250px] lg:w-[550px] lg:h-[300px] ${
+        className={`${
           roomImageUrl ? "bg-transparent" : "bg-white"
         } p-5 flex items-center justify-center z-20 relative ${cursorClass} select-none`}
-        style={backgroundStyle}
+        style={{
+          width: `${dynamicCanvas.width}px`,
+          height: `${dynamicCanvas.height}px`,
+          maxHeight: `${dynamicCanvas.height}px`,
+          ...backgroundStyle,
+        }}
         onMouseDown={handleImageMouseDown}
         onMouseMove={handleImageMouseMove}
         onMouseUp={handleImageMouseUp}
@@ -661,7 +720,21 @@ export const Canvas = () => {
   };
 
   const renderCanvasPreview = () => (
-    <div className="relative w-full max-w-[400px] h-[250px] md:max-w-[550px] md:h-[320px] lg:max-w-[650px] lg:h-[370px] rounded-lg flex items-center justify-center overflow-hidden">
+    <div
+      className="relative rounded-lg flex items-center justify-center overflow-hidden"
+      style={{
+        width: `${Math.min(
+          dynamicCanvas.width + 100,
+          window.innerWidth - 40
+        )}px`,
+        height: `${Math.min(
+          dynamicCanvas.height + 100,
+          window.innerHeight - 200
+        )}px`,
+        maxWidth: "100vw",
+        maxHeight: "80vh",
+      }}
+    >
       {renderCanvasBackground()}
 
       {/* Image Controls Panel */}
@@ -692,17 +765,19 @@ export const Canvas = () => {
   );
 
   const renderEmptyCanvas = () => (
-    <div className="w-[300px] h-[180px] max-h-[300px] md:w-[450px] md:h-[250px] lg:w-[550px] lg:h-[300px] bg-white text-center flex flex-col items-center justify-center px-4">
-      <p className="text-gray-500 text-xs lg:text-base">
-        Start your configuration by choosing the model that suits your needs.
-      </p>
-      <button
-        onClick={openModal}
-        className="mt-6 flex items-center justify-center space-x-1 lg:space-x-2 w-full max-w-40 lg:max-w-52 h-8 lg:h-10 text-white bg-[#3AAFA9] hover:bg-teal-600 transition-colors"
-      >
-        <CirclePlus className="shrink-0 w-4 h-4 lg:w-5 lg:h-5" />
-        <span className="text-xs lg:text-base">Configuration</span>
-      </button>
+    <div className="relative w-full max-w-[400px] h-[250px] md:max-w-[550px] md:h-[320px] lg:max-w-[650px] lg:h-[380px] rounded-lg flex items-center justify-center overflow-hidden">
+      <div className="w-[300px] h-[180px] max-h-[300px] md:w-[450px] md:h-[250px] lg:w-[550px] lg:h-[300px] bg-white text-center flex flex-col items-center justify-center px-4">
+        <p className="text-gray-500 text-xs lg:text-base">
+          Start your configuration by choosing the model that suits your needs.
+        </p>
+        <button
+          onClick={openModal}
+          className="mt-6 flex items-center justify-center space-x-1 lg:space-x-2 w-full max-w-40 lg:max-w-52 h-8 lg:h-10 text-white bg-[#3AAFA9] hover:bg-teal-600 transition-colors cursor-pointer"
+        >
+          <CirclePlus className="shrink-0 w-4 h-4 lg:w-5 lg:h-5" />
+          <span className="text-xs lg:text-base">Configuration</span>
+        </button>
+      </div>
     </div>
   );
 
@@ -713,25 +788,41 @@ export const Canvas = () => {
 
         {/* Canvas Container */}
         <div className="relative m-auto flex justify-center items-center w-full">
-          {/* <div className="absolute top-[41.5%] left-[11%] -translate-x-1/2 w-52 p-3 text-xs text-white rounded-lg bg-black/40">
-            <X className="absolute top-2 right-2 w-5 h-5 cursor-pointer" />
-            <p>1. Scroll to Zoom</p>
-            <p>2. Click & Drag to Move Image</p>
-          </div> */}
+          {configured && selectedModel && (
+            <>
+              {/* Total Wall Width */}
+              <div
+                className="absolute -top-3 border-t z-50 border-teal-400 pointer-events-none"
+                style={{
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: `${dynamicCanvas.width}px`,
+                }}
+              >
+                <span className="absolute left-1/2 -translate-x-1/2 -top-5 px-1 text-xs text-teal-600">
+                  {wallWidth} m
+                </span>
+              </div>
 
-          {/* Total Wall Width */}
-          <div className="absolute -top-3 left-[26%] w-[300px] md:w-[450px] lg:w-[550px] border-t z-50 border-teal-400 pointer-events-none">
-            <span className="absolute left-1/2 -translate-x-1/2 -top-5 bg-white px-1 text-xs text-teal-600">
-              {wallWidth} m
-            </span>
-          </div>
-
-          {/* Total Wall Height */}
-          <div className="absolute top-[9%] left-[20%] h-[180px] md:h-[250px] lg:h-[300px] border-l z-50 border-teal-400 pointer-events-none">
-            <span className="absolute top-1/2 -translate-y-1/2 -left-8 bg-white px-1 text-xs text-teal-600 whitespace-nowrap">
-              {wallHeight} m
-            </span>
-          </div>
+              {/* Total Wall Height */}
+              <div
+                className="absolute border-l z-50 border-teal-400 pointer-events-none"
+                style={{
+                  top: "50%",
+                  left: `calc(46% - ${dynamicCanvas.width / 2}px - 20px)`,
+                  transform: "translateY(-50%)",
+                  height: `${dynamicCanvas.height}px`,
+                }}
+              >
+                <span
+                  className="absolute top-1/2 -translate-y-1/2 -left-8 rotate-180 px-1 text-xs text-teal-600 whitespace-nowrap"
+                  style={{ writingMode: "vertical-lr" }}
+                >
+                  {wallHeight} m
+                </span>
+              </div>
+            </>
+          )}
 
           {configured && selectedModel
             ? renderCanvasPreview()

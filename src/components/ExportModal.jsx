@@ -49,17 +49,7 @@ export const ExportModal = () => {
     const blob = await pdf(<PDFDocument data={data} />).toBlob();
     const url = URL.createObjectURL(blob);
 
-    const timestamp = new Date()
-      .toLocaleDateString("id-ID", {
-        timeZone: "Asia/Jakarta",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      })
-      .replace(/\//g, "-");
-
-    // Use auto-generated PDF title instead of user input
-    const filename = `${generatePdfTitle()}_${timestamp}.pdf`;
+    const filename = `${generatePdfTitle()}.pdf`;
 
     const link = document.createElement("a");
     link.href = url;

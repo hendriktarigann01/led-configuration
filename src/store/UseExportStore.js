@@ -47,20 +47,21 @@ export const UseExportStore = create((set, get) => ({
   // Generate automatic PDF title
   generatePdfTitle: () => {
     const navbarStore = UseNavbarStore.getState();
+    const state = get();
 
-    if (!navbarStore.selectedModel) {
-      return "MJS-LED-Display";
-    }
-
-    const displayType = navbarStore.selectedModel.name
-      .replace(/\s+/g, "") // Remove spaces
-      .replace(/[^a-zA-Z0-9]/g, ""); // Remove special characters
-
-    const pixelPitch = navbarStore.selectedModel.modelData?.pixel_pitch
+    const pixelPitch = navbarStore.selectedModel?.modelData?.pixel_pitch
       ? `${navbarStore.selectedModel.modelData.pixel_pitch}`
       : "P1.8";
 
-    return `MJS-${displayType}-${pixelPitch}`;
+    const projectName = state.projectName.trim() || "";
+
+    const cleanProjectName = projectName
+      .replace(/\s+/g, "-")
+      .replace(/[^a-zA-Z0-9\-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    return `${cleanProjectName}_${pixelPitch}_ByMJSolutionIndonesia`;
   },
 
   // Get comprehensive data for PDF export

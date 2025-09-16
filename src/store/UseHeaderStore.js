@@ -167,9 +167,9 @@ export const UseHeaderStore = create((set, get) => ({
         });
       }
 
-      // Validate wall size
-      const minWallWidth = Math.max(5, actualScreenSize.width + 1);
-      const minWallHeight = Math.max(3, actualScreenSize.height + 1);
+      // Validate wall size - allow wall to match screen size but minimum 1m
+      const minWallWidth = Math.max(1, actualScreenSize.width);
+      const minWallHeight = Math.max(1, actualScreenSize.height);
 
       if (
         currentState.wallWidth < minWallWidth ||
@@ -204,7 +204,8 @@ export const UseHeaderStore = create((set, get) => ({
     const currentState = get();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    const minWidth = Math.max(5, actualScreenSize.width + 1);
+    // Allow wall to be exactly same size as screen, but minimum 1m
+    const minWidth = Math.max(1, actualScreenSize.width);
     const finalWidth = Math.max(minWidth, width);
 
     set({ wallWidth: finalWidth });
@@ -216,7 +217,8 @@ export const UseHeaderStore = create((set, get) => ({
     const currentState = get();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    const minHeight = Math.max(3, actualScreenSize.height + 1);
+    // Allow wall to be exactly same size as screen, but minimum 1m
+    const minHeight = Math.max(1, actualScreenSize.height);
     const finalHeight = Math.max(minHeight, height);
 
     set({ wallHeight: finalHeight });
@@ -291,32 +293,32 @@ export const UseHeaderStore = create((set, get) => ({
   // Wall increment/decrement utilities
   incrementWallHeight: () => {
     const state = get();
-    const newHeight = Number((state.wallHeight + 1).toFixed(1));
+    const newHeight = Number((state.wallHeight + 0.5).toFixed(1));
     state.setWallHeight(newHeight);
   },
 
   decrementWallHeight: () => {
     const state = get();
-    const minHeight = 3;
+    const minHeight = 1; // Changed from 3 to 1
     const newHeight = Math.max(
       minHeight,
-      Number((state.wallHeight - 1).toFixed(1))
+      Number((state.wallHeight - 0.5).toFixed(1))
     );
     state.setWallHeight(newHeight);
   },
 
   incrementWallWidth: () => {
     const state = get();
-    const newWidth = Number((state.wallWidth + 1).toFixed(1));
+    const newWidth = Number((state.wallWidth + 0.5).toFixed(1));
     state.setWallWidth(newWidth);
   },
 
   decrementWallWidth: () => {
     const state = get();
-    const minWidth = 5;
+    const minWidth = 1; // Changed from 5 to 1
     const newWidth = Math.max(
       minWidth,
-      Number((state.wallWidth - 1).toFixed(1))
+      Number((state.wallWidth - 0.5).toFixed(1))
     );
     state.setWallWidth(newWidth);
   },

@@ -266,7 +266,7 @@ export const CanvasUtils = {
 
     return (
       <>
-        {/* Horizontal Bottom Measure Canvas to Wall */}
+        {/* Horizontal Bottom Measure Screen */}
         <div
           className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
           style={{
@@ -275,13 +275,28 @@ export const CanvasUtils = {
                 ? "36px"
                 : deviceType === "tablet"
                 ? "36px"
-                : "36px",
+                : "51px",
             transform: "translateX(-75%) translateY(100%)",
             width: `${effectiveCanvasWidth + horizontalExtension}px`,
           }}
         />
 
-        {/* Vertical Right Measure Canvas to Wall */}
+        {/* Horizontal Top Measure Screen */}
+        <div
+          className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
+          style={{
+            top:
+              deviceType === "mobile"
+                ? "36px"
+                : deviceType === "tablet"
+                ? "36px"
+                : "50px",
+            transform: "translateX(-75%) translateY(100%)",
+            width: `${effectiveCanvasWidth + horizontalExtension}px`,
+          }}
+        />
+
+        {/* Vertical Right Measure Screen */}
         <div
           className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
           style={{
@@ -291,6 +306,21 @@ export const CanvasUtils = {
                 : deviceType === "tablet"
                 ? "52px"
                 : "52px",
+            transform: "translateX(100%) translateY(-75%)",
+            height: `${effectiveCanvasHeight + verticalExtension}px`,
+          }}
+        />
+
+        {/* Vertical Left Measure Screen */}
+        <div
+          className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
+          style={{
+            left:
+              deviceType === "mobile"
+                ? "50px"
+                : deviceType === "tablet"
+                ? "52px"
+                : "50px",
             transform: "translateX(100%) translateY(-75%)",
             height: `${effectiveCanvasHeight + verticalExtension}px`,
           }}
@@ -343,7 +373,8 @@ export const CanvasUtils = {
           </span>
         </div>
 
-        {/* Width measurements - Top */}
+        {/* Width measurements - Top Left */}
+
         <div
           className={`absolute ${topOffset} left-[25%] -translate-x-1/2 flex flex-col items-center justify-center z-50`}
         >
@@ -352,6 +383,7 @@ export const CanvasUtils = {
           </span>
         </div>
 
+        {/* Width measurements - Top Right */}
         <div
           className={`absolute ${topOffset} right-[25%] translate-x-1/2 flex flex-col items-center justify-center z-50`}
         >
@@ -433,7 +465,7 @@ export const CanvasUtils = {
             ).toFixed(1)}% of wall`}
             style={{
               height: `${finalHumanHeight}px`,
-              width: "auto",
+              width: "100%",
               objectFit: "contain",
               maxWidth: maxWidth,
             }}

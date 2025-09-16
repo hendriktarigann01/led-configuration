@@ -44,23 +44,18 @@ const styles = StyleSheet.create({
     width: 300,
   },
   userName: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 300,
     color: "#374151",
-    textAlign: "center",
-  },
-  configDate: {
-    fontSize: 12,
-    color: "#666",
     textAlign: "center",
   },
   divider: {
     width: "100%",
     height: 1,
     backgroundColor: "#999",
-    marginVertical: 15,
+    marginVertical: 10,
   },
-  displayType: {
+  information: {
     fontSize: 16,
     color: "#666",
     textAlign: "center",
@@ -84,16 +79,15 @@ export const FirstPage = ({ data }) => (
       </View>
 
       <View style={styles.userInfo}>
-        <Text style={styles.userName}>
-          {data?.userName || "Muhammad Faris"}
+        <Text style={styles.userName}>{data?.userName || ""}</Text>
+        <Text style={styles.information}>
+          Date of Configuration {data?.exportDate || ""}
         </Text>
-        <Text style={styles.configDate}>
-          Date of Configuration {data?.exportDate || "16-03-2025"}
-        </Text>
+        <Text style={styles.information}>{data?.projectName || ""}</Text>
         <View style={styles.divider} />
-        <Text style={styles.displayType}>
-          {data?.displayType || "Indoor LED Fixed"}{" "}
-          {data?.pixelPitch ? `${data.pixelPitch}` : "P 1.86"}
+        <Text style={styles.information}>
+          {data?.displayType || ""}{" "}
+          {data?.pixelPitch ? `${data.pixelPitch}` : ""}
         </Text>
       </View>
     </View>

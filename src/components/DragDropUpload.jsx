@@ -85,7 +85,7 @@ export const DragDropUpload = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`mt-2 border-2 border-dashed h-40 transition-colors relative cursor-pointer ${
+        className={`mt-2 border-2 border-dashed w-full h-36 lg:h-32 transition-colors relative cursor-pointer ${
           isDragOver
             ? "border-[#3AAFA9] bg-teal-50"
             : "border-gray-500 hover:border-gray-500"
@@ -105,7 +105,7 @@ export const DragDropUpload = ({
             <div className="absolute top-2 right-2 flex space-x-1 cursor-pointer">
               <button
                 onClick={handleRemoveImage}
-                className="w-6 h-6 bg-red-500 text-white z-50 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                className="w-6 h-6 bg-red-500 text-white z-50 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors cursor-pointer"
                 title="Remove image"
               >
                 <X size={12} />
@@ -123,8 +123,12 @@ export const DragDropUpload = ({
         ) : (
           /* Show upload prompt */
           <div className="flex flex-col justify-center items-center h-full text-center">
-            <img src="/icons/icon-upload.svg" alt="upload-icon" />
-            <p className="text-sm text-gray-500 mt-2">
+            <img
+              src="/icons/icon-upload.svg"
+              className="h-10"
+              alt="upload-icon"
+            />
+            <p className="text-xs text-gray-700 mt-2">
               Drag and Drop file here or choose file
             </p>
           </div>

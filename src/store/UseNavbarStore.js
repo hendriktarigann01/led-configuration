@@ -1,11 +1,8 @@
 import { create } from "zustand";
 
 export const UseNavbarStore = create((set) => ({
-  // Active tab state
-  activeTab: "LED Setup", // 'LED Setup' or 'Room Setup'
-
-  // Application selection state
-  selectedApplication: "Control Room",
+  // Active tab state - removed since no more tabs needed
+  activeTab: "LED Setup", // Keep for backward compatibility if needed
 
   // Model state - null means empty model
   selectedModel: null,
@@ -24,8 +21,6 @@ export const UseNavbarStore = create((set) => ({
 
   // Actions
   setActiveTab: (tab) => set({ activeTab: tab }),
-  setSelectedApplication: (application) =>
-    set({ selectedApplication: application }),
   setSelectedModel: (model) => set({ selectedModel: model }),
   setSelectedContent: (content) => set({ selectedContent: content }),
   setCustomImageUrl: (url) => set({ customImageUrl: url }),
@@ -39,7 +34,6 @@ export const UseNavbarStore = create((set) => ({
   resetNavbar: () =>
     set({
       activeTab: "LED Setup",
-      selectedApplication: "Control Room",
       selectedModel: null,
       selectedContent: "Default Image",
       customImageUrl: null,

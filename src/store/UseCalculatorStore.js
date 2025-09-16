@@ -7,7 +7,6 @@ export const UseCalculatorStore = create((set, get) => ({
 
     // Handle different formats
     if (sizeString.includes("(W)") && sizeString.includes("(H)")) {
-      // Format: "1,075 (W) x 606 (H) x 54 (D)"
       const parts = sizeString.split(" x ");
       const width = parseFloat(
         parts[0].replace("(W)", "").replace(",", "").trim()
@@ -25,7 +24,7 @@ export const UseCalculatorStore = create((set, get) => ({
       const width = parseFloat(parts[0].replace(",", "").trim());
       const height = parseFloat(parts[1].replace(",", "").trim());
       return {
-        width: width / 1000, // convert mm to m
+        width: width / 1000, 
         height: height / 1000,
       };
     }

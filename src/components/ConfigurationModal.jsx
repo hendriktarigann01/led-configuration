@@ -321,7 +321,7 @@ export const ConfigurationModal = () => {
               className="p-4 rounded-lg bg-white cursor-pointer"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-32 h-auto mb-3 flex items-center justify-center">
+                <div className="w-40 h-auto mb-3 flex items-center justify-center">
                   <img src={item.image} alt={`${item.name}-Image`} />
                 </div>
                 <div className="flex items-center gap-2">
@@ -380,7 +380,7 @@ export const ConfigurationModal = () => {
         <div
           className="overflow-y-auto max-h-96 lg:max-h-full 
                     [&::-webkit-scrollbar]:w-1 
-                    [&::-webkit-scrollbar-track]:bg-gray-100 
+                    [&::-webkit-scrollbar-track]:bg-gray-200 
                     [&::-webkit-scrollbar-thumb]:bg-[#3AAFA9] 
                     [&::-webkit-scrollbar-thumb]:rounded-full"
         >
@@ -391,7 +391,7 @@ export const ConfigurationModal = () => {
                   (header, index) => (
                     <th
                       key={index}
-                      className="p-1.5 w-32 text-left text-xs font-medium text-gray-700"
+                      className="p-3 w-32 text-left text-xs font-medium text-gray-700"
                     >
                       {header}
                     </th>
@@ -419,7 +419,7 @@ export const ConfigurationModal = () => {
                     ).map((data, dataIndex) => (
                       <td
                         key={dataIndex}
-                        className="py-0 lg:p-1.5 w-32 text-[11px] lg:text-xs text-gray-700"
+                        className="py-0 lg:p-3 w-32 text-[11px] lg:text-xs text-gray-700"
                       >
                         {data}
                       </td>

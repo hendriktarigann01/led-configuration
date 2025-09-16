@@ -50,9 +50,6 @@ export const Header = () => {
   } = UseCanvasStore();
   const { openModal } = UseExportStore();
 
-  // Import navbar store for tab functionality
-  const { activeTab, setActiveTab } = UseNavbarStore();
-
   // Initialize defaults and sync on component mount
   useEffect(() => {
     initializeDefaults();
@@ -79,13 +76,12 @@ export const Header = () => {
   const canDecreaseCabinetHeight =
     canDecreaseScreenHeight && cabinetCount.vertical > 1;
 
-  // Wall validation with minimum limits (5m width, 3m height)
+  // Wall validation - wall can be reduced to match screen size but minimum 1m
   const canIncreaseWallWidth = true; // Wall can always increase
-  const canDecreaseWallWidth =
-    wallWidth > 5 && wallWidth > actualScreenSize.width + 1; // Cannot go below 5m and must keep margin
+  const canDecreaseWallWidth = wallWidth > Math.max(1, actualScreenSize.width); // Can decrease until wall = screen size or 1m, whichever is larger
   const canIncreaseWallHeight = true; // Wall can always increase
   const canDecreaseWallHeight =
-    wallHeight > 3 && wallHeight > actualScreenSize.height + 1; // Cannot go below 3m and must keep margin
+    wallHeight > Math.max(1, actualScreenSize.height); // Can decrease until wall = screen size or 1m, whichever is larger
 
   // Check if controls are interactive based on resolution mode
   const isCustomMode = resolution === "Custom";
@@ -137,7 +133,7 @@ export const Header = () => {
                     ${
                       disabled || isInteger || !isCustomMode
                         ? "bg-gray-50 text-gray-400 cursor-not-allowed"
-                        : "text-gray-600 cursor-not-allowed"
+                        : "text-gray-600 "
                     }`}
         />
         <button
@@ -185,37 +181,13 @@ export const Header = () => {
   return (
     <>
       <div className="bg-white border-gray-200 p-5">
-        {/* Mobile: Show logo here */}
+        {/* Mobile logo */}
         <div className="lg:hidden flex justify-center mb-4">
           <img
             src="/logo/mjs_logo_text.png"
             alt="logo"
             className="w-32 h-auto"
           />
-        </div>
-
-        {/* Tab Navigation - Moved from Navbar */}
-        <div className="-mx-5 lg:hidden flex mb-4">
-          <button
-            onClick={() => setActiveTab("LED Setup")}
-            className={`flex-1 py-3 px-4 text-xs font-medium ${
-              activeTab === "LED Setup"
-                ? "bg-[#3AAFA9] text-white"
-                : "bg-white text-gray-500 hover:bg-gray-200 cursor-pointer"
-            }`}
-          >
-            LED Setup
-          </button>
-          <button
-            onClick={() => setActiveTab("Room Setup")}
-            className={`flex-1 py-3 px-4 text-xs font-medium ${
-              activeTab === "Room Setup"
-                ? "bg-[#3AAFA9] text-white"
-                : "bg-white text-gray-500 hover:bg-gray-200 cursor-pointer"
-            }`}
-          >
-            Room Setup
-          </button>
         </div>
 
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between w-full mx-auto space-y-2 lg:space-y-0">
@@ -381,7 +353,12 @@ export const Header = () => {
           <div className="flex justify-center lg:flex-col space-y-2 gap-5 lg:gap-0 my-auto">
             <button
               onClick={openModal}
-              className="flex items-center justify-center space-x-2 w-[144px] h-8 lg:h-auto px-4 py-2 cursor-pointer bg-white border border-gray-300 rounded text-gray-600 hover:bg-gray-50 transition-colors"
+              disabled={!isConfigured()}
+              className={`flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+                isConfigured()
+                  ? "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+                  : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
+              }`}
             >
               <FileDown size={16} />
               <span className="text-xs">Export to PDF</span>

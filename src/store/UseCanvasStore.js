@@ -39,9 +39,9 @@ export const UseCanvasStore = create((set, get) => ({
     const calculator = UseCalculatorStore.getState();
     const validated = calculator.validateWallSize(width, height);
 
-    // Ensure minimum wall size is 5m x 3m
-    const finalWidth = Math.max(5, validated.width);
-    const finalHeight = Math.max(3, validated.height);
+    // Ensure minimum wall size is 1m x 1m
+    const finalWidth = Math.max(1, validated.width);
+    const finalHeight = Math.max(1, validated.height);
 
     set({
       wallWidth: finalWidth,

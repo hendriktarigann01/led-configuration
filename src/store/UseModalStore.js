@@ -6,7 +6,7 @@ export const UseModalStore = create((set, get) => ({
   // Modal visibility
   isOpen: false,
 
-  // Current step: 'select' | 'subtype' | 'configure'
+  // Current step: 'select' | 'configure' | 'subtype'
   currentStep: "select",
 
   // Selected display type ID
@@ -28,18 +28,10 @@ export const UseModalStore = create((set, get) => ({
     }));
   },
 
-  // Get configurations for selected display type and sub-type
   getSelectedTypeConfigurations: () => {
-    const { selectedDisplayTypeId, selectedSubTypeId } = get();
+    const { selectedDisplayTypeId } = get();
     if (!selectedDisplayTypeId) return [];
 
-    // For Indoor LED Fixed (id=1), filter by sub-type
-    if (selectedDisplayTypeId === 1 && selectedSubTypeId) {
-      const subTypeData = model.find((item) => item.id === selectedSubTypeId);
-      return subTypeData ? subTypeData.data : [];
-    }
-
-    // For other display types, use display type directly
     const selectedType = model.find(
       (item) => item.id === selectedDisplayTypeId
     );
@@ -74,31 +66,28 @@ export const UseModalStore = create((set, get) => ({
     }),
 
   selectDisplayType: (displayTypeId) => {
-    // If Indoor LED Fixed is selected, go to subtype step
-    if (displayTypeId === 1) {
-      set({
-        selectedDisplayTypeId: displayTypeId,
-        currentStep: "subtype",
-        selectedSubTypeId: null,
-        selectedModel: null,
-      });
-    } else {
-      // For other types, go directly to configure step
-      set({
-        selectedDisplayTypeId: displayTypeId,
-        currentStep: "configure",
-        selectedSubTypeId: null,
-        selectedModel: null,
-      });
-    }
+    // All display types go to configure step first
+    set({
+      selectedDisplayTypeId: displayTypeId,
+      currentStep: "configure",
+      selectedSubTypeId: null,
+      selectedModel: null,
+    });
   },
 
-  selectSubType: (subTypeId) =>
+  selectSubType: (subTypeId) => {
+    let displayTypeId = 1; // default Cabinet
+    if (subTypeId === 2) displayTypeId = 2; // Module
+
+    const typeData = model.find((item) => item.id === displayTypeId);
+
     set({
       selectedSubTypeId: subTypeId,
-      selectedModel: null,
-    }),
-
+      selectedDisplayTypeId: displayTypeId,
+      selectedModel:
+        typeData && typeData.data.length > 0 ? typeData.data[0] : null,
+    });
+  },
   selectModel: (model) =>
     set({
       selectedModel: model,
@@ -108,40 +97,36 @@ export const UseModalStore = create((set, get) => ({
     const { currentStep, selectedDisplayTypeId } = get();
 
     if (currentStep === "select") {
-      // This is handled by selectDisplayType already
-      return;
-    }
-
-    if (currentStep === "subtype") {
+      // Go to configure step
       set({
         currentStep: "configure",
         selectedModel: null,
       });
+    } else if (currentStep === "configure") {
+      // If Indoor LED, go to subtype selection
+      if (selectedDisplayTypeId === 1) {
+        set({
+          currentStep: "subtype",
+        });
+      }
+      // For other types, this shouldn't happen as they confirm directly
     }
   },
 
   goBack: () => {
     const { currentStep } = get();
 
-    if (currentStep === "configure") {
-      const { selectedDisplayTypeId } = get();
-      // If coming from Indoor LED, go back to subtype step
-      if (selectedDisplayTypeId === 1) {
-        set({
-          currentStep: "subtype",
-          selectedModel: null,
-        });
-      } else {
-        // For other types, go back to select step
-        set({
-          currentStep: "select",
-          selectedModel: null,
-        });
-      }
-    } else if (currentStep === "subtype") {
+    if (currentStep === "subtype") {
+      // Go back to configure step
+      set({
+        currentStep: "configure",
+        selectedSubTypeId: null,
+        selectedModel: null,
+      });
+    } else if (currentStep === "configure") {
+      // Go back to select step
       set({
         currentStep: "select",
-        selectedSubTypeId: null,
         selectedModel: null,
       });
     }
@@ -157,7 +142,13 @@ export const UseModalStore = create((set, get) => ({
     } = get();
     const displayType = getSelectedDisplayType();
 
+    // Pastikan semua data yang diperlukan sudah dipilih
     if (selectedDisplayTypeId && selectedModel && displayType) {
+      // For Indoor LED, subtype harus dipilih
+      if (selectedDisplayTypeId === 1 && !selectedSubTypeId) {
+        return; // Jangan konfirmasi jika subtype belum dipilih
+      }
+
       // Update navbar store with selected model
       const navbarStore = UseNavbarStore.getState();
 
@@ -192,9 +183,9 @@ export const UseModalStore = create((set, get) => ({
         subTypeId: selectedSubTypeId,
         modelData: selectedModel,
       });
-    }
 
-    // Close modal after confirmation
-    closeModal();
+      // Close modal after confirmation
+      closeModal();
+    }
   },
 }));

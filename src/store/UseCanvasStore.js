@@ -94,21 +94,48 @@ export const UseCanvasStore = create((set, get) => ({
     });
   },
 
-  // Update model data and recalculate base size
+  // Update model data and maintain cabinet count (MODIFIED)
   updateModelData: (modelData, displayType) => {
     const calculator = UseCalculatorStore.getState();
-    const dimensions = calculator.getBaseDimensions(modelData, displayType);
+    const newDimensions = calculator.getBaseDimensions(modelData, displayType);
 
-    set({
-      baseWidth: dimensions.width,
-      baseHeight: dimensions.height,
-      // Initialize screen size to one unit
-      screenWidth: dimensions.width,
-      screenHeight: dimensions.height,
-      // Ensure wall defaults are maintained
-      wallWidth: Math.max(5, get().wallWidth),
-      wallHeight: Math.max(3, get().wallHeight),
-    });
+    const currentState = get();
+
+    // Check if this is first configuration (no previous model)
+    const isFirstConfiguration =
+      currentState.baseWidth === 0 || currentState.baseHeight === 0;
+
+    if (isFirstConfiguration) {
+      // First time configuration - use single unit
+      set({
+        baseWidth: newDimensions.width,
+        baseHeight: newDimensions.height,
+        screenWidth: newDimensions.width,
+        screenHeight: newDimensions.height,
+        // Ensure wall defaults are maintained
+        wallWidth: Math.max(5, currentState.wallWidth),
+        wallHeight: Math.max(3, currentState.wallHeight),
+      });
+    } else {
+      // Model change - maintain current cabinet count
+      const currentCabinetCount = get().getCabinetCount();
+
+      // Calculate new screen size to maintain the same cabinet count
+      const newScreenWidth =
+        currentCabinetCount.horizontal * newDimensions.width;
+      const newScreenHeight =
+        currentCabinetCount.vertical * newDimensions.height;
+
+      set({
+        baseWidth: newDimensions.width,
+        baseHeight: newDimensions.height,
+        screenWidth: newScreenWidth,
+        screenHeight: newScreenHeight,
+        // Keep existing wall dimensions
+        wallWidth: currentState.wallWidth,
+        wallHeight: currentState.wallHeight,
+      });
+    }
   },
 
   // Check if configuration is ready (has selected model)

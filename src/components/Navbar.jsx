@@ -223,12 +223,11 @@ export const Navbar = () => {
       </div>
 
       {/* Room Setup Section - Moved to bottom */}
-      <div>
+      <div className="m-0">
         <h3 className="text-sm font-normal text-gray-700 mb-2">Room Setup</h3>
         <p className="text-xs text-[#3AAFA9] mb-3">
-          Upload a photo of your room for a customized view of your new Radiance
-          LED display. For best results, position yourself at least 6 m away
-          from the intended surface. Do not zoom in while shooting.
+          Upload a room photo for a custom Radiance LED preview. Stand about 6 m
+          from the surface and avoid zooming.
         </p>
 
         <div
@@ -239,6 +238,10 @@ export const Navbar = () => {
         <p className="text-[10px] text-gray-500 mt-3">
           * JPG or PNG only, Max 3mb
         </p>
+      </div>
+
+      <div className="visible lg:invisible w-auto p-3 lg:p-0 mt-1 lg:mt-0 text-xs text-gray-500 text-center">
+        <p>© 2025 MJ Solution Indonesia</p>
       </div>
     </>
   );

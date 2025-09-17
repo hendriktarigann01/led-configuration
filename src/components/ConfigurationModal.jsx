@@ -30,27 +30,10 @@ const getTableHeaders = (selectedDisplayType, selectedSubTypeId) => {
           "Refresh Rate",
         ];
   }
-  // Indoor
-  if (selectedSubTypeId === 2) {
-    return window.innerWidth < 1024
-      ? ["Pixel Pitch", "Module Size"]
-      : [
-          "Pixel Pitch",
-          "Module Size",
-          "Module Weight",
-          "Brightness",
-          "Refresh Rate",
-        ];
-  }
+  // Indoor - merged table with combined size and weight columns
   return window.innerWidth < 1024
-    ? ["Pixel Pitch", "Cabinet Size"]
-    : [
-        "Pixel Pitch",
-        "Cabinet Size",
-        "Cabinet Weight",
-        "Brightness",
-        "Refresh Rate",
-      ];
+    ? ["Pixel Pitch", "Size"]
+    : ["Pixel Pitch", "Size", "Weight", "Brightness", "Refresh Rate"];
 };
 
 // Helper untuk table row data
@@ -61,6 +44,7 @@ const getTableRowData = (config, selectedDisplayType, selectedSubTypeId) => {
       ? [config.inch, config.unit_size_mm]
       : [config.inch, config.b2b, config.unit_size_mm, config.brightness];
   }
+
   // Outdoor
   if (selectedDisplayType?.name.includes("Outdoor")) {
     return window.innerWidth < 1024
@@ -73,24 +57,31 @@ const getTableRowData = (config, selectedDisplayType, selectedSubTypeId) => {
           config.refresh_rate,
         ];
   }
-  // Indoor
-  if (selectedSubTypeId === 2) {
-    return window.innerWidth < 1024
-      ? [config.pixel_pitch, config.module_size]
-      : [
-          config.pixel_pitch,
-          config.module_size,
-          config.module_weight,
-          config.brightness,
-          config.refresh_rate,
-        ];
-  }
+
+  // Indoor - PERBAIKAN: Cek apakah data cabinet ada
+  const moduleSize = config.module_size || "320*160mm";
+  const cabinetSize = config.cabinet_size || "640*480mm";
+
+  // Jika ada data cabinet, tampilkan keduanya
+  // Jika tidak ada, hanya tampilkan module
+  const combinedSize = config.cabinet_size
+    ? `${moduleSize} (Module)\n${cabinetSize} (Cabinet)`
+    : `${moduleSize} (Module)`;
+
+  const moduleWeight = config.module_weight || "0.48kg/pcs";
+  const cabinetWeight = config.cabinet_weight || "7.8kg/pcs";
+
+  // Sama dengan size, cek apakah cabinet weight ada
+  const combinedWeight = config.cabinet_weight
+    ? `${moduleWeight} (Module)\n${cabinetWeight} (Cabinet)`
+    : `${moduleWeight} (Module)`;
+
   return window.innerWidth < 1024
-    ? [config.pixel_pitch, config.cabinet_size]
+    ? [config.pixel_pitch, combinedSize]
     : [
         config.pixel_pitch,
-        config.cabinet_size,
-        config.cabinet_weight || config.module_weight,
+        combinedSize,
+        combinedWeight,
         config.brightness,
         config.refresh_rate,
       ];
@@ -126,27 +117,13 @@ export const ConfigurationModal = () => {
   // Enhanced selectDisplayType for mobile flow
   const handleSelectDisplayType = (typeId) => {
     selectDisplayType(typeId);
-    // Di desktop, langsung pindah ke step selanjutnya
-    if (window.innerWidth >= 1024) {
-      if (typeId === 1) {
-        // Indoor LED - perlu subtype selection
-        // Akan otomatis pindah ke subtype step
-      } else {
-        // Outdoor atau Video Wall - langsung ke configuration
-        nextStep();
-      }
-    }
+    // Di desktop, tidak perlu nextStep() karena sudah otomatis ke configure di store
   };
 
   // Handle next for mobile display type selection
   const handleMobileDisplayNext = () => {
-    if (selectedDisplayTypeId === 1) {
-      // Indoor LED - perlu subtype selection
-      nextStep();
-    } else {
-      // Outdoor atau Video Wall - langsung ke configuration
-      nextStep();
-    }
+    // Semua display type langsung ke configuration
+    nextStep();
   };
 
   // Toggle row expansion for mobile
@@ -155,47 +132,51 @@ export const ConfigurationModal = () => {
   };
 
   // Get all row data for expanded view
-  const getAllRowData = (config, selectedDisplayType, selectedSubTypeId) => {
-    // Video Wall
-    if (selectedDisplayType?.name.includes("Video Wall")) {
-      return [
-        { label: "Inch", value: config.inch },
-        { label: "Bezel to Bezel", value: config.b2b },
-        { label: "Unit Size (mm)", value: config.unit_size_mm },
-        { label: "Brightness", value: config.brightness },
-      ];
-    }
-    // Outdoor
-    if (selectedDisplayType?.name.includes("Outdoor")) {
-      return [
-        { label: "Pixel Pitch", value: config.pixel_pitch },
-        { label: "Cabinet Size", value: config.cabinet_size },
-        { label: "Module Weight", value: config.module_weight },
-        { label: "Brightness", value: config.brightness },
-        { label: "Refresh Rate", value: config.refresh_rate },
-      ];
-    }
-    // Indoor
-    if (selectedSubTypeId === 2) {
-      return [
-        { label: "Pixel Pitch", value: config.pixel_pitch },
-        { label: "Module Size", value: config.module_size },
-        { label: "Module Weight", value: config.module_weight },
-        { label: "Brightness", value: config.brightness },
-        { label: "Refresh Rate", value: config.refresh_rate },
-      ];
-    }
+const getAllRowData = (config, selectedDisplayType, selectedSubTypeId) => {
+  // Video Wall
+  if (selectedDisplayType?.name.includes("Video Wall")) {
+    return [
+      { label: "Inch", value: config.inch },
+      { label: "Bezel to Bezel", value: config.b2b },
+      { label: "Unit Size (mm)", value: config.unit_size_mm },
+      { label: "Brightness", value: config.brightness },
+    ];
+  }
+
+  // Outdoor
+  if (selectedDisplayType?.name.includes("Outdoor")) {
     return [
       { label: "Pixel Pitch", value: config.pixel_pitch },
       { label: "Cabinet Size", value: config.cabinet_size },
-      {
-        label: "Cabinet Weight",
-        value: config.cabinet_weight || config.module_weight,
-      },
+      { label: "Module Weight", value: config.module_weight },
       { label: "Brightness", value: config.brightness },
       { label: "Refresh Rate", value: config.refresh_rate },
     ];
-  };
+  }
+
+  // Indoor - PERBAIKAN: Format yang lebih baik untuk mobile
+  const moduleSize = config.module_size || "320*160mm";
+  const cabinetSize = config.cabinet_size || "640*480mm";
+
+  const combinedSize = config.cabinet_size
+    ? `${moduleSize} (Module), ${cabinetSize} (Cabinet)`
+    : `${moduleSize} (Module)`;
+
+  const moduleWeight = config.module_weight || "0.48kg/pcs";
+  const cabinetWeight = config.cabinet_weight || "7.8kg/pcs";
+
+  const combinedWeight = config.cabinet_weight
+    ? `${moduleWeight} (Module), ${cabinetWeight} (Cabinet)`
+    : `${moduleWeight} (Module)`;
+
+  return [
+    { label: "Pixel Pitch", value: config.pixel_pitch },
+    { label: "Size", value: combinedSize },
+    { label: "Weight", value: combinedWeight },
+    { label: "Brightness", value: config.brightness },
+    { label: "Refresh Rate", value: config.refresh_rate },
+  ];
+};
 
   // Modal Header Component
   const ModalHeader = () => (
@@ -222,6 +203,12 @@ export const ConfigurationModal = () => {
         {currentStep === "configure" && (
           <h2 className="flex lg:hidden text-md font-normal text-gray-800">
             Choose Display Configurator
+          </h2>
+        )}
+
+        {currentStep === "subtype" && (
+          <h2 className="flex lg:hidden text-md font-normal text-gray-800">
+            Choose Configuration Method
           </h2>
         )}
 
@@ -348,9 +335,9 @@ export const ConfigurationModal = () => {
 
       {/* Buttons at bottom */}
       <div className="lg:flex space-y-3 w-full max-w-lg lg:w-[200px] mx-auto">
-        {/* Back button - hanya tampil di mobile */}
+        {/* Choose Model */}
         <button
-          onClick={nextStep}
+          onClick={confirmSelection}
           disabled={!selectedSubTypeId}
           className={`flex-1 py-2 rounded-lg text-sm w-full font-medium transition-colors ${
             selectedSubTypeId
@@ -358,8 +345,10 @@ export const ConfigurationModal = () => {
               : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
         >
-          Next
+          Choose Model
         </button>
+
+        {/* Back button - hanya tampil di mobile */}
         <button
           onClick={goBack}
           className="flex-1 lg:hidden py-2 border-2 border-[#3AAFA9] text-[#3AAFA9] rounded-lg text-sm w-full font-medium hover:bg-teal-50 transition-colors"
@@ -419,7 +408,7 @@ export const ConfigurationModal = () => {
                     ).map((data, dataIndex) => (
                       <td
                         key={dataIndex}
-                        className="py-0 lg:p-3 w-32 text-[11px] lg:text-xs text-gray-700"
+                        className="py-0 lg:p-3 w-32 text-[11px] lg:text-xs text-gray-700 whitespace-pre-line"
                       >
                         {data}
                       </td>
@@ -490,18 +479,32 @@ export const ConfigurationModal = () => {
 
       {/* Buttons at bottom */}
       <div className="lg:flex space-y-3 w-full max-w-lg lg:w-[200px] mx-auto">
-        {/* Choose Model */}
-        <button
-          onClick={confirmSelection}
-          disabled={!selectedModel}
-          className={`flex-1 py-2 rounded-lg text-sm w-full font-medium transition-colors ${
-            selectedModel
-              ? "bg-[#3AAFA9] text-white hover:bg-teal-600"
-              : "bg-gray-200 text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          Choose Model
-        </button>
+        {/* Next button for Indoor to go to subtype selection */}
+        {selectedDisplayTypeId === 1 ? (
+          <button
+            onClick={nextStep}
+            disabled={!selectedModel}
+            className={`flex-1 py-2 rounded-lg text-sm w-full font-medium transition-colors ${
+              selectedModel
+                ? "bg-[#3AAFA9] text-white hover:bg-teal-600"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            Next
+          </button>
+        ) : (
+          <button
+            onClick={confirmSelection}
+            disabled={!selectedModel}
+            className={`flex-1 py-2 rounded-lg text-sm w-full font-medium transition-colors ${
+              selectedModel
+                ? "bg-[#3AAFA9] text-white hover:bg-teal-600"
+                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            Choose Model
+          </button>
+        )}
 
         {/* Back button - hanya tampil di mobile */}
         <button
@@ -524,9 +527,9 @@ export const ConfigurationModal = () => {
         <div className="block lg:block">
           <DisplayTypeGrid />
         </div>
-        {currentStep === "subtype" ? (
+        {currentStep === "configure" ? (
           <div className="hidden lg:block flex-1">
-            <SubtypeSelection />
+            <ConfigurationTable />
           </div>
         ) : (
           <div className="flex-1 flex flex-col justify-center items-center">
@@ -556,17 +559,6 @@ export const ConfigurationModal = () => {
     </div>
   );
 
-  const renderSubtypeStep = () => (
-    <div className="h-full flex flex-col">
-      <ModalHeader />
-      {/* Di desktop: tampilkan DisplayTypeGrid */}
-      <div className="hidden lg:block">
-        <DisplayTypeGrid clickable={true} />
-      </div>
-      <SubtypeSelection />
-    </div>
-  );
-
   const renderConfigureStep = () => (
     <div className="h-full flex flex-col">
       <ModalHeader />
@@ -578,13 +570,24 @@ export const ConfigurationModal = () => {
     </div>
   );
 
+  const renderSubtypeStep = () => (
+    <div className="h-full flex flex-col">
+      <ModalHeader />
+      {/* Di desktop: tampilkan DisplayTypeGrid */}
+      <div className="hidden lg:block">
+        <DisplayTypeGrid clickable={true} />
+      </div>
+      <SubtypeSelection />
+    </div>
+  );
+
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-50 overflow-hidden">
       <div className="bg-white mx-5 rounded-xl shadow-2xl w-[380px] lg:w-full max-w-[820px] h-[90vh] max-h-[600px] overflow-hidden">
         <div className="p-6 h-full">
           {currentStep === "select" && renderSelectStep()}
-          {currentStep === "subtype" && renderSubtypeStep()}
           {currentStep === "configure" && renderConfigureStep()}
+          {currentStep === "subtype" && renderSubtypeStep()}
         </div>
       </div>
     </div>

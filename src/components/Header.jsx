@@ -82,10 +82,11 @@ export const Header = () => {
   const canIncreaseWallHeight = true; // Wall can always increase
   const canDecreaseWallHeight =
     wallHeight > Math.max(1, actualScreenSize.height); // Can decrease until wall = screen size or 1m, whichever is larger
-
+  const screenControlsEnabled = isScreenControlsEnabled();
+  const wallControlsEnabled = isWallControlsEnabled();
   // Check if controls are interactive based on resolution mode
   const isCustomMode = resolution === "Custom";
-  const controlsDisabled = !isScreenControlsEnabled() || !isCustomMode;
+  const controlsDisabled = !screenControlsEnabled || !isCustomMode;
 
   const NumberInput = ({
     label,
@@ -126,15 +127,15 @@ export const Header = () => {
           step={step}
           disabled={disabled || isInteger || !isCustomMode}
           className={`w-full text-center border-none outline-none text-xs
-                    appearance-none
-                    [appearance:textfield]
-                    [&::-webkit-inner-spin-button]:appearance-none
-                    [&::-webkit-outer-spin-button]:appearance-none
-                    ${
-                      disabled || isInteger || !isCustomMode
-                        ? "bg-gray-50 text-gray-400 cursor-not-allowed"
-                        : "text-gray-600 "
-                    }`}
+                      appearance-none
+                      [appearance:textfield]
+                      [&::-webkit-inner-spin-button]:appearance-none
+                      [&::-webkit-outer-spin-button]:appearance-none
+                      ${
+                        disabled || (isInteger && !isCustomMode)
+                          ? "bg-gray-50 text-gray-400 cursor-not-allowed"
+                          : "text-gray-600"
+                      }`}
         />
         <button
           onClick={onIncrement}
@@ -171,9 +172,6 @@ export const Header = () => {
       ))}
     </div>
   );
-
-  const screenControlsEnabled = isScreenControlsEnabled();
-  const wallControlsEnabled = isWallControlsEnabled();
 
   // Determine if we're in cabinet mode
   const isCabinetMode = screenSize === "Column/Row";
@@ -224,7 +222,7 @@ export const Header = () => {
                 // Cabinet Mode - Show cabinet counts
                 <>
                   <NumberInput
-                    label="Row Count"
+                    label="Column Count"
                     value={cabinetCount.horizontal}
                     onIncrement={incrementCabinetWidth}
                     onDecrement={decrementCabinetWidth}
@@ -236,7 +234,7 @@ export const Header = () => {
                     showResolutionInfo={true}
                   />
                   <NumberInput
-                    label="Column Count"
+                    label="Row Count"
                     value={cabinetCount.vertical}
                     onIncrement={incrementCabinetHeight}
                     onDecrement={decrementCabinetHeight}

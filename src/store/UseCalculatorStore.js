@@ -24,7 +24,7 @@ export const UseCalculatorStore = create((set, get) => ({
       const width = parseFloat(parts[0].replace(",", "").trim());
       const height = parseFloat(parts[1].replace(",", "").trim());
       return {
-        width: width / 1000, 
+        width: width / 1000,
         height: height / 1000,
       };
     }

@@ -346,10 +346,10 @@ export const CanvasUtils = {
       <>
         {/* Height measurements - Left Side */}
         <div
-          className={`absolute ${leftOffset} top-[25%] -translate-y-1/2 flex flex-col items-center justify-center z-50`}
+          className={`absolute ${leftOffset} top-[28%] -translate-y-1/2 flex flex-col items-center justify-center z-50`}
         >
           <span
-            className="text-xs text-gray-700 text-center"
+            className="text-[10px] lg:text-xs text-gray-700 text-center"
             style={{
               writingMode: "vertical-rl",
               transform: "rotate(180deg)",
@@ -360,10 +360,10 @@ export const CanvasUtils = {
         </div>
 
         <div
-          className={`absolute ${leftOffset} top-[75%] -translate-y-1/2 flex flex-col items-center justify-center z-50`}
+          className={`absolute ${leftOffset} top-[72%] -translate-y-1/2 flex flex-col items-center justify-center z-50`}
         >
           <span
-            className="text-xs text-gray-700 text-center"
+            className="text-[10px] lg:text-xs text-gray-700 text-center"
             style={{
               writingMode: "vertical-rl",
               transform: "rotate(180deg)",
@@ -376,18 +376,18 @@ export const CanvasUtils = {
         {/* Width measurements - Top Left */}
 
         <div
-          className={`absolute ${topOffset} left-[25%] -translate-x-1/2 flex flex-col items-center justify-center z-50`}
+          className={`absolute ${topOffset} left-[27%] -translate-x-1/2 flex flex-col items-center justify-center z-50`}
         >
-          <span className="text-xs text-gray-700 text-center">
+          <span className="text-[10px] lg:text-xs text-gray-700 text-center">
             {remainingWallWidth.toFixed(2)} m
           </span>
         </div>
 
         {/* Width measurements - Top Right */}
         <div
-          className={`absolute ${topOffset} right-[25%] translate-x-1/2 flex flex-col items-center justify-center z-50`}
+          className={`absolute ${topOffset} right-[27%] translate-x-1/2 flex flex-col items-center justify-center z-50`}
         >
-          <span className="text-xs text-gray-700 text-center">
+          <span className="text-[10px] lg:text-xs text-gray-700 text-center">
             {remainingWallWidth.toFixed(2)} m
           </span>
         </div>
@@ -400,7 +400,7 @@ export const CanvasUtils = {
     const deviceType = CanvasUtils.getDeviceType();
 
     // Adjust positioning and spacing based on device
-    const leftPosition = deviceType === "mobile" ? "left-1" : "left-13";
+    const leftPosition = deviceType === "mobile" ? "left-12" : "left-13";
     const rightPosition = deviceType === "mobile" ? "right-0" : "right-1";
     const bottomPosition = deviceType === "mobile" ? "bottom-0.5" : "bottom-1";
 

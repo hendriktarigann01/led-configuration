@@ -278,10 +278,10 @@ export const Canvas = () => {
 
   // Validation for control buttons
   const canIncreaseScreenWidth =
-    actualScreenSize.width + baseWidth <= wallWidth;
+    actualScreenSize.width + baseWidth + 0.2 <= wallWidth;
   const canDecreaseScreenWidth = actualScreenSize.width > baseWidth;
   const canIncreaseScreenHeight =
-    actualScreenSize.height + baseHeight <= wallHeight;
+    actualScreenSize.height + baseHeight + 0.2 <= wallHeight;
   const canDecreaseScreenHeight = actualScreenSize.height > baseHeight;
 
   // Complete reset function
@@ -783,11 +783,16 @@ export const Canvas = () => {
 
   return (
     <>
-      <div className="flex-1 bg-gray-100 h-80 lg:h-full p-2 lg:p-4 flex items-center justify-center">
+      <div className="flex-1 bg-gray-100 h-80 lg:h-full px-2 mt-12 mb-28 lg:my-0 lg:p-4 flex items-center justify-center">
         {renderResetButton()}
 
         {/* Canvas Container */}
         <div className="relative m-auto flex justify-center items-center w-full">
+          {/* <div className="absolute top-[41.5%] left-[11%] -translate-x-1/2 w-52 p-3 text-xs text-white rounded-lg bg-black/40">
+            <X className="absolute top-2 right-2 w-5 h-5 cursor-pointer" />
+            <p>1. Scroll to Zoom</p>
+            <p>2. Click & Drag to Move Image</p>
+          </div> */}
           {configured && selectedModel && (
             <>
               {/* Total Wall Width */}
@@ -800,7 +805,8 @@ export const Canvas = () => {
                 }}
               >
                 <span className="absolute left-1/2 -translate-x-1/2 -top-5 px-1 text-xs text-teal-600">
-                  {wallWidth} m
+                  {parseFloat((Math.floor(wallWidth * 1000) / 1000).toString())}{" "}
+                  m
                 </span>
               </div>
 
@@ -815,21 +821,23 @@ export const Canvas = () => {
                 }}
               >
                 <span
-                  className="absolute top-1/2 -translate-y-1/2 -left-8 rotate-180 px-1 text-xs text-teal-600 whitespace-nowrap"
+                  className="absolute top-1/2 -translate-y-1/2 -left-5 rotate-180 px-1 text-xs text-teal-600 whitespace-nowrap"
                   style={{ writingMode: "vertical-lr" }}
                 >
-                  {wallHeight} m
+                  {parseFloat(
+                    (Math.floor(wallHeight * 1000) / 1000).toString()
+                  )}{" "}
+                  m
                 </span>
               </div>
             </>
           )}
-
           {configured && selectedModel
             ? renderCanvasPreview()
             : renderEmptyCanvas()}
         </div>
 
-        <div className="absolute bottom-2 right-2 w-auto p-3 text-xs text-white rounded-lg bg-black/40">
+        <div className="invisible lg:visible absolute bottom-2 right-2 w-auto p-3 text-xs text-white rounded-lg bg-black/40">
           <p>© 2025 MJ Solution Indonesia</p>
         </div>
       </div>

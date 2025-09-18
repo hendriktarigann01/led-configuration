@@ -132,51 +132,49 @@ export const ConfigurationModal = () => {
   };
 
   // Get all row data for expanded view
-const getAllRowData = (config, selectedDisplayType, selectedSubTypeId) => {
-  // Video Wall
-  if (selectedDisplayType?.name.includes("Video Wall")) {
-    return [
-      { label: "Inch", value: config.inch },
-      { label: "Bezel to Bezel", value: config.b2b },
-      { label: "Unit Size (mm)", value: config.unit_size_mm },
-      { label: "Brightness", value: config.brightness },
-    ];
-  }
+  const getAllRowData = (config, selectedDisplayType, selectedSubTypeId) => {
+    // Video Wall
+    if (selectedDisplayType?.name.includes("Video Wall")) {
+      return [
+        { label: "Inch", value: config.inch },
+        { label: "Bezel to Bezel", value: config.b2b },
+        { label: "Unit Size (mm)", value: config.unit_size_mm },
+        { label: "Brightness", value: config.brightness },
+      ];
+    }
 
-  // Outdoor
-  if (selectedDisplayType?.name.includes("Outdoor")) {
+    // Outdoor
+    if (selectedDisplayType?.name.includes("Outdoor")) {
+      return [
+        { label: "Pixel Pitch", value: config.pixel_pitch },
+        { label: "Cabinet Size", value: config.cabinet_size },
+        { label: "Module Weight", value: config.module_weight },
+        { label: "Brightness", value: config.brightness },
+        { label: "Refresh Rate", value: config.refresh_rate },
+      ];
+    }
+
+    // Indoor - PERBAIKAN: Format yang lebih baik untuk mobile
+    const moduleSize = config.module_size || "320*160mm";
+    const cabinetSize = config.cabinet_size || "640*480mm";
+
+    const combinedSize = config.cabinet_size
+      ? `${moduleSize} (Module), ${cabinetSize} (Cabinet)`
+      : `${moduleSize} (Module)`;
+
+    const moduleWeight = config.module_weight || "0.48kg/pcs";
+    const cabinetWeight = config.cabinet_weight || "7.8kg/pcs";
+
+    const combinedWeight = config.cabinet_weight
+      ? `${moduleWeight} (Module), ${cabinetWeight} (Cabinet)`
+      : `${moduleWeight} (Module)`;
+
     return [
-      { label: "Pixel Pitch", value: config.pixel_pitch },
-      { label: "Cabinet Size", value: config.cabinet_size },
-      { label: "Module Weight", value: config.module_weight },
+      { label: "Weight", value: combinedWeight },
       { label: "Brightness", value: config.brightness },
       { label: "Refresh Rate", value: config.refresh_rate },
     ];
-  }
-
-  // Indoor - PERBAIKAN: Format yang lebih baik untuk mobile
-  const moduleSize = config.module_size || "320*160mm";
-  const cabinetSize = config.cabinet_size || "640*480mm";
-
-  const combinedSize = config.cabinet_size
-    ? `${moduleSize} (Module), ${cabinetSize} (Cabinet)`
-    : `${moduleSize} (Module)`;
-
-  const moduleWeight = config.module_weight || "0.48kg/pcs";
-  const cabinetWeight = config.cabinet_weight || "7.8kg/pcs";
-
-  const combinedWeight = config.cabinet_weight
-    ? `${moduleWeight} (Module), ${cabinetWeight} (Cabinet)`
-    : `${moduleWeight} (Module)`;
-
-  return [
-    { label: "Pixel Pitch", value: config.pixel_pitch },
-    { label: "Size", value: combinedSize },
-    { label: "Weight", value: combinedWeight },
-    { label: "Brightness", value: config.brightness },
-    { label: "Refresh Rate", value: config.refresh_rate },
-  ];
-};
+  };
 
   // Modal Header Component
   const ModalHeader = () => (
@@ -266,14 +264,14 @@ const getAllRowData = (config, selectedDisplayType, selectedSubTypeId) => {
               {/* Title */}
               <div
                 className={`py-2 lg:w-[200px] rounded-md text-xs font-medium transition-colors
-                            ${
-                              type.id === selectedDisplayTypeId
-                                ? "lg:bg-[#3AAFA9] lg:text-white text-gray-600"
-                                : "text-gray-600"
-                            }
-                          `}
+              ${
+                type.id === selectedDisplayTypeId
+                  ? "lg:bg-[#3AAFA9] lg:text-white text-gray-600"
+                  : "text-gray-600"
+              }
+            `}
               >
-                {type.name}
+                {type.id === 1 ? "Indoor LED Fixed" : type.name}
               </div>
 
               {/* Description */}
@@ -308,7 +306,7 @@ const getAllRowData = (config, selectedDisplayType, selectedSubTypeId) => {
               className="p-4 rounded-lg bg-white cursor-pointer"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-40 h-auto mb-3 flex items-center justify-center">
+                <div className="w-32 lg:w-40 h-auto mb-3 flex items-center justify-center">
                   <img src={item.image} alt={`${item.name}-Image`} />
                 </div>
                 <div className="flex items-center gap-2">
@@ -408,7 +406,7 @@ const getAllRowData = (config, selectedDisplayType, selectedSubTypeId) => {
                     ).map((data, dataIndex) => (
                       <td
                         key={dataIndex}
-                        className="py-0 lg:p-3 w-32 text-[11px] lg:text-xs text-gray-700 whitespace-pre-line"
+                        className="py-0 px-3 lg:p-3 w-32 text-[10px] lg:text-xs text-gray-700 whitespace-pre-line"
                       >
                         {data}
                       </td>
@@ -449,7 +447,7 @@ const getAllRowData = (config, selectedDisplayType, selectedSubTypeId) => {
                           ).length + 1
                         }
                       >
-                        <div className="px-2 rounded-lg mb-2">
+                        <div className="px-3 rounded-lg mb-2">
                           <div className="grid grid-cols-1 gap-2">
                             {getAllRowData(
                               config,
@@ -457,10 +455,10 @@ const getAllRowData = (config, selectedDisplayType, selectedSubTypeId) => {
                               selectedSubTypeId
                             ).map((item, itemIndex) => (
                               <div key={itemIndex} className="flex">
-                                <span className="text-[11px] w-[145px] py-1 text-gray-700">
+                                <span className="text-[10px] w-[145px] py-1 text-gray-700">
                                   {item.label}:
                                 </span>
-                                <span className="text-[11px] w-[145px] py-1 text-gray-700">
+                                <span className="text-[10px] w-[145px] py-1 text-gray-700">
                                   {item.value}
                                 </span>
                               </div>

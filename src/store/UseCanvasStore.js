@@ -38,10 +38,20 @@ export const UseCanvasStore = create((set, get) => ({
   setWallSize: (width, height) => {
     const calculator = UseCalculatorStore.getState();
     const validated = calculator.validateWallSize(width, height);
+    const { screenWidth, screenHeight } = get();
+
+    // Get actual screen size to compare with wall
+    const actualScreenSize = get().getActualScreenSize();
 
     // Ensure minimum wall size is 1m x 1m
-    const finalWidth = Math.max(1, validated.width);
-    const finalHeight = Math.max(1, validated.height);
+    let finalWidth = Math.max(1, validated.width);
+    let finalHeight = Math.max(1, validated.height);
+
+    // Wall must be larger than or equal to screen size (exact match allowed)
+    if (screenWidth > 0 && screenHeight > 0) {
+      finalWidth = Math.max(finalWidth, actualScreenSize.width);
+      finalHeight = Math.max(finalHeight, actualScreenSize.height);
+    }
 
     set({
       wallWidth: finalWidth,
@@ -107,14 +117,20 @@ export const UseCanvasStore = create((set, get) => ({
 
     if (isFirstConfiguration) {
       // First time configuration - use single unit
+      const newScreenWidth = newDimensions.width;
+      const newScreenHeight = newDimensions.height;
+
+      // Ensure wall is larger than screen (minimum buffer for practical installation)
+      const minWallWidth = Math.max(5, newScreenWidth + 0.5);
+      const minWallHeight = Math.max(3, newScreenHeight + 0.5);
+
       set({
         baseWidth: newDimensions.width,
         baseHeight: newDimensions.height,
-        screenWidth: newDimensions.width,
-        screenHeight: newDimensions.height,
-        // Ensure wall defaults are maintained
-        wallWidth: Math.max(5, currentState.wallWidth),
-        wallHeight: Math.max(3, currentState.wallHeight),
+        screenWidth: newScreenWidth,
+        screenHeight: newScreenHeight,
+        wallWidth: Math.max(currentState.wallWidth, minWallWidth),
+        wallHeight: Math.max(currentState.wallHeight, minWallHeight),
       });
     } else {
       // Model change - maintain current cabinet count
@@ -131,7 +147,7 @@ export const UseCanvasStore = create((set, get) => ({
         baseHeight: newDimensions.height,
         screenWidth: newScreenWidth,
         screenHeight: newScreenHeight,
-        // Keep existing wall dimensions
+        // Keep existing wall dimensions - don't auto-resize
         wallWidth: currentState.wallWidth,
         wallHeight: currentState.wallHeight,
       });

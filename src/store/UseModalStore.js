@@ -18,20 +18,40 @@ export const UseModalStore = create((set, get) => ({
   // Selected model configuration
   selectedModel: null,
 
-  // Get display types from model data
+  // Get display types from model data - filter out module data (ID 2)
   getDisplayTypes: () => {
-    return model.map((item) => ({
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      data: item.data,
-    }));
+    return model
+      .filter((item) => item.id !== 2) // Exclude module data, only show cabinet
+      .map((item) => ({
+        id: item.id === 1 ? 1 : item.id, // Indoor LED will always be ID 1
+        name: item.id === 1 ? "Indoor LED Fixed" : item.name,
+        description: item.description,
+        data: item.data,
+      }));
   },
 
   getSelectedTypeConfigurations: () => {
-    const { selectedDisplayTypeId } = get();
+    const { selectedDisplayTypeId, selectedSubTypeId } = get();
     if (!selectedDisplayTypeId) return [];
 
+    // For Indoor LED, return data based on subtype selection
+    if (selectedDisplayTypeId === 1) {
+      if (selectedSubTypeId === 1) {
+        // Cabinet - ID 1
+        const selectedType = model.find((item) => item.id === 1);
+        return selectedType ? selectedType.data : [];
+      } else if (selectedSubTypeId === 2) {
+        // Module - ID 2
+        const selectedType = model.find((item) => item.id === 2);
+        return selectedType ? selectedType.data : [];
+      } else {
+        // No subtype selected, return cabinet data as default
+        const selectedType = model.find((item) => item.id === 1);
+        return selectedType ? selectedType.data : [];
+      }
+    }
+
+    // For other display types
     const selectedType = model.find(
       (item) => item.id === selectedDisplayTypeId
     );
@@ -42,6 +62,16 @@ export const UseModalStore = create((set, get) => ({
   getSelectedDisplayType: () => {
     const { selectedDisplayTypeId } = get();
     if (!selectedDisplayTypeId) return null;
+
+    // For Indoor LED, always return the generic info
+    if (selectedDisplayTypeId === 1) {
+      return {
+        id: 1,
+        name: "Indoor LED Fixed",
+        description:
+          "Suitable for indoor use with a modular and flexible design.",
+      };
+    }
 
     return model.find((item) => item.id === selectedDisplayTypeId);
   },
@@ -76,18 +106,37 @@ export const UseModalStore = create((set, get) => ({
   },
 
   selectSubType: (subTypeId) => {
-    let displayTypeId = 1; // default Cabinet
-    if (subTypeId === 2) displayTypeId = 2; // Module
+    const { selectedModel } = get();
 
-    const typeData = model.find((item) => item.id === displayTypeId);
+    // Ketika subtype berubah, reset selectedModel karena kita pindah antara cabinet dan module
+    // yang memiliki struktur data berbeda
+    let newSelectedModel = null;
+
+    // Jika ada model yang sudah dipilih sebelumnya, coba cari yang pixel pitch sama
+    if (selectedModel && selectedModel.pixel_pitch) {
+      const targetDataId = subTypeId === 1 ? 1 : 2; // 1 for Cabinet, 2 for Module
+      const targetType = model.find((item) => item.id === targetDataId);
+
+      if (targetType) {
+        // Cari model dengan pixel pitch yang sama
+        newSelectedModel = targetType.data.find(
+          (item) => item.pixel_pitch === selectedModel.pixel_pitch
+        );
+      }
+    }
+
+    console.log(
+      "Switching to subtype:",
+      subTypeId === 1 ? "Cabinet" : "Module"
+    );
+    console.log("New selected model:", newSelectedModel);
 
     set({
       selectedSubTypeId: subTypeId,
-      selectedDisplayTypeId: displayTypeId,
-      selectedModel:
-        typeData && typeData.data.length > 0 ? typeData.data[0] : null,
+      selectedModel: newSelectedModel,
     });
   },
+
   selectModel: (model) =>
     set({
       selectedModel: model,
@@ -142,10 +191,20 @@ export const UseModalStore = create((set, get) => ({
     } = get();
     const displayType = getSelectedDisplayType();
 
+    console.log("=== CONFIRM SELECTION DEBUG ===");
+    console.log("selectedDisplayTypeId:", selectedDisplayTypeId);
+    console.log("selectedSubTypeId:", selectedSubTypeId);
+    console.log("selectedModel:", selectedModel);
+    console.log(
+      "Model type:",
+      selectedModel?.cabinet_size ? "Cabinet" : "Module"
+    );
+
     // Pastikan semua data yang diperlukan sudah dipilih
     if (selectedDisplayTypeId && selectedModel && displayType) {
       // For Indoor LED, subtype harus dipilih
       if (selectedDisplayTypeId === 1 && !selectedSubTypeId) {
+        console.log("Missing subtype for Indoor LED");
         return; // Jangan konfirmasi jika subtype belum dipilih
       }
 
@@ -175,14 +234,18 @@ export const UseModalStore = create((set, get) => ({
         displayName = `${displayType.name} - ${subTypeName}`;
       }
 
-      navbarStore.setSelectedModel({
+      const finalData = {
         name: displayName,
         code: modelCode,
         image: imagePath,
         displayTypeId: selectedDisplayTypeId,
         subTypeId: selectedSubTypeId,
         modelData: selectedModel,
-      });
+      };
+
+      console.log("Final data being sent to navbar:", finalData);
+
+      navbarStore.setSelectedModel(finalData);
 
       // Close modal after confirmation
       closeModal();

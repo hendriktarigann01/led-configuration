@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileDown, Eye, Info } from "lucide-react";
+import { FileDown, Eye } from "lucide-react";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseExportStore } from "../store/UseExportStore";
@@ -60,7 +60,7 @@ export const Header = () => {
   const actualScreenSize = getActualScreenSize();
   const cabinetCount = getCabinetCount();
 
-  // Validation rules - Wall always bigger than Screen
+  // Validation rules - Wall must be >= Screen (exact match allowed)
   const canIncreaseScreenWidth =
     actualScreenSize.width + baseWidth <= wallWidth;
   const canDecreaseScreenWidth = actualScreenSize.width > baseWidth;
@@ -77,16 +77,98 @@ export const Header = () => {
     canDecreaseScreenHeight && cabinetCount.vertical > 1;
 
   // Wall validation - wall can be reduced to match screen size but minimum 1m
-  const canIncreaseWallWidth = true; // Wall can always increase
-  const canDecreaseWallWidth = wallWidth > Math.max(1, actualScreenSize.width); // Can decrease until wall = screen size or 1m, whichever is larger
-  const canIncreaseWallHeight = true; // Wall can always increase
+  const canIncreaseWallWidth = true;
+  const canDecreaseWallWidth = wallWidth > Math.max(1, actualScreenSize.width);
+  const canIncreaseWallHeight = true;
   const canDecreaseWallHeight =
-    wallHeight > Math.max(1, actualScreenSize.height); // Can decrease until wall = screen size or 1m, whichever is larger
+    wallHeight > Math.max(1, actualScreenSize.height);
+
   const screenControlsEnabled = isScreenControlsEnabled();
   const wallControlsEnabled = isWallControlsEnabled();
-  // Check if controls are interactive based on resolution mode
   const isCustomMode = resolution === "Custom";
   const controlsDisabled = !screenControlsEnabled || !isCustomMode;
+
+  // Validation for manual input - check if input value will exceed wall limits
+  const validateScreenInput = (value, type) => {
+    if (type === "width") {
+      const maxWidth = Math.floor(wallWidth / baseWidth) * baseWidth;
+      return Math.min(value, maxWidth);
+    } else {
+      const maxHeight = Math.floor(wallHeight / baseHeight) * baseHeight;
+      return Math.min(value, maxHeight);
+    }
+  };
+
+  // Enhanced manual input handlers
+  const handleScreenWidthChange = (value) => {
+    if (!isCustomMode) return;
+    const validatedValue = validateScreenInput(value, "width");
+    setScreenWidth(validatedValue);
+  };
+
+  const handleScreenHeightChange = (value) => {
+    if (!isCustomMode) return;
+    const validatedValue = validateScreenInput(value, "height");
+    setScreenHeight(validatedValue);
+  };
+
+  // Enhanced manual input handlers for cabinet count
+  const handleCabinetWidthChange = (value) => {
+    if (!isCustomMode) return;
+
+    const newCabinetCount = Math.round(Math.max(1, value));
+    const maxColumns = Math.floor(wallWidth / baseWidth);
+    const validatedCount = Math.min(newCabinetCount, maxColumns);
+
+    const newScreenWidth = validatedCount * baseWidth;
+    setScreenWidth(newScreenWidth);
+  };
+
+  const handleCabinetHeightChange = (value) => {
+    if (!isCustomMode) return;
+
+    const newCabinetCount = Math.round(Math.max(1, value));
+    const maxRows = Math.floor(wallHeight / baseHeight);
+    const validatedCount = Math.min(newCabinetCount, maxRows);
+
+    const newScreenHeight = validatedCount * baseHeight;
+    setScreenHeight(newScreenHeight);
+  };
+
+  // Calculate maximum possible screen dimensions based on current wall
+  const getMaxScreenDimensions = () => {
+    const maxWidth = Math.floor(wallWidth / baseWidth) * baseWidth;
+    const maxHeight = Math.floor(wallHeight / baseHeight) * baseHeight;
+    return { maxWidth, maxHeight };
+  };
+
+  // Calculate maximum cabinet count
+  const getMaxCabinetCount = () => {
+    const maxColumns = Math.floor(wallWidth / baseWidth);
+    const maxRows = Math.floor(wallHeight / baseHeight);
+    return { maxColumns, maxRows };
+  };
+
+  // Enhanced increment handlers - removed warning, just prevent increment
+  const handleScreenWidthIncrement = () => {
+    if (!canIncreaseScreenWidth) return;
+    incrementScreenWidth();
+  };
+
+  const handleScreenHeightIncrement = () => {
+    if (!canIncreaseScreenHeight) return;
+    incrementScreenHeight();
+  };
+
+  const handleCabinetWidthIncrement = () => {
+    if (!canIncreaseCabinetWidth) return;
+    incrementCabinetWidth();
+  };
+
+  const handleCabinetHeightIncrement = () => {
+    if (!canIncreaseCabinetHeight) return;
+    incrementCabinetHeight();
+  };
 
   const NumberInput = ({
     label,
@@ -127,8 +209,7 @@ export const Header = () => {
           step={step}
           disabled={disabled || isInteger || !isCustomMode}
           className={`w-full text-center border-none outline-none text-xs
-                      appearance-none
-                      [appearance:textfield]
+                     
                       [&::-webkit-inner-spin-button]:appearance-none
                       [&::-webkit-outer-spin-button]:appearance-none
                       ${
@@ -219,14 +300,14 @@ export const Header = () => {
 
             <div className="flex gap-5 lg:gap-0 lg:flex-row lg:items-end space-y-4 lg:space-y-0 lg:space-x-6">
               {isCabinetMode ? (
-                // Cabinet Mode - Show cabinet counts
+                // Cabinet Mode - Show cabinet counts with enhanced handlers
                 <>
                   <NumberInput
                     label="Column Count"
                     value={cabinetCount.horizontal}
-                    onIncrement={incrementCabinetWidth}
+                    onIncrement={handleCabinetWidthIncrement}
                     onDecrement={decrementCabinetWidth}
-                    onChange={() => {}} // No direct input for cabinet count
+                    onChange={handleCabinetWidthChange} // Tambahkan fungsi ini
                     disabled={controlsDisabled}
                     canIncrease={canIncreaseCabinetWidth && isCustomMode}
                     canDecrease={canDecreaseCabinetWidth && isCustomMode}
@@ -236,9 +317,9 @@ export const Header = () => {
                   <NumberInput
                     label="Row Count"
                     value={cabinetCount.vertical}
-                    onIncrement={incrementCabinetHeight}
+                    onIncrement={handleCabinetHeightIncrement}
                     onDecrement={decrementCabinetHeight}
-                    onChange={() => {}} // No direct input for cabinet count
+                    onChange={handleCabinetHeightChange} // Tambahkan fungsi ini
                     disabled={controlsDisabled}
                     canIncrease={canIncreaseCabinetHeight && isCustomMode}
                     canDecrease={canDecreaseCabinetHeight && isCustomMode}
@@ -247,14 +328,14 @@ export const Header = () => {
                   />
                 </>
               ) : (
-                // Area Mode - Show screen dimensions in meters
+                // Area Mode - Show screen dimensions with enhanced handlers
                 <>
                   <NumberInput
                     label="Screen Width(m)"
                     value={screenWidth}
-                    onIncrement={incrementScreenWidth}
+                    onIncrement={handleScreenWidthIncrement}
                     onDecrement={decrementScreenWidth}
-                    onChange={setScreenWidth}
+                    onChange={handleScreenWidthChange}
                     disabled={controlsDisabled}
                     canIncrease={canIncreaseScreenWidth && isCustomMode}
                     canDecrease={canDecreaseScreenWidth && isCustomMode}
@@ -263,9 +344,9 @@ export const Header = () => {
                   <NumberInput
                     label="Screen Height(m)"
                     value={screenHeight}
-                    onIncrement={incrementScreenHeight}
+                    onIncrement={handleScreenHeightIncrement}
                     onDecrement={decrementScreenHeight}
-                    onChange={setScreenHeight}
+                    onChange={handleScreenHeightChange}
                     disabled={controlsDisabled}
                     canIncrease={canIncreaseScreenHeight && isCustomMode}
                     canDecrease={canDecreaseScreenHeight && isCustomMode}

@@ -125,21 +125,17 @@ export const UseHeaderStore = create((set, get) => ({
 
       canvasStore.setScreenSize(screenSize.width, screenSize.height);
 
-      // Auto-adjust wall size if needed
+      // Auto-adjust wall size untuk FHD/UHD - dibulatkan ke atas
       const currentState = get();
-      const minWallWidth = Math.max(5, screenSize.width + 2);
-      const minWallHeight = Math.max(3, screenSize.height + 1.5);
+      const requiredWallWidth = Math.ceil(screenSize.width);
+      const requiredWallHeight = Math.ceil(screenSize.height);
 
-      let newWallWidth = currentState.wallWidth;
-      let newWallHeight = currentState.wallHeight;
-
-      if (currentState.wallWidth < minWallWidth) {
-        newWallWidth = minWallWidth;
-      }
-
-      if (currentState.wallHeight < minWallHeight) {
-        newWallHeight = minWallHeight;
-      }
+      // Update wall size jika lebih kecil dari screen
+      const newWallWidth = Math.max(currentState.wallWidth, requiredWallWidth);
+      const newWallHeight = Math.max(
+        currentState.wallHeight,
+        requiredWallHeight
+      );
 
       if (
         newWallWidth !== currentState.wallWidth ||
@@ -152,7 +148,7 @@ export const UseHeaderStore = create((set, get) => ({
         canvasStore.setWallSize(newWallWidth, newWallHeight);
       }
     } else {
-      // Custom mode - sync with canvas
+      // Custom mode - sync dengan canvas seperti biasa
       const canvasStore = UseCanvasStore.getState();
       const actualScreenSize = canvasStore.getActualScreenSize();
       const currentState = get();
@@ -166,37 +162,33 @@ export const UseHeaderStore = create((set, get) => ({
           screenHeight: actualScreenSize.height,
         });
       }
-
-      // Validate wall size - allow wall to match screen size but minimum 1m
-      const minWallWidth = Math.max(1, actualScreenSize.width);
-      const minWallHeight = Math.max(1, actualScreenSize.height);
-
-      if (
-        currentState.wallWidth < minWallWidth ||
-        currentState.wallHeight < minWallHeight
-      ) {
-        const newWallWidth = Math.max(currentState.wallWidth, minWallWidth);
-        const newWallHeight = Math.max(currentState.wallHeight, minWallHeight);
-
-        set({
-          wallWidth: newWallWidth,
-          wallHeight: newWallHeight,
-        });
-        canvasStore.setWallSize(newWallWidth, newWallHeight);
-      }
     }
-  },
+  },  
 
   setScreenHeight: (height) => {
     const canvasStore = UseCanvasStore.getState();
-    set({ screenHeight: height });
-    canvasStore.setScreenSize(get().screenWidth, height);
+    const { baseHeight } = canvasStore;
+    const { wallHeight } = get();
+
+    // Validate against wall size
+    const maxHeight = Math.floor(wallHeight / baseHeight) * baseHeight;
+    const validatedHeight = Math.min(height, maxHeight);
+
+    set({ screenHeight: validatedHeight });
+    canvasStore.setScreenSize(get().screenWidth, validatedHeight);
   },
 
   setScreenWidth: (width) => {
     const canvasStore = UseCanvasStore.getState();
-    set({ screenWidth: width });
-    canvasStore.setScreenSize(width, get().screenHeight);
+    const { baseWidth } = canvasStore;
+    const { wallWidth } = get();
+
+    // Validate against wall size
+    const maxWidth = Math.floor(wallWidth / baseWidth) * baseWidth;
+    const validatedWidth = Math.min(width, maxWidth);
+
+    set({ screenWidth: validatedWidth });
+    canvasStore.setScreenSize(validatedWidth, get().screenHeight);
   },
 
   setWallWidth: (width) => {
@@ -299,7 +291,9 @@ export const UseHeaderStore = create((set, get) => ({
 
   decrementWallHeight: () => {
     const state = get();
-    const minHeight = 1; // Changed from 3 to 1
+    const canvasStore = UseCanvasStore.getState();
+    const actualScreenSize = canvasStore.getActualScreenSize();
+    const minHeight = Math.max(1, actualScreenSize.height); // Wall can't be smaller than screen
     const newHeight = Math.max(
       minHeight,
       Number((state.wallHeight - 0.5).toFixed(1))
@@ -315,7 +309,9 @@ export const UseHeaderStore = create((set, get) => ({
 
   decrementWallWidth: () => {
     const state = get();
-    const minWidth = 1; // Changed from 5 to 1
+    const canvasStore = UseCanvasStore.getState();
+    const actualScreenSize = canvasStore.getActualScreenSize();
+    const minWidth = Math.max(1, actualScreenSize.width); // Wall can't be smaller than screen
     const newWidth = Math.max(
       minWidth,
       Number((state.wallWidth - 0.5).toFixed(1))

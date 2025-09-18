@@ -38,7 +38,7 @@ export const CanvasUtils = {
     return { effectiveCanvasWidth, effectiveCanvasHeight };
   },
 
-  // Calculate image dimensions based on screen to wall ratio
+  // FIXED: Calculate image dimensions with proper constraints
   getImageDimensions: (
     actualScreenSize,
     wallWidth,
@@ -46,17 +46,41 @@ export const CanvasUtils = {
     effectiveCanvasWidth,
     effectiveCanvasHeight
   ) => {
+    // Calculate screen-to-wall ratios
     const screenToWallRatioX = actualScreenSize.width / wallWidth;
     const screenToWallRatioY = actualScreenSize.height / wallHeight;
 
-    const imageWidth = Math.min(
-      effectiveCanvasWidth * screenToWallRatioX,
-      effectiveCanvasWidth * 1.5
-    );
-    const imageHeight = Math.min(
-      effectiveCanvasHeight * screenToWallRatioY,
-      effectiveCanvasHeight * 1.5
-    );
+    // Calculate ideal image dimensions based on screen-to-wall ratio
+    const idealImageWidth = effectiveCanvasWidth * screenToWallRatioX;
+    const idealImageHeight = effectiveCanvasHeight * screenToWallRatioY;
+
+    // CRITICAL FIX: Ensure screen never exceeds canvas bounds
+    // Add safety margins to prevent visual overflow
+    const safetyMargin = 0.95; // 5% safety margin
+    const maxAllowedWidth = effectiveCanvasWidth * safetyMargin;
+    const maxAllowedHeight = effectiveCanvasHeight * safetyMargin;
+
+    // Constrain to canvas bounds with safety margin
+    let imageWidth = Math.min(idealImageWidth, maxAllowedWidth);
+    let imageHeight = Math.min(idealImageHeight, maxAllowedHeight);
+
+    // Additional constraint: maintain aspect ratio if one dimension hits the limit
+    const screenAspectRatio = actualScreenSize.width / actualScreenSize.height;
+
+    if (imageWidth >= maxAllowedWidth) {
+      // Width is constrained, adjust height to maintain aspect ratio
+      imageHeight = Math.min(imageWidth / screenAspectRatio, maxAllowedHeight);
+    }
+
+    if (imageHeight >= maxAllowedHeight) {
+      // Height is constrained, adjust width to maintain aspect ratio
+      imageWidth = Math.min(imageHeight * screenAspectRatio, maxAllowedWidth);
+    }
+
+    // Final safety check - ensure minimum visible size
+    const minSize = 20; // Minimum 20px for visibility
+    imageWidth = Math.max(imageWidth, minSize);
+    imageHeight = Math.max(imageHeight, minSize);
 
     return { imageWidth, imageHeight };
   },
@@ -180,7 +204,7 @@ export const CanvasUtils = {
 
         {/* Vertical Left Measure */}
         <div
-          className="absolute top-0 left-[1px] border-l border-dashed z-50 border-teal-400 pointer-events-none"
+          className="absolute top-0 left-[0px] border-l border-dashed z-50 border-teal-400 pointer-events-none"
           style={{
             transform: transformValues.verticalLeft,
             height: `${verticalMeasureLength + verticalExtension}px`,
@@ -272,7 +296,7 @@ export const CanvasUtils = {
           style={{
             bottom:
               deviceType === "mobile"
-                ? "36px"
+                ? "51px"
                 : deviceType === "tablet"
                 ? "36px"
                 : "51px",
@@ -287,7 +311,7 @@ export const CanvasUtils = {
           style={{
             top:
               deviceType === "mobile"
-                ? "36px"
+                ? "50px"
                 : deviceType === "tablet"
                 ? "36px"
                 : "50px",
@@ -302,7 +326,7 @@ export const CanvasUtils = {
           style={{
             right:
               deviceType === "mobile"
-                ? "50px"
+                ? "46px"
                 : deviceType === "tablet"
                 ? "52px"
                 : "52px",
@@ -317,7 +341,7 @@ export const CanvasUtils = {
           style={{
             left:
               deviceType === "mobile"
-                ? "50px"
+                ? "45px"
                 : deviceType === "tablet"
                 ? "52px"
                 : "50px",
@@ -402,7 +426,7 @@ export const CanvasUtils = {
     // Adjust positioning and spacing based on device
     const leftPosition = deviceType === "mobile" ? "left-12" : "left-13";
     const rightPosition = deviceType === "mobile" ? "right-0" : "right-1";
-    const bottomPosition = deviceType === "mobile" ? "bottom-0.5" : "bottom-1";
+    const bottomPosition = deviceType === "mobile" ? "bottom-5" : "bottom-1";
 
     return (
       <>
@@ -434,7 +458,7 @@ export const CanvasUtils = {
     switch (deviceType) {
       case "mobile":
         rightPosition = "-right-27";
-        bottomPosition = "bottom-8";
+        bottomPosition = "bottom-12";
         maxWidth = "50px";
         break;
       case "tablet":
@@ -443,16 +467,16 @@ export const CanvasUtils = {
         maxWidth = "65px";
         break;
       default: // desktop
-        rightPosition = "-right-22";
-        bottomPosition = "bottom-8";
+        rightPosition = "-right-35";
+        bottomPosition = "bottom-10";
         maxWidth = "80px";
     }
 
     return (
       <div
-        className={`absolute ${rightPosition} ${bottomPosition} z-50`}
+        className={`absolute ${rightPosition} ${bottomPosition} z-[999]`}
         style={{
-          width: "150px",
+          width: "200px",
           height: "auto",
           alignItems: "flex-end",
         }}
@@ -463,9 +487,9 @@ export const CanvasUtils = {
             alt={`Human Scale Reference (1.7m) - ${(
               humanToWallRatio * 100
             ).toFixed(1)}% of wall`}
+            className={`${finalHumanHeight > 200 ? "hidden" : "block"} w-full`}
             style={{
               height: `${finalHumanHeight}px`,
-              width: "100%",
               objectFit: "contain",
               maxWidth: maxWidth,
             }}

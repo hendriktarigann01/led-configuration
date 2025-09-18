@@ -274,7 +274,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
                     {getWeightLabel()}
                   </h4>
                   <p className="text-sm lg:text-base text-gray-600">
-                    {totalWeight > 0 ? `${totalWeight.toFixed(0)} kg` : "N/A"}
+                    {totalWeight > 0 ? `${totalWeight} kg` : "N/A"}
                   </p>
                 </div>
               </div>

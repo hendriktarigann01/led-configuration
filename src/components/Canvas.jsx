@@ -1,15 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import {
-  CirclePlus,
-  Plus,
-  Minus,
-  Move,
-  RotateCcw,
-  ZoomIn,
-  ZoomOut,
-  RotateCw,
-  X,
-} from "lucide-react";
+import { CirclePlus, Plus, Minus, X } from "lucide-react";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseModalStore } from "../store/UseModalStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
@@ -30,28 +20,25 @@ export const Canvas = () => {
   } = UseNavbarStore();
   const headerStore = UseHeaderStore();
 
-  // Image positioning state (enhanced version)
+  // Image positioning state (simplified)
   const [imageSettings, setImageSettings] = useState({
-    x: 50, // percentage
-    y: 50, // percentage
-    scale: 1, // 0.5 to 3
-    rotation: 0, // degrees
+    x: 50,
+    y: 50,
+    scale: 1,
     isDragging: false,
     dragStart: { x: 0, y: 0 },
   });
-  const [showImageControls, setShowImageControls] = useState(false);
-  const [aspectRatioLocked, setAspectRatioLocked] = useState(true);
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Size warning modal state
+  const [showSizeWarning, setShowSizeWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState("");
 
   // Refs
   const canvasRef = useRef(null);
-  const imageRef = useRef(null);
 
-  // Destructure canvas store
+  // Destructure stores
   const {
-    canvasWidth,
-    canvasHeight,
-    screenWidth,
-    screenHeight,
     wallWidth,
     wallHeight,
     baseWidth,
@@ -63,7 +50,6 @@ export const Canvas = () => {
     isConfigured,
   } = canvasStore;
 
-  // Destructure header store
   const {
     syncWithCanvas,
     incrementScreenWidth,
@@ -74,13 +60,14 @@ export const Canvas = () => {
     resolution,
     getResolutionInfo,
     resetToDefaults,
+    screenSize,
+    getCabinetCount: getHeaderCabinetCount,
   } = headerStore;
 
   // Initialize model data when selected
   useEffect(() => {
     if (selectedModel?.modelData) {
       updateModelData(selectedModel.modelData, selectedModel.name);
-
       setTimeout(() => {
         initializeDefaults();
         syncWithCanvas();
@@ -88,52 +75,43 @@ export const Canvas = () => {
     }
   }, [selectedModel, updateModelData, syncWithCanvas, initializeDefaults]);
 
-  // Show/hide image controls based on room image
+  // Reset image settings when room image changes
   useEffect(() => {
     if (roomImageUrl) {
-      setShowImageControls(true);
-      // Reset to center when new image is loaded
       setImageSettings((prev) => ({
         ...prev,
         x: 50,
         y: 50,
         scale: 1,
-        rotation: 0,
       }));
-    } else {
-      setShowImageControls(false);
     }
   }, [roomImageUrl]);
 
-  // Dynamic Canvas Size Calculator
+  // FIXED: Improved Dynamic Canvas Size Calculator
   const getDynamicCanvasSize = () => {
     const maxWidth =
       window.innerWidth < 768 ? 300 : window.innerWidth < 1024 ? 450 : 550;
     const maxHeight =
       window.innerWidth < 768 ? 180 : window.innerWidth < 1024 ? 250 : 300;
 
-    // Calculate aspect ratio from wall dimensions
+    // Calculate wall aspect ratio
     const wallAspectRatio = wallWidth / wallHeight;
 
-    // Calculate canvas size maintaining wall aspect ratio
     let canvasW, canvasH;
 
+    // Determine canvas size based on wall dimensions
     if (wallAspectRatio >= 1) {
-      // Landscape or square - limit by width
+      // Wall is wider than tall
       canvasW = Math.min(maxWidth, maxWidth);
       canvasH = canvasW / wallAspectRatio;
-
-      // If height exceeds max, scale down
       if (canvasH > maxHeight) {
         canvasH = maxHeight;
         canvasW = canvasH * wallAspectRatio;
       }
     } else {
-      // Portrait - limit by height
+      // Wall is taller than wide
       canvasH = Math.min(maxHeight, maxHeight);
       canvasW = canvasH * wallAspectRatio;
-
-      // If width exceeds max, scale down
       if (canvasW > maxWidth) {
         canvasW = maxWidth;
         canvasH = canvasW / wallAspectRatio;
@@ -146,36 +124,41 @@ export const Canvas = () => {
     };
   };
 
-  // Get dynamic canvas dimensions
   const dynamicCanvas = getDynamicCanvasSize();
 
-  // Image interaction handlers
-  const handleImageMouseDown = (e) => {
-    if (!roomImageUrl) return;
+  // Touch and Mouse handlers (unified for mobile and desktop)
+  const getPointerPosition = (e) => {
+    const rect = canvasRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+    };
+  };
 
+  const handlePointerDown = (e) => {
+    if (!roomImageUrl) return;
     e.preventDefault();
     e.stopPropagation();
 
-    const rect = canvasRef.current.getBoundingClientRect();
-    const startX = e.clientX - rect.left;
-    const startY = e.clientY - rect.top;
-
+    const position = getPointerPosition(e);
     setImageSettings((prev) => ({
       ...prev,
       isDragging: true,
-      dragStart: { x: startX, y: startY },
+      dragStart: position,
     }));
+    setShowTutorial(true);
   };
 
-  const handleImageMouseMove = (e) => {
+  const handlePointerMove = (e) => {
     if (!imageSettings.isDragging || !roomImageUrl) return;
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const currentX = e.clientX - rect.left;
-    const currentY = e.clientY - rect.top;
+    const position = getPointerPosition(e);
 
-    const deltaX = currentX - imageSettings.dragStart.x;
-    const deltaY = currentY - imageSettings.dragStart.y;
+    const deltaX = position.x - imageSettings.dragStart.x;
+    const deltaY = position.y - imageSettings.dragStart.y;
 
     const newX = imageSettings.x + (deltaX / rect.width) * 100;
     const newY = imageSettings.y + (deltaY / rect.height) * 100;
@@ -184,89 +167,31 @@ export const Canvas = () => {
       ...prev,
       x: Math.max(-50, Math.min(150, newX)),
       y: Math.max(-50, Math.min(150, newY)),
-      dragStart: { x: currentX, y: currentY },
+      dragStart: position,
     }));
   };
 
-  const handleImageMouseUp = () => {
+  const handlePointerUp = () => {
     setImageSettings((prev) => ({
       ...prev,
       isDragging: false,
     }));
+    setShowTutorial(false);
   };
 
-  // Wheel zoom handler
-  const handleImageWheel = (e) => {
+  // Wheel zoom handler (slower zoom with minimum scale to cover canvas)
+  const handleWheel = (e) => {
     if (!roomImageUrl) return;
-
     e.preventDefault();
     e.stopPropagation();
 
-    const delta = e.deltaY > 0 ? -0.1 : 0.1;
-    const newScale = Math.max(0.5, Math.min(3, imageSettings.scale + delta));
+    const delta = e.deltaY > 0 ? -0.05 : 0.05; // Reduced from 0.1 to 0.05
+    // Set minimum scale to 1.0 so image always covers the canvas
+    const newScale = Math.max(1.0, Math.min(3, imageSettings.scale + delta));
 
     setImageSettings((prev) => ({
       ...prev,
       scale: newScale,
-    }));
-  };
-
-  // Control handlers
-  const handleZoomIn = () => {
-    setImageSettings((prev) => ({
-      ...prev,
-      scale: Math.min(1, prev.scale + 0.1),
-    }));
-  };
-
-  const handleZoomOut = () => {
-    setImageSettings((prev) => ({
-      ...prev,
-      scale: Math.max(1, prev.scale - 0.1),
-    }));
-  };
-
-  const handleRotateLeft = () => {
-    setImageSettings((prev) => ({
-      ...prev,
-      rotation: (prev.rotation - 15) % 360,
-    }));
-  };
-
-  const handleRotateRight = () => {
-    setImageSettings((prev) => ({
-      ...prev,
-      rotation: (prev.rotation + 15) % 360,
-    }));
-  };
-
-  const resetImagePosition = () => {
-    setImageSettings((prev) => ({
-      ...prev,
-      x: 50,
-      y: 50,
-      scale: 1,
-      rotation: 0,
-    }));
-  };
-
-  const fitImageToCanvas = () => {
-    setImageSettings((prev) => ({
-      ...prev,
-      x: 50,
-      y: 50,
-      scale: 1,
-      rotation: 0,
-    }));
-  };
-
-  const fillCanvas = () => {
-    setImageSettings((prev) => ({
-      ...prev,
-      x: 50,
-      y: 50,
-      scale: 1.5,
-      rotation: 0,
     }));
   };
 
@@ -278,11 +203,71 @@ export const Canvas = () => {
 
   // Validation for control buttons
   const canIncreaseScreenWidth =
-    actualScreenSize.width + baseWidth + 0.2 <= wallWidth;
+    actualScreenSize.width + baseWidth <= wallWidth;
   const canDecreaseScreenWidth = actualScreenSize.width > baseWidth;
   const canIncreaseScreenHeight =
-    actualScreenSize.height + baseHeight + 0.2 <= wallHeight;
+    actualScreenSize.height + baseHeight <= wallHeight;
   const canDecreaseScreenHeight = actualScreenSize.height > baseHeight;
+
+  // Show size warning modal for screen size limits
+  const showMaxSizeWarning = (type, currentValue) => {
+    const isCabinetMode = screenSize === "Column/Row";
+
+    if (isCabinetMode) {
+      const currentCabinetCount = getHeaderCabinetCount();
+      if (type === "width") {
+        setWarningMessage(
+          `The maximum number of columns you can install is ${Math.floor(
+            wallWidth / baseWidth
+          )} columns with current wall width of ${wallWidth}m. Currently trying to set ${
+            currentCabinetCount.horizontal + 1
+          } columns.`
+        );
+      } else {
+        setWarningMessage(
+          `The maximum number of rows you can install is ${Math.floor(
+            wallHeight / baseHeight
+          )} rows with current wall height of ${wallHeight}m. Currently trying to set ${
+            currentCabinetCount.vertical + 1
+          } rows.`
+        );
+      }
+    } else {
+      if (type === "width") {
+        setWarningMessage(
+          `The maximum screen width you can install is ${
+            Math.floor(wallWidth / baseWidth) * baseWidth
+          }m with current wall width of ${wallWidth}m. Cannot set screen width to ${currentValue}m.`
+        );
+      } else {
+        setWarningMessage(
+          `The maximum screen height you can install is ${
+            Math.floor(wallHeight / baseHeight) * baseHeight
+          }m with current wall height of ${wallHeight}m. Cannot set screen height to ${currentValue}m.`
+        );
+      }
+    }
+    setShowSizeWarning(true);
+  };
+
+  // Enhanced increment handlers with warning
+  const handleScreenWidthIncrement = () => {
+    const newWidth = actualScreenSize.width + baseWidth;
+    if (newWidth > wallWidth) {
+      showMaxSizeWarning("width", newWidth);
+      return;
+    }
+    incrementScreenWidth();
+  };
+
+  const handleScreenHeightIncrement = () => {
+    const newHeight = actualScreenSize.height + baseHeight;
+    if (newHeight > wallHeight) {
+      showMaxSizeWarning("height", newHeight);
+      return;
+    }
+    incrementScreenHeight();
+  };
 
   // Complete reset function
   const handleCompleteReset = () => {
@@ -293,18 +278,18 @@ export const Canvas = () => {
       x: 50,
       y: 50,
       scale: 1,
-      rotation: 0,
       isDragging: false,
       dragStart: { x: 0, y: 0 },
     });
-    setShowImageControls(false);
+    setShowTutorial(false);
+    setShowSizeWarning(false);
   };
 
   // Screen control handlers
   const handleWidthIncrement = () => {
     if (!configured || !canIncreaseScreenWidth || resolution !== "Custom")
       return;
-    incrementScreenWidth();
+    handleScreenWidthIncrement();
   };
 
   const handleWidthDecrement = () => {
@@ -316,7 +301,7 @@ export const Canvas = () => {
   const handleHeightIncrement = () => {
     if (!configured || !canIncreaseScreenHeight || resolution !== "Custom")
       return;
-    incrementScreenHeight();
+    handleScreenHeightIncrement();
   };
 
   const handleHeightDecrement = () => {
@@ -325,7 +310,7 @@ export const Canvas = () => {
     decrementScreenHeight();
   };
 
-  // Use utility functions for calculations with dynamic canvas size
+  // FIXED: Improved calculations using CanvasUtils
   const { effectiveCanvasWidth, effectiveCanvasHeight } =
     CanvasUtils.getCanvasDimensions(
       wallWidth,
@@ -333,13 +318,20 @@ export const Canvas = () => {
       dynamicCanvas.width,
       dynamicCanvas.height
     );
-  const { imageWidth, imageHeight } = CanvasUtils.getImageDimensions(
-    actualScreenSize,
-    wallWidth,
-    wallHeight,
-    effectiveCanvasWidth,
-    effectiveCanvasHeight
-  );
+
+  // CRITICAL FIX: Calculate screen size based on actual canvas dimensions
+  const screenToWallRatioX = actualScreenSize.width / wallWidth;
+  const screenToWallRatioY = actualScreenSize.height / wallHeight;
+
+  // Calculate screen image size with proper constraints
+  const maxScreenWidth = dynamicCanvas.width * 0.9; // 90% of canvas width max
+  const maxScreenHeight = dynamicCanvas.height * 0.9; // 90% of canvas height max
+
+  const idealScreenWidth = dynamicCanvas.width * screenToWallRatioX;
+  const idealScreenHeight = dynamicCanvas.height * screenToWallRatioY;
+
+  const imageWidth = Math.min(idealScreenWidth, maxScreenWidth);
+  const imageHeight = Math.min(idealScreenHeight, maxScreenHeight);
 
   const {
     horizontalMeasureLength,
@@ -352,8 +344,8 @@ export const Canvas = () => {
     wallHeight,
     imageWidth,
     imageHeight,
-    effectiveCanvasWidth,
-    effectiveCanvasHeight
+    dynamicCanvas.width,
+    dynamicCanvas.height
   );
 
   const { finalHumanHeight, humanToWallRatio } =
@@ -387,152 +379,58 @@ export const Canvas = () => {
     </div>
   );
 
-  const renderImageControls = () => {
-    if (!roomImageUrl || !showImageControls) return null;
+  // Size Warning Modal Component
+  const SizeWarningModal = () => {
+    if (!showSizeWarning) return null;
 
     return (
-      <div className="absolute top-20 -left-80 z-40 bg-white rounded-lg shadow-lg border p-4 min-w-[280px]">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Move size={16} className="text-gray-600" />
-            <span className="text-sm font-medium text-gray-700">
-              Image Controls
-            </span>
-          </div>
-          <button
-            onClick={() => setShowImageControls(!showImageControls)}
-            className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-          >
-            Hide
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {/* Position Info */}
-          <div className="grid grid-cols-2 gap-4 text-xs">
-            <div>
-              <span className="text-gray-500">X: </span>
-              <span className="font-mono">{imageSettings.x.toFixed(1)}%</span>
-            </div>
-            <div>
-              <span className="text-gray-500">Y: </span>
-              <span className="font-mono">{imageSettings.y.toFixed(1)}%</span>
-            </div>
-          </div>
-
-          {/* Scale Controls */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-medium text-gray-600">
-                Scale: {Math.round(imageSettings.scale * 100)}%
-              </label>
-              <div className="flex space-x-1">
-                <button
-                  onClick={handleZoomOut}
-                  disabled={imageSettings.scale <= 0.5}
-                  className="p-1 text-gray-600 hover:bg-gray-100 rounded disabled:text-gray-300 disabled:cursor-not-allowed"
-                  title="Zoom Out"
-                >
-                  <ZoomOut size={14} />
-                </button>
-                <button
-                  onClick={handleZoomIn}
-                  disabled={imageSettings.scale >= 3}
-                  className="p-1 text-gray-600 hover:bg-gray-100 rounded disabled:text-gray-300 disabled:cursor-not-allowed"
-                  title="Zoom In"
-                >
-                  <ZoomIn size={14} />
-                </button>
-              </div>
-            </div>
-            <input
-              type="range"
-              min="0.5"
-              max="3"
-              step="0.1"
-              value={imageSettings.scale}
-              onChange={(e) =>
-                setImageSettings((prev) => ({
-                  ...prev,
-                  scale: parseFloat(e.target.value),
-                }))
-              }
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-            />
-          </div>
-
-          {/* Rotation Controls */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-medium text-gray-600">
-                Rotation: {imageSettings.rotation}°
-              </label>
-              <div className="flex space-x-1">
-                <button
-                  onClick={handleRotateLeft}
-                  className="p-1 text-gray-600 hover:bg-gray-100 rounded"
-                  title="Rotate Left"
-                >
-                  <RotateCcw size={14} />
-                </button>
-                <button
-                  onClick={handleRotateRight}
-                  className="p-1 text-gray-600 hover:bg-gray-100 rounded"
-                  title="Rotate Right"
-                >
-                  <RotateCw size={14} />
-                </button>
-              </div>
-            </div>
-            <input
-              type="range"
-              min="-180"
-              max="180"
-              step="15"
-              value={imageSettings.rotation}
-              onChange={(e) =>
-                setImageSettings((prev) => ({
-                  ...prev,
-                  rotation: parseInt(e.target.value),
-                }))
-              }
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-            />
-          </div>
-
-          {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-2">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-md mx-4">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="text-orange-500 text-xl"></div>
+            <h3 className="text-lg font-semibold text-gray-800">
+              Size Limitation
+            </h3>
             <button
-              onClick={fitImageToCanvas}
-              className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+              onClick={() => setShowSizeWarning(false)}
+              className="ml-auto text-gray-400 hover:text-gray-600"
             >
-              Fit to Canvas
-            </button>
-            <button
-              onClick={fillCanvas}
-              className="px-3 py-2 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-            >
-              Fill Canvas
+              <X size={20} />
             </button>
           </div>
 
-          {/* Reset Button */}
-          <button
-            onClick={resetImagePosition}
-            className="w-full flex items-center justify-center space-x-1 px-3 py-2 text-xs bg-[#3AAFA9] text-white hover:bg-teal-600 rounded transition-colors"
-          >
-            <RotateCcw size={12} />
-            <span>Reset Position</span>
-          </button>
+          <p className="text-gray-600 mb-4">{warningMessage}</p>
 
-          {/* Instructions */}
-          <div className="text-xs text-gray-500 pt-2 border-t">
-            <p>• Drag image to move</p>
-            <p>• Mouse wheel to zoom</p>
-            <p>• Use controls above for fine-tuning</p>
+          <div className="text-sm text-gray-500 mb-4">
+            To install a larger screen, please increase the wall dimensions
+            first.
+          </div>
+
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={() => setShowSizeWarning(false)}
+              className="px-4 py-2 bg-[#3AAFA9] text-white rounded hover:bg-teal-600 transition-colors"
+            >
+              Got it
+            </button>
           </div>
         </div>
+      </div>
+    );
+  };
+
+  const renderTutorialCard = () => {
+    if (!showTutorial || !roomImageUrl) return null;
+
+    return (
+      <div className="absolute top-[41.5%] left-[11%] -translate-x-1/2 w-52 p-3 text-xs text-white rounded-lg bg-black/40 z-50">
+        <X
+          className="absolute top-2 right-2 w-5 h-5 cursor-pointer hover:text-gray-300"
+          onClick={() => setShowTutorial(false)}
+        />
+        <p>1. Scroll to Zoom</p>
+        <p>2. Click & Drag to Move Image</p>
+        <p>3. Touch & Drag on Mobile</p>
       </div>
     );
   };
@@ -664,8 +562,6 @@ export const Canvas = () => {
           backgroundSize: `${imageSettings.scale * 100}%`,
           backgroundPosition: `${imageSettings.x}% ${imageSettings.y}%`,
           backgroundRepeat: "no-repeat",
-          transform: `rotate(${imageSettings.rotation}deg)`,
-          transformOrigin: "center center",
           transition: imageSettings.isDragging ? "none" : "all 0.2s ease-out",
         }
       : {};
@@ -681,34 +577,25 @@ export const Canvas = () => {
         ref={canvasRef}
         className={`${
           roomImageUrl ? "bg-transparent" : "bg-white"
-        } p-5 flex items-center justify-center z-20 relative ${cursorClass} select-none`}
+        } p-5 flex items-center justify-center z-20 relative  ${cursorClass} select-none`}
         style={{
           width: `${dynamicCanvas.width}px`,
           height: `${dynamicCanvas.height}px`,
           maxHeight: `${dynamicCanvas.height}px`,
           ...backgroundStyle,
         }}
-        onMouseDown={handleImageMouseDown}
-        onMouseMove={handleImageMouseMove}
-        onMouseUp={handleImageMouseUp}
-        onMouseLeave={handleImageMouseUp}
-        onWheel={handleImageWheel}
+        onMouseDown={handlePointerDown}
+        onMouseMove={handlePointerMove}
+        onMouseUp={handlePointerUp}
+        onMouseLeave={handlePointerUp}
+        onTouchStart={handlePointerDown}
+        onTouchMove={handlePointerMove}
+        onTouchEnd={handlePointerUp}
+        onWheel={handleWheel}
       >
-        {/* Optional overlay for better contrast */}
-        {roomImageUrl && (
-          <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
-        )}
-
         {/* Drag indicator */}
         {imageSettings.isDragging && (
           <div className="absolute inset-0 border-2 border-dashed border-[#3AAFA9] z-15 pointer-events-none rounded" />
-        )}
-
-        {/* Center crosshair when dragging */}
-        {imageSettings.isDragging && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-15 pointer-events-none">
-            <div className="w-4 h-4 border-2 border-[#3AAFA9] rounded-full bg-white/80"></div>
-          </div>
         )}
 
         {/* LED Screen Content */}
@@ -737,13 +624,10 @@ export const Canvas = () => {
     >
       {renderCanvasBackground()}
 
-      {/* Image Controls Panel */}
-      {renderImageControls()}
-
       {/* Canvas to Wall Measurements */}
       {CanvasUtils.renderCanvasToWallMeasurements(
-        effectiveCanvasWidth,
-        effectiveCanvasHeight
+        dynamicCanvas.width,
+        dynamicCanvas.height
       )}
 
       {/* Wall Measurements */}
@@ -783,16 +667,22 @@ export const Canvas = () => {
 
   return (
     <>
-      <div className="flex-1 bg-gray-100 h-80 lg:h-full px-2 mt-12 mb-28 lg:my-0 lg:p-4 flex items-center justify-center">
+      {/* Backdrop overlay when positioning */}
+      {imageSettings.isDragging && (
+        <div className="fixed inset-0 backdrop-brightness-50 z-40 pointer-events-none" />
+      )}
+
+      <div className="flex-1 bg-gray-100 w-full h-80 lg:h-full px-2 mt-12 mb-28 lg:my-0 lg:p-4 flex items-center justify-center">
         {renderResetButton()}
 
         {/* Canvas Container */}
         <div className="relative m-auto flex justify-center items-center w-full">
-          {/* <div className="absolute top-[41.5%] left-[11%] -translate-x-1/2 w-52 p-3 text-xs text-white rounded-lg bg-black/40">
-            <X className="absolute top-2 right-2 w-5 h-5 cursor-pointer" />
-            <p>1. Scroll to Zoom</p>
-            <p>2. Click & Drag to Move Image</p>
-          </div> */}
+          {/* Tutorial Card - only shows when positioning */}
+          {renderTutorialCard()}
+
+          {/* Size Warning Modal */}
+          <SizeWarningModal />
+
           {configured && selectedModel && (
             <>
               {/* Total Wall Width */}

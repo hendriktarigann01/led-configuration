@@ -186,8 +186,8 @@ export const VideoWallConfig = ({ data }) => {
         {
           label: "Display Area",
           value: data?.screenConfig?.area
-            ? `${data.screenConfig.area} mÂ²`
-            : "0.84 mÂ²",
+            ? `${data.screenConfig.area} m²`
+            : "0.84 m²",
         },
       ],
     },

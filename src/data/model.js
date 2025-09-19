@@ -132,7 +132,7 @@ export const model = [
         brightness: "500 - 1.000 Nits",
         refresh_rate: "2400 Hz / 3840 Hz",
         module_resolution: "128x64 dots",
-        module_pixels: "8192 dots",
+        module_pixels: "8192 dots", // total pixel
         ic: "ICN2153",
         led_configuration: "3 in 1",
         application: "Indoor Fixed Installation",

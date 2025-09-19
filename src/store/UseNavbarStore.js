@@ -16,8 +16,8 @@ export const UseNavbarStore = create((set) => ({
   // Room image URL for room setup
   roomImageUrl: null,
 
-  // Crop settings for room image positioning
-  cropSettings: null, // { x, y, width, height, scale, rotate }
+  // Crop settings for Cropper.js positioning
+  cropSettings: null, // { canvasData, cropBoxData }
 
   // Actions
   setActiveTab: (tab) => set({ activeTab: tab }),

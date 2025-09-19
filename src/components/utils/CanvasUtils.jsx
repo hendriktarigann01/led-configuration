@@ -276,8 +276,8 @@ export const CanvasUtils = {
     let horizontalExtension, verticalExtension;
     switch (deviceType) {
       case "mobile":
-        horizontalExtension = 60;
-        verticalExtension = 60;
+        horizontalExtension = 40;
+        verticalExtension = 40;
         break;
       case "tablet":
         horizontalExtension = 80;
@@ -298,7 +298,7 @@ export const CanvasUtils = {
               deviceType === "mobile"
                 ? "51px"
                 : deviceType === "tablet"
-                ? "36px"
+                ? "51px"
                 : "51px",
             transform: "translateX(-75%) translateY(100%)",
             width: `${effectiveCanvasWidth + horizontalExtension}px`,
@@ -313,7 +313,7 @@ export const CanvasUtils = {
               deviceType === "mobile"
                 ? "50px"
                 : deviceType === "tablet"
-                ? "36px"
+                ? "50px"
                 : "50px",
             transform: "translateX(-75%) translateY(100%)",
             width: `${effectiveCanvasWidth + horizontalExtension}px`,
@@ -326,7 +326,7 @@ export const CanvasUtils = {
           style={{
             right:
               deviceType === "mobile"
-                ? "46px"
+                ? "38px"
                 : deviceType === "tablet"
                 ? "52px"
                 : "52px",
@@ -341,7 +341,7 @@ export const CanvasUtils = {
           style={{
             left:
               deviceType === "mobile"
-                ? "45px"
+                ? "38px"
                 : deviceType === "tablet"
                 ? "52px"
                 : "50px",
@@ -361,7 +361,7 @@ export const CanvasUtils = {
     const leftOffset = deviceType === "mobile" ? "left-2" : "left-4";
     const topOffset =
       deviceType === "mobile"
-        ? "top-1"
+        ? "top-8"
         : deviceType === "tablet"
         ? "top-1.5"
         : "top-2 lg:top-2";
@@ -457,12 +457,12 @@ export const CanvasUtils = {
     let rightPosition, bottomPosition, maxWidth;
     switch (deviceType) {
       case "mobile":
-        rightPosition = "-right-27";
+        rightPosition = "-right-40";
         bottomPosition = "bottom-12";
         maxWidth = "50px";
         break;
       case "tablet":
-        rightPosition = "-right-24";
+        rightPosition = "-right-35";
         bottomPosition = "bottom-8";
         maxWidth = "65px";
         break;
@@ -474,7 +474,7 @@ export const CanvasUtils = {
 
     return (
       <div
-        className={`absolute ${rightPosition} ${bottomPosition} z-[999]`}
+        className={`absolute ${rightPosition} ${bottomPosition} z-50`}
         style={{
           width: "200px",
           height: "auto",

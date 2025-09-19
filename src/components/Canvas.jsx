@@ -20,16 +20,6 @@ export const Canvas = () => {
   } = UseNavbarStore();
   const headerStore = UseHeaderStore();
 
-  // Image positioning state (simplified)
-  const [imageSettings, setImageSettings] = useState({
-    x: 50,
-    y: 50,
-    scale: 1,
-    isDragging: false,
-    dragStart: { x: 0, y: 0 },
-  });
-  const [showTutorial, setShowTutorial] = useState(false);
-
   // Size warning modal state
   const [showSizeWarning, setShowSizeWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState("");
@@ -75,18 +65,6 @@ export const Canvas = () => {
     }
   }, [selectedModel, updateModelData, syncWithCanvas, initializeDefaults]);
 
-  // Reset image settings when room image changes
-  useEffect(() => {
-    if (roomImageUrl) {
-      setImageSettings((prev) => ({
-        ...prev,
-        x: 50,
-        y: 50,
-        scale: 1,
-      }));
-    }
-  }, [roomImageUrl]);
-
   // FIXED: Improved Dynamic Canvas Size Calculator
   const getDynamicCanvasSize = () => {
     const maxWidth =
@@ -125,75 +103,6 @@ export const Canvas = () => {
   };
 
   const dynamicCanvas = getDynamicCanvasSize();
-
-  // Touch and Mouse handlers (unified for mobile and desktop)
-  const getPointerPosition = (e) => {
-    const rect = canvasRef.current.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    };
-  };
-
-  const handlePointerDown = (e) => {
-    if (!roomImageUrl) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    const position = getPointerPosition(e);
-    setImageSettings((prev) => ({
-      ...prev,
-      isDragging: true,
-      dragStart: position,
-    }));
-    setShowTutorial(true);
-  };
-
-  const handlePointerMove = (e) => {
-    if (!imageSettings.isDragging || !roomImageUrl) return;
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const position = getPointerPosition(e);
-
-    const deltaX = position.x - imageSettings.dragStart.x;
-    const deltaY = position.y - imageSettings.dragStart.y;
-
-    const newX = imageSettings.x + (deltaX / rect.width) * 100;
-    const newY = imageSettings.y + (deltaY / rect.height) * 100;
-
-    setImageSettings((prev) => ({
-      ...prev,
-      x: Math.max(-50, Math.min(150, newX)),
-      y: Math.max(-50, Math.min(150, newY)),
-      dragStart: position,
-    }));
-  };
-
-  const handlePointerUp = () => {
-    setImageSettings((prev) => ({
-      ...prev,
-      isDragging: false,
-    }));
-    setShowTutorial(false);
-  };
-
-  // Wheel zoom handler (slower zoom with minimum scale to cover canvas)
-  const handleWheel = (e) => {
-    if (!roomImageUrl) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    const delta = e.deltaY > 0 ? -0.05 : 0.05; // Reduced from 0.1 to 0.05
-    // Set minimum scale to 1.0 so image always covers the canvas
-    const newScale = Math.max(1.0, Math.min(3, imageSettings.scale + delta));
-
-    setImageSettings((prev) => ({
-      ...prev,
-      scale: newScale,
-    }));
-  };
 
   // Calculate display values
   const cabinetCount = getCabinetCount();
@@ -274,14 +183,6 @@ export const Canvas = () => {
     reset();
     resetToDefaults();
     resetNavbar();
-    setImageSettings({
-      x: 50,
-      y: 50,
-      scale: 1,
-      isDragging: false,
-      dragStart: { x: 0, y: 0 },
-    });
-    setShowTutorial(false);
     setShowSizeWarning(false);
   };
 
@@ -419,22 +320,6 @@ export const Canvas = () => {
     );
   };
 
-  const renderTutorialCard = () => {
-    if (!showTutorial || !roomImageUrl) return null;
-
-    return (
-      <div className="absolute top-[41.5%] left-[11%] -translate-x-1/2 w-52 p-3 text-xs text-white rounded-lg bg-black/40 z-50">
-        <X
-          className="absolute top-2 right-2 w-5 h-5 cursor-pointer hover:text-gray-300"
-          onClick={() => setShowTutorial(false)}
-        />
-        <p>1. Scroll to Zoom</p>
-        <p>2. Click & Drag to Move Image</p>
-        <p>3. Touch & Drag on Mobile</p>
-      </div>
-    );
-  };
-
   const renderVideoContent = () => (
     <div className="relative inline-block">
       <div
@@ -559,45 +444,25 @@ export const Canvas = () => {
     const backgroundStyle = roomImageUrl
       ? {
           backgroundImage: `url(${roomImageUrl})`,
-          backgroundSize: `${imageSettings.scale * 100}%`,
-          backgroundPosition: `${imageSettings.x}% ${imageSettings.y}%`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
-          transition: imageSettings.isDragging ? "none" : "all 0.2s ease-out",
         }
       : {};
-
-    const cursorClass = roomImageUrl
-      ? imageSettings.isDragging
-        ? "cursor-grabbing"
-        : "cursor-grab"
-      : "";
 
     return (
       <div
         ref={canvasRef}
         className={`${
           roomImageUrl ? "bg-transparent" : "bg-white"
-        } p-5 flex items-center justify-center z-20 relative  ${cursorClass} select-none`}
+        } p-5 flex items-center justify-center z-20 relative select-none`}
         style={{
           width: `${dynamicCanvas.width}px`,
           height: `${dynamicCanvas.height}px`,
           maxHeight: `${dynamicCanvas.height}px`,
           ...backgroundStyle,
         }}
-        onMouseDown={handlePointerDown}
-        onMouseMove={handlePointerMove}
-        onMouseUp={handlePointerUp}
-        onMouseLeave={handlePointerUp}
-        onTouchStart={handlePointerDown}
-        onTouchMove={handlePointerMove}
-        onTouchEnd={handlePointerUp}
-        onWheel={handleWheel}
       >
-        {/* Drag indicator */}
-        {imageSettings.isDragging && (
-          <div className="absolute inset-0 border-2 border-dashed border-[#3AAFA9] z-15 pointer-events-none rounded" />
-        )}
-
         {/* LED Screen Content */}
         <div className="relative z-20 pointer-events-none">
           {isVideo ? renderVideoContent() : renderImageContent()}
@@ -667,19 +532,11 @@ export const Canvas = () => {
 
   return (
     <>
-      {/* Backdrop overlay when positioning */}
-      {imageSettings.isDragging && (
-        <div className="fixed inset-0 backdrop-brightness-50 z-40 pointer-events-none" />
-      )}
-
       <div className="flex-1 bg-gray-100 w-full h-80 lg:h-full px-2 mt-12 mb-28 lg:my-0 lg:p-4 flex items-center justify-center">
         {renderResetButton()}
 
         {/* Canvas Container */}
         <div className="relative m-auto flex justify-center items-center w-full">
-          {/* Tutorial Card - only shows when positioning */}
-          {renderTutorialCard()}
-
           {/* Size Warning Modal */}
           <SizeWarningModal />
 
@@ -687,9 +544,8 @@ export const Canvas = () => {
             <>
               {/* Total Wall Width */}
               <div
-                className="absolute -top-3 border-t z-50 border-teal-400 pointer-events-none"
+                className="absolute -top-3 left-[50%] border-t z-50 border-teal-400 pointer-events-none"
                 style={{
-                  left: "50%",
                   transform: "translateX(-50%)",
                   width: `${dynamicCanvas.width}px`,
                 }}
@@ -702,10 +558,10 @@ export const Canvas = () => {
 
               {/* Total Wall Height */}
               <div
-                className="absolute border-l z-50 border-teal-400 pointer-events-none"
+                className="absolute border-l left-[2%] md:left-[14.5%] lg:left-[22.5%] z-50 border-teal-400 pointer-events-none"
                 style={{
                   top: "50%",
-                  left: `calc(46% - ${dynamicCanvas.width / 2}px - 20px)`,
+
                   transform: "translateY(-50%)",
                   height: `${dynamicCanvas.height}px`,
                 }}

@@ -6,8 +6,6 @@ import { UseNavbarStore } from "../store/UseNavbarStore";
 
 export const ResultModal = ({ isOpen, onClose }) => {
   const {
-    getCabinetCount,
-    getActualScreenSize,
     baseWidth,
     baseHeight,
     wallWidth,
@@ -20,6 +18,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
   const calculator = UseCalculatorStore();
   const { selectedModel } = UseNavbarStore();
 
+  // Early returns for invalid states
   if (!isOpen || !isConfigured() || !selectedModel) return null;
 
   const modelData = selectedModel.modelData;
@@ -46,6 +45,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
     totalWeight,
   } = results;
 
+  // Calculate display area
   const displayArea = (
     actualScreenSize.width * actualScreenSize.height
   ).toFixed(2);
@@ -53,7 +53,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
   // Check if this is Video Wall type
   const isVideoWall = displayType.includes("Video Wall");
 
-  // Format display names based on type
+  // Helper functions for dynamic labels
   const getUnitName = () => {
     if (displayType.includes("Cabinet") || displayType.includes("Outdoor")) {
       return "Cabinets";
@@ -76,118 +76,136 @@ export const ResultModal = ({ isOpen, onClose }) => {
     return "Weight";
   };
 
-  // Video Wall simplified UI
-  if (isVideoWall) {
-    return (
-      <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
-        <div className="bg-white rounded-xl shadow-2xl w-[380px] lg:w-full max-w-xl max-h-[90vh] overflow-hidden">
-          <div className="p-6 h-full">
-            {/* Header */}
-            <div className="flex justify-end">
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-              >
-                <X size={24} />
-              </button>
-            </div>
+  // Specification sections data
+  const sections = [
+    {
+      title: "Display Requirements",
+      items: [
+        {
+          label: "Screen Configuration",
+          value: `${unitCount.horizontal} x ${unitCount.vertical}`,
+        },
+        {
+          label: `Number of ${getUnitName()}`,
+          value: `${totalUnits} pcs`,
+        },
+        // Only show resolution for non-Video Wall types
+        ...(!isVideoWall
+          ? [
+              {
+                label: "Resolution",
+                value:
+                  resolutionPerUnit.width > 0 && resolutionPerUnit.height > 0
+                    ? `${resolutionPerUnit.width} x ${resolutionPerUnit.height} dots`
+                    : "N/A",
+              },
+            ]
+          : []),
+      ],
+    },
+    {
+      title: "Display Wall",
+      items: [
+        {
+          label: "Real Size",
+          value: `${screenWidth.toFixed(3)} (${baseWidth.toFixed(
+            isVideoWall ? 3 : 2
+          )}) x ${screenHeight.toFixed(3)} (${baseHeight.toFixed(
+            isVideoWall ? 3 : 2
+          )})`,
+        },
+        {
+          label: "SQM",
+          value: `${displayArea} m${isVideoWall ? "2" : "²"}`,
+        },
+        // Only show weight for non-Video Wall types
+        ...(!isVideoWall
+          ? [
+              {
+                label: getWeightLabel(),
+                value: totalWeight > 0 ? `${totalWeight} kg` : "N/A",
+              },
+            ]
+          : []),
+      ],
+    },
+    // Only show power section if model has power_consumption
+    ...(modelData.power_consumption
+      ? [
+          {
+            title: "Power Requirements",
+            items: [
+              {
+                label: "Max Power",
+                value:
+                  totalPower.max > 0 ? `${totalPower.max.toFixed(0)} W` : "N/A",
+              },
+              // Only show average power for non-Video Wall types
+              ...(!isVideoWall
+                ? [
+                    {
+                      label: "Average Power",
+                      value:
+                        totalPower.average > 0
+                          ? `${totalPower.average.toFixed(0)} W`
+                          : "N/A",
+                    },
+                  ]
+                : []),
+            ],
+          },
+        ]
+      : []),
+  ];
 
-            <div className="flex mb-8 justify-center lg:justify-start">
-              <h2 className="text-md lg:text-xl font-normal lg:font-medium text-gray-800">
-                Specification
-              </h2>
-            </div>
+  // Render specification item
+  const renderSpecItem = (item, index) => (
+    <div key={index}>
+      <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
+        {item.label}
+      </h4>
+      <p
+        className={`text-sm lg:text-base text-gray-600 ${
+          isVideoWall ? "font-medium" : ""
+        }`}
+      >
+        {item.value}
+      </p>
+    </div>
+  );
 
-            {/* Content - Video Wall Layout */}
-            <div className="space-y-6 lg:space-y-8">
-              {/* Display Requirements */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
-                <div>
-                  <h3 className="text-sm lg:text-lg font-medium text-gray-700 mb-2 lg:mb-0">
-                    Display Requirements
-                  </h3>
-                </div>
-                <div className="space-y-3 lg:space-y-4">
-                  <div>
-                    <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                      Screen Configuration
-                    </h4>
-                    <p className="text-sm lg:text-base text-gray-600 font-medium">
-                      {unitCount.horizontal} x {unitCount.vertical}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                      Number of {getUnitName()}
-                    </h4>
-                    <p className="text-sm lg:text-base text-gray-600 font-medium">
-                      {totalUnits} pcs
-                    </p>
-                  </div>
-                </div>
-              </div>
+  // Render specification section
+  const renderSection = (section, sectionIndex) => (
+    <div key={sectionIndex}>
+      {/* Add divider for non-first sections in non-Video Wall */}
+      {!isVideoWall && sectionIndex > 0 && (
+        <div className="border-t-2 border-gray-200"></div>
+      )}
 
-              {/* Display Wall */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
-                <div>
-                  <h3 className="text-sm lg:text-lg font-medium text-gray-700 mb-2 lg:mb-0">
-                    Display Wall
-                  </h3>
-                </div>
-                <div className="space-y-3 lg:space-y-4">
-                  <div>
-                    <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                      Dimensions
-                    </h4>
-                    <p className="text-sm lg:text-base text-gray-600 font-medium">
-                      {screenWidth.toFixed(3)} ({baseWidth.toFixed(3)}) x{" "}
-                      {screenHeight.toFixed(3)} ({baseHeight.toFixed(3)})
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                      Display Area
-                    </h4>
-                    <p className="text-sm lg:text-base text-gray-600 font-medium">
-                      {displayArea} m2
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Power Requirements - Only show if model has power_consumption */}
-              {modelData.power_consumption && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
-                  <div>
-                    <h3 className="text-sm lg:text-lg font-medium text-gray-700 mb-2 lg:mb-0">
-                      Power Requirements
-                    </h3>
-                  </div>
-                  <div className="space-y-3 lg:space-y-4">
-                    <div>
-                      <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                        Max Power
-                      </h4>
-                      <p className="text-sm lg:text-base text-gray-600 font-medium">
-                        {totalPower.max > 0
-                          ? `${totalPower.max.toFixed(0)} W`
-                          : "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
+        <div>
+          <h3
+            className={`text-sm lg:text-lg font-medium text-gray-700 mb-2 ${
+              isVideoWall ? "lg:mb-0" : "lg:mb-4"
+            }`}
+          >
+            {section.title}
+          </h3>
+        </div>
+        <div className={`space-y-${isVideoWall ? "3 lg:space-y-4" : "2"}`}>
+          {section.items.map(renderSpecItem)}
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
-  // Original UI for non-Video Wall types
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
-      <div className="bg-white rounded-xl shadow-2xl w-[380px] lg:w-full max-w-2xl max-h-[90vh] overflow-hidden">
+      <div
+        className={`bg-white rounded-xl shadow-2xl w-[380px] lg:w-full ${
+          isVideoWall ? "max-w-xl" : "max-w-2xl"
+        } max-h-[90vh] overflow-hidden`}
+      >
         <div className="p-6 h-full">
           {/* Header */}
           <div className="flex justify-end">
@@ -199,119 +217,19 @@ export const ResultModal = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          <div className="flex mb-8 justify-center lg:justify-start">
+          <div className="flex mb-5 justify-center lg:justify-start">
             <h2 className="text-md lg:text-xl font-normal lg:font-medium text-gray-800">
               Specification
             </h2>
           </div>
 
           {/* Content */}
-          <div className="space-y-6">
-            {/* Display Requirements */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
-              <div>
-                <h3 className="text-sm lg:text-lg font-medium text-gray-700 mb-2 lg:mb-4">
-                  Display Requirements
-                </h3>
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                    Screen Configuration
-                  </h4>
-                  <p className="text-sm lg:text-base text-gray-600">
-                    {unitCount.horizontal} x {unitCount.vertical}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                    Number of {getUnitName()}
-                  </h4>
-                  <p className="text-sm lg:text-base text-gray-600">
-                    {totalUnits} pcs
-                  </p>
-                </div>
-                <div>
-                  <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                    Display Resolution
-                  </h4>
-                  <p className="text-sm lg:text-base text-gray-600">
-                    {resolutionPerUnit.width > 0 && resolutionPerUnit.height > 0
-                      ? `${resolutionPerUnit.width} x ${resolutionPerUnit.height} dots`
-                      : "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Display Wall */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
-              <div>
-                <h3 className="text-sm lg:text-lg font-medium text-gray-700 mb-2 lg:mb-4">
-                  Display Wall
-                </h3>
-              </div>
-              <div className="space-y-2">
-                <div>
-                  <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                    Dimensions
-                  </h4>
-                  <p className="text-sm lg:text-base text-gray-600">
-                    {screenWidth.toFixed(3)} ({baseWidth.toFixed(2)}) x{" "}
-                    {screenHeight.toFixed(3)} ({baseHeight.toFixed(2)})
-                  </p>
-                </div>
-                <div>
-                  <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                    Display Area
-                  </h4>
-                  <p className="text-sm lg:text-base text-gray-600">
-                    {displayArea} m²
-                  </p>
-                </div>
-                <div>
-                  <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                    {getWeightLabel()}
-                  </h4>
-                  <p className="text-sm lg:text-base text-gray-600">
-                    {totalWeight > 0 ? `${totalWeight} kg` : "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Power Requirements - Only show if model has power_consumption */}
-            {modelData.power_consumption && (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
-                <div>
-                  <h3 className="text-sm lg:text-lg font-medium text-gray-700 mb-2 lg:mb-4">
-                    Power Requirements
-                  </h3>
-                </div>
-                <div className="space-y-2">
-                  <div>
-                    <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                      Max Power
-                    </h4>
-                    <p className="text-sm lg:text-base text-gray-600">
-                      {totalPower.max > 0
-                        ? `${totalPower.max.toFixed(0)} W`
-                        : "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <h4 className="text-xs lg:text-sm font-medium text-gray-600 mb-1">
-                      Average Power
-                    </h4>
-                    <p className="text-sm lg:text-base text-gray-600">
-                      {totalPower.average > 0
-                        ? `${totalPower.average.toFixed(0)} W`
-                        : "N/A"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+          <div
+            className={`space-y-${
+              isVideoWall ? "6 lg:space-y-4" : "4 lg:space-y-1"
+            }`}
+          >
+            {sections.map(renderSection)}
           </div>
         </div>
       </div>

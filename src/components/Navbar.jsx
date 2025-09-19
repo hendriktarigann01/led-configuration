@@ -7,7 +7,7 @@ import { UseModalStore } from "../store/UseModalStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 
 export const Navbar = () => {
-  const [height, setHeight] = useState(200);
+  const [height, setHeight] = useState(80);
   const [isExpanded, setIsExpanded] = useState(false);
   const dragControls = useDragControls();
 
@@ -309,7 +309,7 @@ export const Navbar = () => {
           </div>
 
           {/* Content - Mobile */}
-          <div className="px-5 pt-5 pb-10 space-y-6 overflow-y-auto h-full">
+          <div className="px-5 pt-5 pb-10 z-50 space-y-6 overflow-y-auto h-full">
             <NavbarContent />
           </div>
         </motion.div>

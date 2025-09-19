@@ -571,7 +571,7 @@ export const ModelPage = ({ data }) => {
             styles.infoText,
             {
               bottom: 15,
-              right: -5,
+              right: -8,
             },
           ]}
         >

@@ -5,6 +5,7 @@ import { Canvas } from "../components/Canvas";
 import { ConfigurationModal } from "../components/ConfigurationModal";
 import { ExportModal } from "../components/ExportModal";
 import { ResultModal } from "../components/ResultModal";
+import { CropperModal } from "../components/CropperModal"; // New import
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
@@ -52,16 +53,15 @@ const Layout = () => {
           <Canvas />
         </div>
       </div>
-
       {/* Mobile: Sidebar at Bottom, Desktop: Sidebar at Left */}
       <div className="flex-shrink-0 lg:order-1 order-2">
         <Navbar />
       </div>
-
-      {/* Modal - renders at root level */}
+      {/* Modals - renders at root level */}
       <ConfigurationModal />
       <ExportModal />
       <ResultModal />
+      <CropperModal /> {/* New cropper modal */}
     </div>
   );
 };

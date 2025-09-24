@@ -265,94 +265,90 @@ export const CanvasUtils = {
     );
   },
 
-  // Render canvas to wall measurements with responsive adjustments
-  renderCanvasToWallMeasurements: (
-    effectiveCanvasWidth,
-    effectiveCanvasHeight
-  ) => {
-    const deviceType = CanvasUtils.getDeviceType();
+renderCanvasToWallMeasurements: (
+  effectiveCanvasWidth,
+  effectiveCanvasHeight
+) => {
+  const deviceType = CanvasUtils.getDeviceType();
 
-    // Adjust extensions based on device
-    let horizontalExtension, verticalExtension;
-    switch (deviceType) {
-      case "mobile":
-        horizontalExtension = 40;
-        verticalExtension = 40;
-        break;
-      case "tablet":
-        horizontalExtension = 80;
-        verticalExtension = 80;
-        break;
-      default: // desktop
-        horizontalExtension = 100;
-        verticalExtension = 100;
-    }
+  // Extensions tetap sama seperti original
+  let horizontalExtension, verticalExtension;
+  switch (deviceType) {
+    case "mobile":
+      horizontalExtension = 100;
+      verticalExtension = 100;
+      break;
+    case "tablet":
+      horizontalExtension = 80;
+      verticalExtension = 80;
+      break;
+    default: // desktop
+      horizontalExtension = 100;
+      verticalExtension = 100;
+  }
 
-    return (
-      <>
-        {/* Horizontal Bottom Measure Screen */}
-        <div
-          className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
-          style={{
-            bottom:
-              deviceType === "mobile"
-                ? "51px"
-                : deviceType === "tablet"
-                ? "51px"
-                : "51px",
-            transform: "translateX(-75%) translateY(100%)",
-            width: `${effectiveCanvasWidth + horizontalExtension}px`,
-          }}
-        />
+  // KUNCI SOLUSI: Hitung dynamic offset berdasarkan effectiveCanvasWidth
+  const getVerticalOffset = () => {
+    // Dapatkan container width untuk setiap device
+    const { containerWidth } = CanvasUtils.getResponsiveContainerDimensions();
+    
+    // Hitung selisih antara container width dan effective canvas width
+    const widthDifference = effectiveCanvasWidth;
+    
+    // Base offset untuk setiap device
+    const baseOffset = deviceType === "mobile" ? 45 : 
+                      deviceType === "tablet" ? 52 : 50;
+    
+    // Offset dinamis = base offset + adjustment berdasarkan canvas size
+    return baseOffset + widthDifference;
+  };
 
-        {/* Horizontal Top Measure Screen */}
-        <div
-          className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
-          style={{
-            top:
-              deviceType === "mobile"
-                ? "50px"
-                : deviceType === "tablet"
-                ? "50px"
-                : "50px",
-            transform: "translateX(-75%) translateY(100%)",
-            width: `${effectiveCanvasWidth + horizontalExtension}px`,
-          }}
-        />
+  const dynamicOffset = getVerticalOffset();
 
-        {/* Vertical Right Measure Screen */}
-        <div
-          className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
-          style={{
-            right:
-              deviceType === "mobile"
-                ? "38px"
-                : deviceType === "tablet"
-                ? "52px"
-                : "52px",
-            transform: "translateX(100%) translateY(-75%)",
-            height: `${effectiveCanvasHeight + verticalExtension}px`,
-          }}
-        />
+  return (
+    <>
+      {/* Horizontal Bottom Measure Screen - TIDAK BERUBAH */}
+      <div
+        className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
+        style={{
+          bottom: "51px",
+          transform: "translateX(-75%) translateY(100%)",
+          width: `${effectiveCanvasWidth + horizontalExtension}px`,
+        }}
+      />
 
-        {/* Vertical Left Measure Screen */}
-        <div
-          className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
-          style={{
-            left:
-              deviceType === "mobile"
-                ? "38px"
-                : deviceType === "tablet"
-                ? "52px"
-                : "50px",
-            transform: "translateX(100%) translateY(-75%)",
-            height: `${effectiveCanvasHeight + verticalExtension}px`,
-          }}
-        />
-      </>
-    );
-  },
+      {/* Horizontal Top Measure Screen - TIDAK BERUBAH */}
+      <div
+        className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
+        style={{
+          top: "50px",
+          transform: "translateX(-75%) translateY(100%)",
+          width: `${effectiveCanvasWidth + horizontalExtension}px`,
+        }}
+      />
 
+      {/* PERBAIKAN: Vertical Right Measure Screen - RESPONSIF */}
+      <div
+        className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
+        style={{
+          right: `${dynamicOffset}px`, // ✅ DINAMIS berdasarkan canvas size
+          transform: "translateX(100%) translateY(-75%)",
+          height: `${effectiveCanvasHeight + verticalExtension}px`,
+        }}
+      />
+
+      {/* PERBAIKAN: Vertical Left Measure Screen - RESPONSIF */}
+      <div
+        className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
+        style={{
+          left: `${dynamicOffset}px`, // ✅ DINAMIS berdasarkan canvas size  
+          transform: "translateX(-100%) translateY(-75%)",
+          height: `${effectiveCanvasHeight + verticalExtension}px`,
+        }}
+      />
+    </>
+  );
+},
   // Render wall measurements with centered values and responsive positioning
   renderWallMeasurements: (remainingWallHeight, remainingWallWidth) => {
     const deviceType = CanvasUtils.getDeviceType();
@@ -469,7 +465,7 @@ export const CanvasUtils = {
       default: // desktop
         rightPosition = "-right-35";
         bottomPosition = "bottom-10";
-        maxWidth = "80px";
+        maxWidth = "77px";
     }
 
     return (

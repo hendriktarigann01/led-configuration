@@ -20,8 +20,8 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: "center",
-    marginBottom: 5,
-    marginTop: 80,
+    marginBottom: 30,
+    marginTop: 60,
   },
   titleWrapper: {
     flexDirection: "row",
@@ -63,66 +63,83 @@ const styles = StyleSheet.create({
   tableContainer: {
     border: "1px solid #E5E7EB",
     overflow: "hidden",
+    borderRadius: 4,
   },
   table: {
     width: "100%",
   },
+  // Section container untuk setiap kategori
   sectionContainer: {
-    position: "relative",
+    flexDirection: "column",
+    borderBottom: "1px solid #E5E7EB",
   },
-  tableRow: {
+  lastSection: {
+    borderBottom: "none",
+  },
+  sectionRow: {
     flexDirection: "row",
-    height: 25,
-    borderBottom: "1px solid #E5E7EB",
+    minHeight: 40,
+    alignItems: "stretch",
   },
-  categoryCell: {
-    position: "absolute",
-    left: 0,
-    top: 0,
+  // Style untuk category cell yang merged
+  mergedCategoryCell: {
     width: "33.333%",
-    paddingVertical: 1,
-    paddingHorizontal: 12,
-    backgroundColor: "#F9FAFB",
-    alignItems: "flex-start",
-    justifyContent: "center",
+    paddingVertical: 2,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
     borderRight: "1px solid #E5E7EB",
-    borderBottom: "1px solid #E5E7EB",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    // Ini yang penting untuk stretch full height
+    alignSelf: "stretch",
   },
   categoryText: {
-    fontSize: 10,
-    fontWeight: "medium",
+    fontSize: 11,
+    fontWeight: "bold",
     color: "#374151",
     textAlign: "left",
   },
-  labelCell: {
-    width: "33.333%",
-    paddingVertical: 1,
-    paddingHorizontal: 12,
-    alignItems: "flex-start",
-    justifyContent: "center",
-    borderRight: "1px solid #E5E7EB",
-    borderBottom: "1px solid #E5E7EB",
-    marginLeft: "33.333%",
+  // Container untuk semua item rows dalam satu section
+  itemsContainer: {
+    flex: 1,
+    flexDirection: "column",
   },
-  labelCellOffset: {
-    backgroundColor: "transparent",
+  itemRow: {
+    flexDirection: "row",
+    minHeight: 25,
+    borderBottom: "1px solid #E5E7EB",
+    alignItems: "stretch",
+  },
+  lastItemRow: {
+    borderBottom: "none",
+  },
+  labelCell: {
+    width: "50%", // Adjusted karena tidak ada category cell
+    paddingVertical: 2,
+    paddingHorizontal: 16,
+    borderRight: "1px solid #E5E7EB",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    backgroundColor: "#FFFFFF",
   },
   labelText: {
     fontSize: 10,
-    color: "#6B7280",
+    color: "#374151",
     textAlign: "left",
   },
   valueCell: {
-    width: "33.333%",
-    paddingVertical: 1,
-    paddingHorizontal: 12,
-    alignItems: "flex-start",
+    width: "50%", // Adjusted karena tidak ada category cell
+    paddingVertical: 2,
+    paddingHorizontal: 16,
     justifyContent: "center",
+    alignItems: "flex-start",
+    backgroundColor: "#FFFFFF",
   },
   valueText: {
     fontSize: 10,
     color: "#374151",
     textAlign: "left",
+    fontWeight: "medium",
   },
   footer: {
     position: "absolute",
@@ -149,8 +166,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   icon: {
-    width: 16,
-    height: 16,
+    width: 12,
+    height: 12,
   },
 });
 
@@ -217,7 +234,7 @@ export const Indoor = ({ data }) => {
         { label: "Weight", value: "7.8KG" },
         {
           label: "Power consumption",
-          value: "Max.: 650W/m², Average; 300W/m²",
+          value: "Max: 500W/m², Avg: 700W/m²",
         },
         {
           label: "Life span",
@@ -236,17 +253,14 @@ export const Indoor = ({ data }) => {
       <View style={styles.content}>
         <View style={styles.titleContainer}>
           <View style={styles.titleWrapper}>
-            {/* Dots kiri */}
             <View style={styles.dotsContainer}>
               <View style={styles.dot1} />
               <View style={styles.dot2} />
               <View style={styles.dot3} />
             </View>
 
-            {/* Title */}
             <Text style={styles.sectionTitle}>Product Specification</Text>
 
-            {/* Dots kanan */}
             <View style={styles.dotsContainer}>
               <View style={styles.dot3} />
               <View style={styles.dot2} />
@@ -258,55 +272,40 @@ export const Indoor = ({ data }) => {
         <View style={styles.tableContainer}>
           <View style={styles.table}>
             {specifications.map((section, sectionIndex) => (
-              <React.Fragment key={sectionIndex}>
-                {section.items.map((item, itemIndex) => (
-                  <View
-                    key={`${sectionIndex}-${itemIndex}`}
-                    style={[
-                      styles.tableRow,
-                      { minHeight: 25 },
-                      // Remove border bottom for last item in each section (except last section)
-                      itemIndex === section.items.length - 1 &&
-                        sectionIndex < specifications.length - 1 && {
-                          borderBottom: "1px solid #E5E7EB",
-                        },
-                      // Remove border bottom for last item in last section
-                      sectionIndex === specifications.length - 1 &&
-                        itemIndex === section.items.length - 1 && {
-                          borderBottom: "none",
-                        },
-                      // Remove border bottom for middle items in each section
-                      itemIndex > 0 &&
-                        itemIndex < section.items.length - 1 && {
-                          borderBottom: "none",
-                        },
-                    ]}
-                  >
-                    {itemIndex === 0 && (
+              <View
+                key={sectionIndex}
+                style={[
+                  styles.sectionContainer,
+                  sectionIndex === specifications.length - 1 &&
+                    styles.lastSection,
+                ]}
+              >
+                <View style={styles.sectionRow}>
+                  <View style={styles.mergedCategoryCell}>
+                    <Text style={styles.categoryText}>{section.category}</Text>
+                  </View>
+
+                  <View style={styles.itemsContainer}>
+                    {section.items.map((item, itemIndex) => (
                       <View
+                        key={itemIndex}
                         style={[
-                          styles.categoryCell,
-                          {
-                            height: section.items.length * 40,
-                          },
+                          styles.itemRow,
+                          itemIndex === section.items.length - 1 &&
+                            styles.lastItemRow,
                         ]}
                       >
-                        <Text style={styles.categoryText}>
-                          {section.category}
-                        </Text>
+                        <View style={styles.labelCell}>
+                          <Text style={styles.labelText}>{item.label}</Text>
+                        </View>
+                        <View style={styles.valueCell}>
+                          <Text style={styles.valueText}>{item.value}</Text>
+                        </View>
                       </View>
-                    )}
-
-                    <View style={styles.labelCell}>
-                      <Text style={styles.labelText}>{item.label}</Text>
-                    </View>
-
-                    <View style={styles.valueCell}>
-                      <Text style={styles.valueText}>{item.value}</Text>
-                    </View>
+                    ))}
                   </View>
-                ))}
-              </React.Fragment>
+                </View>
+              </View>
             ))}
           </View>
         </View>

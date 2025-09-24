@@ -20,15 +20,15 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     alignItems: "center",
-    marginBottom: 5,
-    marginTop: 80,
+    marginBottom: 30,
+    marginTop: 60,
   },
   titleWrapper: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
-    height: 40,
+    minHeight: 40,
     padding: 8,
   },
   dotsContainer: {
@@ -63,64 +63,83 @@ const styles = StyleSheet.create({
   tableContainer: {
     border: "1px solid #E5E7EB",
     overflow: "hidden",
+    borderRadius: 4,
   },
   table: {
     width: "100%",
   },
+  // Section container untuk setiap kategori
   sectionContainer: {
-    position: "relative",
-  },
-  tableRow: {
-    flexDirection: "row",
-    height: 25,
+    flexDirection: "column",
     borderBottom: "1px solid #E5E7EB",
   },
-  categoryCell: {
-    position: "absolute",
-    left: 0,
-    top: 0,
+  lastSection: {
+    borderBottom: "none",
+  },
+  sectionRow: {
+    flexDirection: "row",
+    minHeight: 40,
+    alignItems: "stretch",
+  },
+  // Style untuk category cell yang merged
+  mergedCategoryCell: {
     width: "33.333%",
-    paddingVertical: 1,
-    paddingHorizontal: 12,
-    backgroundColor: "#F9FAFB",
-    alignItems: "flex-start",
-    justifyContent: "center",
+    paddingVertical: 2,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
     borderRight: "1px solid #E5E7EB",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    // Ini yang penting untuk stretch full height
+    alignSelf: "stretch",
   },
   categoryText: {
-    fontSize: 10,
-    fontWeight: "medium",
+    fontSize: 11,
+    fontWeight: "bold",
     color: "#374151",
     textAlign: "left",
   },
-  labelCell: {
-    width: "33.333%",
-    paddingVertical: 1,
-    paddingHorizontal: 12,
-    alignItems: "flex-start",
-    justifyContent: "center",
-    borderRight: "1px solid #E5E7EB",
-    marginLeft: "33.333%",
+  // Container untuk semua item rows dalam satu section
+  itemsContainer: {
+    flex: 1,
+    flexDirection: "column",
   },
-  labelCellOffset: {
-    backgroundColor: "transparent",
+  itemRow: {
+    flexDirection: "row",
+    minHeight: 25,
+    borderBottom: "1px solid #E5E7EB",
+    alignItems: "stretch",
+  },
+  lastItemRow: {
+    borderBottom: "none",
+  },
+  labelCell: {
+    width: "50%", // Adjusted karena tidak ada category cell
+    paddingVertical: 2,
+    paddingHorizontal: 16,
+    borderRight: "1px solid #E5E7EB",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    backgroundColor: "#FFFFFF",
   },
   labelText: {
     fontSize: 10,
-    color: "#6B7280",
+    color: "#374151",
     textAlign: "left",
   },
   valueCell: {
-    width: "33.333%",
-    paddingVertical: 1,
-    paddingHorizontal: 12,
-    alignItems: "flex-start",
+    width: "50%", // Adjusted karena tidak ada category cell
+    paddingVertical: 2,
+    paddingHorizontal: 16,
     justifyContent: "center",
+    alignItems: "flex-start",
+    backgroundColor: "#FFFFFF",
   },
   valueText: {
     fontSize: 10,
     color: "#374151",
     textAlign: "left",
+    fontWeight: "medium",
   },
   footer: {
     position: "absolute",
@@ -147,63 +166,90 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   icon: {
-    width: 16,
-    height: 16,
+    width: 12,
+    height: 12,
   },
 });
 
 export const VideoWallConfig = ({ data }) => {
   console.log(">>> VideoWallConfig received data:", data);
 
-  const specifications = [
+  // Return null if no data (fallback as requested)
+  if (!data || !data.calculations || !data.calculations.processedValues) {
+    return null;
+  }
+
+  const { processedValues } = data.calculations;
+  const { isVideoWall } = data;
+
+  // Build specifications using processed values from export store (same as IndoorOutdoor)
+  const productItems = [
     {
-      category: "Display Requirements",
-      items: [
-        {
-          label: "Screen Configuration",
-          value: data?.calculations?.unitCount
-            ? `${data.calculations.unitCount.horizontal} x ${data.calculations.unitCount.vertical}`
-            : "4 x 4",
-        },
-        {
-          label: "Number Of Screen",
-          value: data?.calculations?.totalUnits
-            ? `${data.calculations.totalUnits} pcs`
-            : "16 pcs",
-        },
-      ],
+      label: isVideoWall ? "Inch" : "Pixel Pitch",
+      value:
+        processedValues.pixelPitchOrInch !== "N/A"
+          ? processedValues.pixelPitchOrInch
+          : null,
     },
     {
-      category: "Display Wall",
-      items: [
-        {
-          label: "Dimensions",
-          value:
-            data?.screenConfig?.width && data?.calculations?.baseDimensions
-              ? `${data.screenConfig.width} (${data.calculations.baseDimensions.width}) x ${data.screenConfig.height} (${data.calculations.baseDimensions.height})`
-              : "2.56 (0.64) x 1.92 (0.48)",
-        },
-        {
-          label: "Display Area",
-          value: data?.screenConfig?.area
-            ? `${data.screenConfig.area} m²`
-            : "0.84 m²",
-        },
-      ],
+      label: "Resolution",
+      value: processedValues.resolutionDisplay,
     },
     {
-      category: "Power Requirements",
-      items: [
-        {
-          label: "Max Power",
-          value:
-            data?.calculations?.power?.max > 0
-              ? `${data.calculations.power.max.toFixed(0)} W`
-              : "10.400 W",
-        },
-      ],
+      label: `Number of ${processedValues.unitName}`,
+      value: processedValues.unitConfiguration,
+    },
+    {
+      label: "SQM",
+      value: processedValues.sqm ? `${processedValues.sqm} m²` : null,
+    },
+    {
+      label: "Real Size",
+      value: processedValues.realSize,
     },
   ];
+
+  // Add weight only for non-Video Wall types and when weight exists
+  if (!isVideoWall && processedValues.weight) {
+    productItems.push({
+      label: `Weight ${processedValues.unitName}`,
+      value: processedValues.weight,
+    });
+  }
+
+  // Filter out null values
+  const validProductItems = productItems.filter((item) => item.value !== null);
+
+  const specifications = [
+    {
+      category: "Product",
+      items: validProductItems,
+    },
+  ];
+
+  // Add power consumption only if available (same logic as IndoorOutdoor)
+  if (data?.modelData?.power_consumption && processedValues.powerConsumption) {
+    const powerItems = [
+      {
+        label: "Max Power",
+        value: processedValues.powerConsumption.maxFormatted,
+      },
+    ];
+
+    const validPowerItems = powerItems.filter((item) => item.value !== null);
+
+    if (validPowerItems.length > 0) {
+      specifications.push({
+        category: "Power Consumption",
+        items: validPowerItems,
+      });
+    }
+  }
+
+  // Return null if no valid specifications
+  if (specifications.length === 0 || specifications[0].items.length === 0) {
+    return null;
+  }
 
   return (
     <BasePage>
@@ -214,17 +260,14 @@ export const VideoWallConfig = ({ data }) => {
       <View style={styles.content}>
         <View style={styles.titleContainer}>
           <View style={styles.titleWrapper}>
-            {/* Dots kiri */}
             <View style={styles.dotsContainer}>
               <View style={styles.dot1} />
               <View style={styles.dot2} />
               <View style={styles.dot3} />
             </View>
 
-            {/* Title */}
             <Text style={styles.sectionTitle}>Specification</Text>
 
-            {/* Dots kanan */}
             <View style={styles.dotsContainer}>
               <View style={styles.dot3} />
               <View style={styles.dot2} />
@@ -236,55 +279,40 @@ export const VideoWallConfig = ({ data }) => {
         <View style={styles.tableContainer}>
           <View style={styles.table}>
             {specifications.map((section, sectionIndex) => (
-              <React.Fragment key={sectionIndex}>
-                {section.items.map((item, itemIndex) => (
-                  <View
-                    key={`${sectionIndex}-${itemIndex}`}
-                    style={[
-                      styles.tableRow,
-                      { minHeight: 25 },
-                      // Remove border bottom for last item in each section (except last section)
-                      itemIndex === section.items.length - 1 &&
-                        sectionIndex < specifications.length - 1 && {
-                          borderBottom: "1px solid #E5E7EB",
-                        },
-                      // Remove border bottom for last item in last section
-                      sectionIndex === specifications.length - 1 &&
-                        itemIndex === section.items.length - 1 && {
-                          borderBottom: "none",
-                        },
-                      // Remove border bottom for middle items in each section
-                      itemIndex > 0 &&
-                        itemIndex < section.items.length - 1 && {
-                          borderBottom: "none",
-                        },
-                    ]}
-                  >
-                    {itemIndex === 0 && (
+              <View
+                key={sectionIndex}
+                style={[
+                  styles.sectionContainer,
+                  sectionIndex === specifications.length - 1 &&
+                    styles.lastSection,
+                ]}
+              >
+                <View style={styles.sectionRow}>
+                  <View style={styles.mergedCategoryCell}>
+                    <Text style={styles.categoryText}>{section.category}</Text>
+                  </View>
+
+                  <View style={styles.itemsContainer}>
+                    {section.items.map((item, itemIndex) => (
                       <View
+                        key={itemIndex}
                         style={[
-                          styles.categoryCell,
-                          {
-                            height: section.items.length * 40,
-                          },
+                          styles.itemRow,
+                          itemIndex === section.items.length - 1 &&
+                            styles.lastItemRow,
                         ]}
                       >
-                        <Text style={styles.categoryText}>
-                          {section.category}
-                        </Text>
+                        <View style={styles.labelCell}>
+                          <Text style={styles.labelText}>{item.label}</Text>
+                        </View>
+                        <View style={styles.valueCell}>
+                          <Text style={styles.valueText}>{item.value}</Text>
+                        </View>
                       </View>
-                    )}
-
-                    <View style={styles.labelCell}>
-                      <Text style={styles.labelText}>{item.label}</Text>
-                    </View>
-
-                    <View style={styles.valueCell}>
-                      <Text style={styles.valueText}>{item.value}</Text>
-                    </View>
+                    ))}
                   </View>
-                ))}
-              </React.Fragment>
+                </View>
+              </View>
             ))}
           </View>
         </View>

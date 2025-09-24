@@ -45,7 +45,7 @@ export const UseCalculatorStore = create((set, get) => ({
     let cleanResolution = resolutionString.toLowerCase();
 
     // Extract numbers from string
-    const numberMatch = cleanResolution.match(/(\d+)\s*[x×]\s*(\d+)/);
+    const numberMatch = cleanResolution.match(/(\d+)\s*[xÃ—]\s*(\d+)/);
 
     if (numberMatch) {
       return {
@@ -72,15 +72,14 @@ export const UseCalculatorStore = create((set, get) => ({
       };
     }
 
-    // Handle Video Wall format: "≤180 W" or "<=180 W"
-    const videoWallPattern = /[≤<=]\s*(\d+)\s*W/i;
+    // Handle Video Wall format: "180 W" or "<=180 W"
+    const videoWallPattern = /[<≤=]\s*(\d+)\s*W/i;
     const videoWallMatch = powerString.match(videoWallPattern);
 
     if (videoWallMatch) {
       const maxPower = parseFloat(videoWallMatch[1]);
       return {
         max: maxPower,
-        average: maxPower * 0.6, // Assume average is 60% of max for video walls
       };
     }
 
@@ -286,7 +285,7 @@ export const UseCalculatorStore = create((set, get) => ({
     };
   },
 
-  // NEW: Calculate total resolution per cabinet/module
+  // Calculate total resolution per cabinet/module
   calculateResolutionPerUnit: (modelData, displayType, totalUnits) => {
     const resolutionField = get().getResolutionField(modelData, displayType);
     if (!resolutionField || totalUnits === 0) {
@@ -301,35 +300,7 @@ export const UseCalculatorStore = create((set, get) => ({
     };
   },
 
-  // NEW: Calculate total power consumption
-  calculateTotalPowerConsumption: (modelData, displayType, totalUnits) => {
-    if (!modelData.power_consumption || totalUnits === 0) {
-      return { max: 0, average: 0 };
-    }
-
-    const powerData = get().parsePowerConsumption(modelData.power_consumption);
-
-    // For LED displays, power consumption format is "W/m²" but calculation is per unit
-    if (displayType.includes("LED")) {
-      // Calculate total screen area in m²
-      const baseDimensions = get().getBaseDimensions(modelData, displayType);
-      const unitArea = baseDimensions.width * baseDimensions.height; // area per unit in m²
-      const totalArea = unitArea * totalUnits; // total area in m²
-
-      return {
-        max: powerData.max * totalUnits,
-        average: powerData.average * totalUnits,
-      };
-    }
-
-    // For Video Wall, power is per unit
-    return {
-      max: powerData.max * totalUnits,
-      average: powerData.average * totalUnits,
-    };
-  },
-
-  // NEW: Calculate total weight
+  // Calculate total weight
   calculateTotalWeight: (modelData, displayType, totalUnits) => {
     const weightField = get().getWeightField(modelData, displayType);
     if (!weightField || totalUnits === 0) {
@@ -340,7 +311,7 @@ export const UseCalculatorStore = create((set, get) => ({
     return unitWeight * totalUnits;
   },
 
-  // NEW: Get comprehensive calculation results
+  // Get comprehensive calculation results (without totalPower)
   getCalculationResults: (
     modelData,
     displayType,
@@ -372,11 +343,6 @@ export const UseCalculatorStore = create((set, get) => ({
       displayType,
       totalUnits
     );
-    const totalPower = get().calculateTotalPowerConsumption(
-      modelData,
-      displayType,
-      totalUnits
-    );
     const totalWeight = get().calculateTotalWeight(
       modelData,
       displayType,
@@ -388,7 +354,6 @@ export const UseCalculatorStore = create((set, get) => ({
       totalUnits,
       actualScreenSize,
       resolutionPerUnit,
-      totalPower,
       totalWeight,
       baseDimensions: { width: baseWidth, height: baseHeight },
     };

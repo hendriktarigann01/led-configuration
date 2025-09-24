@@ -14,7 +14,7 @@ export const model = [
         cabinet_pixels: "196608 dots",
         pixel_density: "640000 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 650W/m², Average; 300W/m²", // calculate (max and average values ​only)
+        power_consumption: "Max: 500W/m², Average; 700W/m²", // calculate (max and average values only)
         life_span: ">10,000 hours",
       },
       {
@@ -27,7 +27,7 @@ export const model = [
         cabinet_pixels: "129792 dots",
         pixel_density: "422500 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 650W/m², Average: 300W/m²",
+        power_consumption: "Max: 500W/m², Average: 700W/m²",
         life_span: ">10,000 hours",
       },
       {
@@ -40,7 +40,7 @@ export const model = [
         cabinet_pixels: "88752 dots",
         pixel_density: "288906 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 650W/m², Average; 300W/m²",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         life_span: ">10,000 hours",
       },
       {
@@ -53,7 +53,7 @@ export const model = [
         cabinet_pixels: "49152 dots",
         pixel_density: "160000 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 650W/m², Average; 300W/m²",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         life_span: ">10,000 hours",
       },
       {
@@ -66,7 +66,7 @@ export const model = [
         cabinet_pixels: "32448 dots",
         pixel_density: "105625 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 650W/m², Average; 300W/m²",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         life_span: ">10,000 hours",
       },
       {
@@ -79,7 +79,7 @@ export const model = [
         cabinet_pixels: "32448 dots",
         pixel_density: "105625 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 650W/m², Average; 300W/m²",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         life_span: ">10,000 hours",
       },
     ],
@@ -99,6 +99,7 @@ export const model = [
         module_pixels: "32768 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         application: "Indoor Fixed Installation",
       },
       {
@@ -111,6 +112,7 @@ export const model = [
         module_pixels: "31632 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         application: "Indoor Fixed Installation",
       },
       {
@@ -123,6 +125,7 @@ export const model = [
         module_pixels: "14792 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         application: "Indoor Fixed Installation",
       },
       {
@@ -135,6 +138,7 @@ export const model = [
         module_pixels: "8192 dots", // total pixel
         ic: "ICN2153",
         led_configuration: "3 in 1",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         application: "Indoor Fixed Installation",
       },
       {
@@ -147,6 +151,7 @@ export const model = [
         module_pixels: "5408 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         application: "Indoor Fixed Installation",
       },
       {
@@ -159,6 +164,7 @@ export const model = [
         module_pixels: "5408 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
+        power_consumption: "Max: 500W/m², Average; 700W/m²",
         application: "Indoor Fixed Installation",
       },
     ],
@@ -182,7 +188,7 @@ export const model = [
         application: "Outdoor Fixed Installation",
         cabinet_resolution: "312 X 312 dots", // calculate
         pixel_density: "105625 dots/m²",
-        power_consumption: "Max: 800W/m², Average: 300W/m²", // calculate (max and average values ​only)
+        power_consumption: "Max: 1000W/m², Average: 700W/m²", // calculate (max and average values only)
         cabinet_material: "Die-casting Magnesium Cabinet",
         life_span: "≥100,000 Hours",
         cabinet_weight: "25kg/pcs", // calculate
@@ -204,7 +210,7 @@ export const model = [
         application: "Outdoor Fixed Installation",
         cabinet_resolution: "240 X 240 dots",
         pixel_density: "62500 dots/m²",
-        power_consumption: "Max: 800W/m², Average: 300W/m²",
+        power_consumption: "Max: 1000W/m², Average: 700W/m²",
         cabinet_material: "Die-casting Magnesium Cabinet",
         life_span: "≥100,000 Hours",
         cabinet_weight: "25kg/pcs",
@@ -226,7 +232,7 @@ export const model = [
         application: "Outdoor Fixed Installation",
         cabinet_resolution: "192 X 192 dots",
         pixel_density: "40000 dots/m²",
-        power_consumption: "Max: 800W/m², Average: 300W/m²",
+        power_consumption: "Max: 1000W/m², Average: 700W/m²",
         cabinet_material: "Die-casting Magnesium Cabinet",
         life_span: "≥100,000 Hours",
         cabinet_weight: "25kg/pcs",
@@ -248,7 +254,7 @@ export const model = [
         application: "Outdoor Fixed Installation",
         cabinet_resolution: "120 X 120 dots",
         pixel_density: "15625 dots/m²",
-        power_consumption: "Max: 800W/m², Average: 300W/m²",
+        power_consumption: "Max: 1000W/m², Average: 700W/m²",
         cabinet_material: "Die-casting Magnesium Cabinet",
         life_span: "≥100,000 Hours",
         cabinet_weight: "25kg/pcs",
@@ -270,7 +276,7 @@ export const model = [
         application: "Outdoor Fixed Installation",
         cabinet_resolution: "96 X 96 dots",
         pixel_density: "15625 dots/m²",
-        power_consumption: "Max: 800W/m², Average: 300W/m²",
+        power_consumption: "Max: 1000W/m², Average: 700W/m²",
         cabinet_material: "Die-casting Magnesium Cabinet",
         life_span: "≥100,000 Hours",
         cabinet_weight: "25kg/pcs",
@@ -302,7 +308,7 @@ export const model = [
         audio_in_out: "Stereo Mini Jack",
         video_in: "HDMI1, HDMI2",
         power_supply: "AC 100 - 240 V / 50 - 60 Hz",
-        power_consumption: "≤180 W", // calculate (max and average values ​only)
+        power_consumption: "≤180 W", // calculate (max and average values only)
         standby_power: "3W",
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",

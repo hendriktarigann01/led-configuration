@@ -187,17 +187,17 @@ export const Header = () => {
         <label className="text-xs text-gray-600">{label}</label>
       </div>
       <div
-        className={`flex items-center justify-between w-[110px] h-8 lg:h-auto border rounded bg-white ${
+        className={`flex items-center justify-between w-[90px] lg:w-[110px] h-8 border rounded bg-white ${
           disabled ? "border-gray-200 bg-gray-50" : "border-gray-300"
         }`}
       >
         <button
           onClick={onDecrement}
           disabled={disabled || !canDecrease}
-          className={`px-3 py-2 ${
+          className={`px-2 py-2 ${
             disabled || !canDecrease
               ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-500 hover:text-gray-600 hover:bg-gray-50 cursor-pointer"
+              : "text-gray-500 hover:text-gray-600 cursor-pointer"
           }`}
         >
           −
@@ -224,7 +224,7 @@ export const Header = () => {
           className={`px-3 py-2 ${
             disabled || !canIncrease
               ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-500 hover:text-gray-600 hover:bg-gray-50 cursor-pointer"
+              : "text-gray-500 hover:text-gray-600 cursor-pointer"
           }`}
         >
           +
@@ -240,7 +240,7 @@ export const Header = () => {
           key={option}
           onClick={() => !disabled && onChange(option)}
           disabled={disabled}
-          className={`px-4 py-2 w-full text-xs transition-colors ${
+          className={`px-3 lg:px-4 py-2 w-full text-xs transition-colors ${
             disabled
               ? "cursor-not-allowed bg-gray-100 text-gray-400"
               : selected === option
@@ -368,7 +368,7 @@ export const Header = () => {
                 {/* Unit */}
                 <div className="flex flex-col space-y-1 ">
                   <label className="text-xs text-gray-600">Unit</label>
-                  <span className="px-4 py-2 text-xs rounded border bg-[#3AAFA9] text-white justify-center text-center w-[110px] lg:w-fit h-[32px] lg:h-auto">
+                  <span className="px-4 py-2 text-xs rounded border bg-[#3AAFA9] text-white justify-center text-center w-[90px] lg:w-fit h-[32px] lg:h-auto">
                     Meter
                   </span>
                 </div>

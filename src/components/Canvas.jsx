@@ -240,9 +240,12 @@ export const Canvas = () => {
     remainingWallHeight,
     remainingWallWidth,
   } = CanvasUtils.getMeasurementValues(
-    actualScreenSize,
-    wallWidth,
-    wallHeight,
+    {
+      width: headerStore.screenWidth,
+      height: headerStore.screenHeight,
+    },
+    headerStore.wallWidth,
+    headerStore.wallHeight,
     imageWidth,
     imageHeight,
     dynamicCanvas.width,
@@ -383,8 +386,9 @@ export const Canvas = () => {
     const baseClasses =
       "flex items-center justify-center text-sm w-5 h-5 border rounded";
     const enabledClasses =
-      "text-gray-500 border-gray-300 hover:bg-gray-50 hover:text-gray-600 cursor-pointer";
-    const disabledClasses = "text-gray-300 border-gray-200 cursor-not-allowed";
+      "text-gray-500 border-gray-500 bg-gray-50 hover:border-gray-600 hover:text-gray-600 cursor-pointer";
+    const disabledClasses =
+      "text-gray-300 bg-gray-50 border-gray-300 cursor-not-allowed";
 
     return (
       <button
@@ -400,14 +404,14 @@ export const Canvas = () => {
   };
 
   const renderWidthControls = () => (
-    <div className="absolute top-1 left-1/2 -translate-x-1/2 hidden lg:flex items-center space-x-2 z-30">
+    <div className="absolute top-1 left-1/2 -translate-x-1/2 hidden lg:flex items-center space-x-2 z-50">
       {renderControlButton(
         handleWidthDecrement,
         !configured || !canDecreaseScreenWidth || resolution !== "Custom",
         <Minus size={12} />
       )}
       <span className="text-xs text-gray-700 px-2 py-1 rounded">
-        {parseFloat(actualScreenSize.width.toFixed(3)).toString()} m
+        {parseFloat(headerStore.screenWidth.toFixed(3)).toString()} m
       </span>
       {renderControlButton(
         handleWidthIncrement,
@@ -418,7 +422,7 @@ export const Canvas = () => {
   );
 
   const renderHeightControls = () => (
-    <div className="absolute left-3 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center justify-center space-y-2 z-30">
+    <div className="absolute left-3 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center justify-center space-y-2 z-50">
       {renderControlButton(
         handleHeightIncrement,
         !configured || !canIncreaseScreenHeight || resolution !== "Custom",
@@ -429,7 +433,7 @@ export const Canvas = () => {
           className="text-xs text-gray-700 text-center rotate-180 px-2 py-1 rounded"
           style={{ writingMode: "vertical-lr" }}
         >
-          {parseFloat(actualScreenSize.height.toFixed(3)).toString()} m
+          {parseFloat(headerStore.screenHeight.toFixed(3)).toString()} m
         </span>
       </div>
       {renderControlButton(
@@ -471,47 +475,61 @@ export const Canvas = () => {
     );
   };
 
-  const renderCanvasPreview = () => (
-    <div
-      className="relative rounded-lg flex items-center justify-center overflow-hidden"
-      style={{
-        width: `${Math.min(
-          dynamicCanvas.width + 100,
-          window.innerWidth - 40
-        )}px`,
-        height: `${Math.min(
-          dynamicCanvas.height + 100,
-          window.innerHeight - 200
-        )}px`,
-        maxWidth: "100vw",
-        maxHeight: "80vh",
-      }}
-    >
-      {renderCanvasBackground()}
+  const renderCanvasPreview = () => {
+    // Gunakan dynamicCanvas yang sudah ada, hanya adjust container padding/margin
+    const screenWidth = window.innerWidth;
+    const isVerySmallScreen = screenWidth <= 375; // iPhone SE
+    const isSmallScreen = screenWidth <= 410; // Small phones
 
-      {/* Canvas to Wall Measurements */}
-      {CanvasUtils.renderCanvasToWallMeasurements(
-        dynamicCanvas.width,
-        dynamicCanvas.height
-      )}
+    const containerPadding = isVerySmallScreen ? 40 : isSmallScreen ? 60 : 100;
+    const screenMargin = isVerySmallScreen ? 15 : isSmallScreen ? 20 : 40;
 
-      {/* Wall Measurements */}
-      {CanvasUtils.renderWallMeasurements(
-        remainingWallHeight,
-        remainingWallWidth
-      )}
+    return (
+      <div
+        className="relative rounded-lg flex items-center justify-center overflow-hidden"
+        style={{
+          width: `${Math.min(
+            dynamicCanvas.width + containerPadding, // Gunakan dynamicCanvas yang sudah ada
+            screenWidth - screenMargin
+          )}px`,
+          height: `${Math.min(
+            dynamicCanvas.height + containerPadding, // Gunakan dynamicCanvas yang sudah ada
+            window.innerHeight - 50
+          )}px`,
+          maxWidth: "100vw",
+          maxHeight: isVerySmallScreen
+            ? "45vh"
+            : isSmallScreen
+            ? "50vh"
+            : "60vh",
+        }}
+      >
+        {renderCanvasBackground()}
 
-      {/* Info Displays */}
-      {CanvasUtils.renderInfoDisplays(getResolutionDisplayString())}
+        {/* Canvas to Wall Measurements */}
+        {CanvasUtils.renderCanvasToWallMeasurements(
+          dynamicCanvas.width,
+          dynamicCanvas.height
+        )}
 
-      {/* Screen Controls */}
-      {renderWidthControls()}
-      {renderHeightControls()}
+        {/* Wall Measurements */}
+        {CanvasUtils.renderWallMeasurements(
+          remainingWallHeight,
+          remainingWallWidth
+        )}
 
-      {/* Human Silhouette */}
-      {CanvasUtils.renderHumanSilhouette(finalHumanHeight, humanToWallRatio)}
-    </div>
-  );
+        {/* Info Displays */}
+        {CanvasUtils.renderInfoDisplays(getResolutionDisplayString())}
+
+        {/* Screen Controls */}
+        {renderWidthControls()}
+        {renderHeightControls()}
+
+        {/* Human Silhouette */}
+        {CanvasUtils.renderHumanSilhouette(finalHumanHeight, humanToWallRatio)}
+      </div>
+    );
+  };
 
   const renderEmptyCanvas = () => (
     <div className="relative w-full max-w-[400px] h-[250px] md:max-w-[550px] md:h-[320px] lg:max-w-[650px] lg:h-[380px] rounded-lg flex items-center justify-center overflow-hidden">
@@ -530,6 +548,18 @@ export const Canvas = () => {
     </div>
   );
 
+  console.log("Canvas values:", {
+    actualScreenWidth: actualScreenSize.width,
+    wallWidth: wallWidth,
+    calculated: (wallWidth - actualScreenSize.width) / 2,
+  });
+
+  console.log("Header values:", {
+    screenWidth: headerStore.screenWidth,
+    wallWidth: headerStore.wallWidth,
+    calculated: (headerStore.wallWidth - headerStore.screenWidth) / 2,
+  });
+
   return (
     <>
       <div className="flex-1 bg-gray-100 w-full h-80 lg:h-full px-2 mt-12 mb-28 lg:my-0 lg:p-4 flex items-center justify-center">
@@ -544,7 +574,7 @@ export const Canvas = () => {
             <>
               {/* Total Wall Width */}
               <div
-                className="absolute -top-3 left-[50%] border-t z-50 border-teal-400 pointer-events-none"
+                className="absolute top-0 lg:-top-3 left-[50%] border-t z-50 border-teal-400 pointer-events-none"
                 style={{
                   transform: "translateX(-50%)",
                   width: `${dynamicCanvas.width}px`,
@@ -555,13 +585,15 @@ export const Canvas = () => {
                   m
                 </span>
               </div>
-
               {/* Total Wall Height */}
               <div
-                className="absolute border-l left-[2%] md:left-[14.5%] lg:left-[22.5%] z-50 border-teal-400 pointer-events-none"
+                className="absolute border-l z-50 border-teal-400 pointer-events-none"
                 style={{
+                  // Hitung 2% dari lebar canvas, bukan viewport
+                  left: `calc(45% - ${dynamicCanvas.width / 2}px - ${
+                    dynamicCanvas.width * 0.02
+                  }px)`,
                   top: "50%",
-
                   transform: "translateY(-50%)",
                   height: `${dynamicCanvas.height}px`,
                 }}

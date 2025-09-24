@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
   sectionHeader: {
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
     width: "100%",
   },
   decorativeContainer: {
@@ -66,13 +65,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     lineHeight: 1,
   },
+
   // Product section
   modelSection: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    width: 487.5,
-    height: 277.5,
+    width: 450,
+    height: 250,
     alignSelf: "center",
     marginBottom: 5,
     gap: 20,
@@ -90,54 +90,47 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   productTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontFamily: "Helvetica",
     color: "#4B5563",
     marginBottom: 20,
   },
   productSpec: {
-    fontSize: 24,
-    color: "#374151",
+    fontSize: 16,
+    color: "#4B5563",
     fontFamily: "Helvetica-Bold",
   },
 
-  // Canvas section
-  canvasSection: {
-    marginBottom: 5,
-  },
+  // Canvas section - SIMPLIFIED with fixed dimensions
   canvasOuterWrapper: {
     position: "relative",
-    width: 487.5,
-    height: 277.5,
+    width: 310,
+    height: 212,
     alignSelf: "center",
-    marginHorizontal: 40,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
   canvasMainContainer: {
-    width: 390, // 487.5pt -20%
-    height: 222, // 277.5pt -20%
     border: "1pt solid #D1D5DB",
     padding: 15,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
     position: "relative",
-    // Ensure this has lower z-index than measurements
     zIndex: 1,
+    width: 235,
+    height: 140,
   },
 
   // Content styles
   contentWrapper: {
     position: "relative",
-    // Make sure this doesn't exceed container bounds
-    maxWidth: "100%",
-    maxHeight: "100%",
+    maxWidth: "90%",
+    maxHeight: "90%",
   },
   imageContainer: {
     position: "relative",
-    // Ensure image container doesn't exceed parent
     maxWidth: "100%",
     maxHeight: "100%",
   },
@@ -147,62 +140,72 @@ const styles = StyleSheet.create({
     objectFit: "fill",
   },
 
-  // Measurement lines - increased z-index
+  // Measurement lines
   measurementLine: {
     position: "absolute",
     borderColor: "#5EEAD4",
     borderStyle: "dashed",
-    zIndex: 150, // Increased z-index
+    zIndex: 50,
   },
 
-  // Text styles - increased z-index
+  // Text styles
   measurementText: {
     position: "absolute",
-    fontSize: 9,
+    fontSize: 8,
     color: "#374151",
     fontFamily: "Helvetica",
-    zIndex: 200, // Increased z-index
+    zIndex: 60,
   },
 
-  // Bezel styles - increased z-index and improved visibility
+  // Bezel styles
   bezelOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 50, // Proper z-index layering
+    zIndex: 30,
   },
   bezelLine: {
     position: "absolute",
-    borderColor: "#666666", // Changed to darker color for better visibility
-    borderStyle: "solid", // Changed from default to solid
-    opacity: 0.9, // Increased opacity for better visibility
+    backgroundColor: "#4A4A4A",
   },
 
-  // Info displays - increased z-index
+  // Info displays
   infoText: {
     position: "absolute",
     fontSize: 9,
     color: "#374151",
     fontFamily: "Helvetica",
-    zIndex: 200, // Increased z-index
+    zIndex: 60,
   },
 
-  // Human silhouette - highest z-index
+  // Human silhouette
   humanContainer: {
     position: "absolute",
-    right: -5,
-    bottom: 24,
-    width: 110,
+    right: 0,
+    bottom: -10,
+    width: 45,
     alignItems: "flex-end",
-    zIndex: 1000, // Highest z-index to ensure visibility
+    zIndex: 70,
   },
   humanImage: {
     width: "auto",
-    maxWidth: 80,
+    maxWidth: 35,
     objectFit: "contain",
   },
+
+  // Screen size control display styles
+  screenControlText: {
+    position: "absolute",
+    fontSize: 8,
+    color: "#374151",
+    fontFamily: "Helvetica",
+    zIndex: 60,
+    backgroundColor: "white",
+    borderRadius: 2,
+  },
+
   footer: {
     position: "absolute",
     bottom: 20,
@@ -251,12 +254,21 @@ export const ModelPage = ({ data }) => {
     return "Indoor LED Display";
   };
 
-  const getPixelPitch = () => {
-    if (!data) return "P 1.8";
-    return data.pixelPitch || (data.inch ? `${data.inch}"` : "1.8");
-  };
+const getPixelPitch = () => {
+  if (!data) return "P 1.8";
 
-  // Calculate canvas data using CanvasUtils
+  if (data.pixelPitch && data.pixelPitch !== "N/A") {
+    return data.pixelPitch;
+  }
+
+  if (data.inch && data.inch !== "N/A") {
+    return `${data.inch}`;
+  }
+
+  return "1.8";
+};
+
+  // SIMPLIFIED: Calculate canvas data with fixed container dimensions
   const calculateCanvasData = () => {
     if (!data || !data.calculations || !data.calculations.unitCount) {
       return {
@@ -267,6 +279,8 @@ export const ModelPage = ({ data }) => {
         contentSource: "/canvas/canvas-bg.png",
         isVideo: false,
         roomImageUrl: null,
+        screenWidth: 1,
+        screenHeight: 1,
       };
     }
 
@@ -295,58 +309,55 @@ export const ModelPage = ({ data }) => {
       contentSource,
       isVideo,
       roomImageUrl: data.roomImageUrl,
+      screenWidth,
+      screenHeight,
     };
   };
 
   const canvasData = calculateCanvasData();
 
-  // Fixed dimensions for PDF (since we can't use responsive functions)
-  const containerWidth = 310; // Fixed container width
-  const containerHeight = 168; // Fixed container height
+  // SIMPLIFIED: Fixed container dimensions
+  const containerWidth = 235;
+  const containerHeight = 140;
 
-  const maxWallWidth = 10;
-  const maxWallHeight = 5.5;
-
-  const wallScaleX = Math.min(1, canvasData.wallWidth / maxWallWidth);
-  const wallScaleY = Math.min(1, canvasData.wallHeight / maxWallHeight);
-
-  const effectiveCanvasWidth = containerWidth * wallScaleX;
-  const effectiveCanvasHeight = containerHeight * wallScaleY;
-
-  // Calculate screen to wall ratio
+  // SIMPLIFIED: Calculate image dimensions with fixed container
   const screenToWallRatioX =
     canvasData.actualScreenSize.width / canvasData.wallWidth;
   const screenToWallRatioY =
     canvasData.actualScreenSize.height / canvasData.wallHeight;
 
-  // Calculate image dimensions with proper constraints
-  const maxImageWidth = containerWidth - 30; // Account for padding
-  const maxImageHeight = containerHeight - 30; // Account for padding
+  const idealImageWidth = containerWidth * screenToWallRatioX * 0.8; // 80% of container for margin
+  const idealImageHeight = containerHeight * screenToWallRatioY * 0.8;
 
-  const calculatedImageWidth = effectiveCanvasWidth * screenToWallRatioX;
-  const calculatedImageHeight = effectiveCanvasHeight * screenToWallRatioY;
+  // Ensure minimum size and respect container limits
+  const imageWidth = Math.min(
+    Math.max(idealImageWidth, 50),
+    containerWidth * 0.9
+  );
+  const imageHeight = Math.min(
+    Math.max(idealImageHeight, 50),
+    containerHeight * 0.9
+  );
 
-  const imageWidth = Math.min(calculatedImageWidth, maxImageWidth);
-  const imageHeight = Math.min(calculatedImageHeight, maxImageHeight);
+  const { remainingWallHeight, remainingWallWidth } =
+    CanvasUtils.getMeasurementValues(
+      canvasData.actualScreenSize,
+      canvasData.wallWidth,
+      canvasData.wallHeight,
+      imageWidth,
+      imageHeight,
+      containerWidth,
+      containerHeight
+    );
 
-  // Calculate measurement values
-  const horizontalMeasureLength = Math.min(imageWidth, effectiveCanvasWidth);
-  const verticalMeasureLength = Math.min(imageHeight, effectiveCanvasHeight);
-  const remainingWallHeight =
-    (canvasData.wallHeight - canvasData.actualScreenSize.height) / 2;
-  const remainingWallWidth =
-    (canvasData.wallWidth - canvasData.actualScreenSize.width) / 2;
-
-  // Calculate human dimensions
-  const humanRealHeight = 1.7;
-  const humanToWallRatio = humanRealHeight / canvasData.wallHeight;
-  const humanDisplayHeight = containerHeight * humanToWallRatio;
-  const finalHumanHeight = Math.max(8, humanDisplayHeight);
+  const { finalHumanHeight } = CanvasUtils.getHumanDimensions(
+    canvasData.wallHeight
+  );
 
   // PDF Render functions
   const renderMeasurementLines = () => {
-    const verticalExtension = 150; // Reduced extension for PDF
-    const horizontalExtension = 170; // Reduced extension for PDF
+    const verticalExtension = 80;
+    const horizontalExtension = 100;
 
     return (
       <>
@@ -355,7 +366,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementLine,
             {
-              top: -verticalExtension,
+              top: -verticalExtension - 20,
               right: 0,
               width: 1,
               borderRightWidth: 1,
@@ -369,7 +380,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementLine,
             {
-              top: -verticalExtension,
+              top: -verticalExtension - 20,
               left: 0,
               width: 1,
               borderLeftWidth: 1,
@@ -410,33 +421,28 @@ export const ModelPage = ({ data }) => {
   };
 
   const renderBezelOverlay = () => {
-    if (
-      canvasData.cabinetCount.horizontal <= 1 &&
-      canvasData.cabinetCount.vertical <= 1
-    ) {
+    const { horizontal, vertical } = canvasData.cabinetCount;
+
+    if (horizontal <= 1 && vertical <= 1) {
       return null;
     }
 
     const bezels = [];
 
-    // Vertical bezel lines
-    if (canvasData.cabinetCount.horizontal > 1) {
-      for (let i = 1; i < canvasData.cabinetCount.horizontal; i++) {
-        const leftPosition = `${
-          (i / canvasData.cabinetCount.horizontal) * 100
-        }%`;
+    // Vertical bezel lines (between columns)
+    if (horizontal > 1) {
+      for (let i = 1; i < horizontal; i++) {
+        const leftPercentage = (i / horizontal) * 100;
         bezels.push(
           <View
             key={`vertical-${i}`}
             style={[
               styles.bezelLine,
               {
-                left: leftPosition,
+                left: `${leftPercentage}%`,
                 top: 0,
-                width: 2, // Increased width for better visibility
+                width: 3,
                 height: "100%",
-                backgroundColor: "#666666", // Added solid background color
-                borderLeftWidth: 0, // Remove border since we're using backgroundColor
               },
             ]}
           />
@@ -444,22 +450,20 @@ export const ModelPage = ({ data }) => {
       }
     }
 
-    // Horizontal bezel lines
-    if (canvasData.cabinetCount.vertical > 1) {
-      for (let i = 1; i < canvasData.cabinetCount.vertical; i++) {
-        const topPosition = `${(i / canvasData.cabinetCount.vertical) * 100}%`;
+    // Horizontal bezel lines (between rows)
+    if (vertical > 1) {
+      for (let i = 1; i < vertical; i++) {
+        const topPercentage = (i / vertical) * 100;
         bezels.push(
           <View
             key={`horizontal-${i}`}
             style={[
               styles.bezelLine,
               {
-                top: topPosition,
+                top: `${topPercentage}%`,
                 left: 0,
-                height: 2, // Increased height for better visibility
+                height: 3,
                 width: "100%",
-                backgroundColor: "#666666", // Added solid background color
-                borderTopWidth: 0, // Remove border since we're using backgroundColor
               },
             ]}
           />
@@ -478,11 +482,11 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementLine,
             {
-              bottom: 29,
+              bottom: 37,
               left: 0,
               height: 1,
               borderTopWidth: 1,
-              width: effectiveCanvasWidth + 80,
+              width: containerWidth,
             },
           ]}
         />
@@ -493,10 +497,10 @@ export const ModelPage = ({ data }) => {
             styles.measurementLine,
             {
               top: 0,
-              right: 50,
+              right: 38,
               width: 1,
               borderLeftWidth: 1,
-              height: effectiveCanvasHeight + 80,
+              height: containerHeight,
             },
           ]}
         />
@@ -512,7 +516,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementText,
             {
-              left: 2,
+              left: 10,
               top: "20%",
               transform: [{ rotate: "-180deg" }],
             },
@@ -525,8 +529,8 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementText,
             {
-              left: 2,
-              top: "70%",
+              left: 10,
+              bottom: "20%",
               transform: [{ rotate: "-180deg" }],
             },
           ]}
@@ -539,7 +543,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementText,
             {
-              top: 4,
+              top: 15,
               left: "20%",
             },
           ]}
@@ -551,12 +555,46 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementText,
             {
-              top: 4,
-              left: "70%",
+              top: 15,
+              right: "20%",
             },
           ]}
         >
           {remainingWallWidth.toFixed(2)} m
+        </Text>
+      </>
+    );
+  };
+
+  const renderScreenSizeControls = () => {
+    return (
+      <>
+        {/* Width Control Display */}
+        <Text
+          style={[
+            styles.screenControlText,
+            {
+              top: -40,
+              left: "45%",
+              transform: [{ translateX: "-50%" }],
+            },
+          ]}
+        >
+          {parseFloat(canvasData.screenWidth.toFixed(3)).toString()} m
+        </Text>
+
+        {/* Height Control Display */}
+        <Text
+          style={[
+            styles.screenControlText,
+            {
+              left: -60,
+              top: "50%",
+              transform: [{ translateY: "-50%" }, { rotate: "90deg" }],
+            },
+          ]}
+        >
+          {parseFloat(canvasData.screenHeight.toFixed(3)).toString()} m
         </Text>
       </>
     );
@@ -570,8 +608,8 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.infoText,
             {
-              bottom: 15,
-              right: -8,
+              bottom: 25,
+              right: 5,
             },
           ]}
         >
@@ -589,7 +627,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.humanImage,
             {
-              height: finalHumanHeight,
+              height: Math.max(finalHumanHeight),
             },
           ]}
         />
@@ -615,11 +653,10 @@ export const ModelPage = ({ data }) => {
     </View>
   );
 
-  // Main canvas render
   const renderCanvas = () => {
     return (
       <View style={styles.canvasOuterWrapper}>
-        {/* Main Canvas Container */}
+        {/* Main Canvas Container - Now with fixed dimensions */}
         <View style={styles.canvasMainContainer}>
           <View style={styles.contentWrapper}>
             <View
@@ -638,6 +675,7 @@ export const ModelPage = ({ data }) => {
               {renderBezelOverlay()}
             </View>
             {renderMeasurementLines()}
+            {renderScreenSizeControls()}
           </View>
         </View>
 

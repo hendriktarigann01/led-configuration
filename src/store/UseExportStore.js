@@ -64,7 +64,7 @@ export const UseExportStore = create((set, get) => ({
     return `${cleanProjectName}_${pixelPitch}_ByMJSolutionIndonesia`;
   },
 
-  // Get comprehensive data for PDF export
+  // Get comprehensive data for PDF export - UPDATED TO MATCH RESULTMODAL
   getPdfExportData: () => {
     const canvasStore = UseCanvasStore.getState();
     const calculatorStore = UseCalculatorStore.getState();
@@ -78,8 +78,8 @@ export const UseExportStore = create((set, get) => ({
     const modelData = navbarStore.selectedModel.modelData;
     const displayType = navbarStore.selectedModel.name;
 
+    // Get partner data for indoor displays
     let partnerData = null;
-
     if (
       navbarStore.selectedModel?.displayTypeId === 1 &&
       navbarStore.selectedModel?.subTypeId
@@ -93,7 +93,9 @@ export const UseExportStore = create((set, get) => ({
       }
     }
 
-    // Get calculation results
+    // ==== EXACT SAME CALCULATION AS RESULTMODAL ====
+
+    // Get comprehensive calculation results (same as ResultModal)
     const results = calculatorStore.getCalculationResults(
       modelData,
       displayType,
@@ -104,6 +106,77 @@ export const UseExportStore = create((set, get) => ({
     );
 
     if (!results) return null;
+
+    const {
+      unitCount,
+      totalUnits,
+      actualScreenSize,
+      resolutionPerUnit,
+      totalWeight,
+    } = results;
+
+    // Calculate SQM (same as ResultModal)
+    const sqm = (actualScreenSize.width * actualScreenSize.height).toFixed(2);
+
+    // Check if this is Video Wall type (same as ResultModal)
+    const isVideoWall = displayType.includes("Video Wall");
+
+    // Get pixel pitch or inch from model data (same as ResultModal)
+    const getPixelPitchOrInch = () => {
+      if (modelData.pixel_pitch) {
+        return modelData.pixel_pitch;
+      } else if (modelData.inch) {
+        return modelData.inch;
+      }
+      return "N/A";
+    };
+
+    // Get unit name based on display type (same as ResultModal)
+    const getUnitName = () => {
+      if (displayType.includes("Cabinet") || displayType.includes("Outdoor")) {
+        return "Cabinets";
+      } else if (displayType.includes("Module")) {
+        return "Module";
+      } else if (displayType.includes("Video Wall")) {
+        return "Units";
+      }
+      return "Units";
+    };
+
+    // Get resolution display format (same as ResultModal)
+    const getResolutionDisplay = () => {
+      const totalResolutionWidth =
+        unitCount.horizontal * (resolutionPerUnit.width / totalUnits);
+      const totalResolutionHeight =
+        unitCount.vertical * (resolutionPerUnit.height / totalUnits);
+      return `${Math.round(totalResolutionWidth)} x ${Math.round(
+        totalResolutionHeight
+      )}`;
+    };
+
+    // Get unit configuration (same as ResultModal)
+    const getUnitConfiguration = () => {
+      return `${unitCount.horizontal}(W) x ${unitCount.vertical}(H) ${totalUnits} Pcs`;
+    };
+
+    // Calculate power consumption using exact ResultModal formula
+    const calculatePowerConsumption = () => {
+      if (!modelData.power_consumption) return { max: 0, average: 0 };
+
+      const powerData = calculatorStore.parsePowerConsumption(
+        modelData.power_consumption
+      );
+
+      // Calculate screen area in square meters (same as ResultModal)
+      const screenArea = actualScreenSize.width * actualScreenSize.height;
+
+      return {
+        max: screenArea * powerData.max,
+        average: screenArea * powerData.average,
+      };
+    };
+
+    const powerConsumption = calculatePowerConsumption();
 
     // Determine component type based on display type
     let specConfigComponent = "IndoorOutdoorConfig";
@@ -116,32 +189,21 @@ export const UseExportStore = create((set, get) => ({
       specDefaultComponent = "Outdoor";
     }
 
-    // Get unit name for display
-    const getUnitName = () => {
-      if (displayType.includes("Cabinet") || displayType.includes("Outdoor")) {
-        return "Cabinets";
-      } else if (displayType.includes("Module")) {
-        return "Modules";
-      } else if (displayType.includes("Video Wall")) {
-        return "Units";
-      }
-      return "Units";
-    };
-
     return {
       // Form data
-      pdfTitle: state.generatePdfTitle(), // Auto-generated PDF title
+      pdfTitle: state.generatePdfTitle(),
       projectName: state.projectName,
       userName: state.userName,
-      phoneNumber: state.phoneNumber, // Added phone number to export data
+      phoneNumber: state.phoneNumber,
       email: state.email,
       exportDate: new Date().toLocaleDateString("id-ID"),
       exportTime: new Date().toLocaleTimeString("id-ID"),
 
-      // Model data
+      // Model data (same as ResultModal)
       modelData,
       displayType,
       modelName: navbarStore.selectedModel.model,
+      isVideoWall, // Add this flag for easy access
 
       // Screen configuration
       screenConfig: {
@@ -156,15 +218,45 @@ export const UseExportStore = create((set, get) => ({
         height: canvasStore.wallHeight.toFixed(1),
       },
 
-      // Calculation results
+      // ==== COMPLETE CALCULATION RESULTS (SAME AS RESULTMODAL) ====
       calculations: {
-        unitCount: results.unitCount,
-        totalUnits: results.totalUnits,
-        unitName: getUnitName(),
-        resolution: results.resolutionPerUnit,
-        power: results.totalPower,
-        weight: results.totalWeight,
-        baseDimensions: results.baseDimensions,
+        // Raw calculation results
+        unitCount,
+        totalUnits,
+        actualScreenSize,
+        resolutionPerUnit,
+        totalWeight,
+        baseDimensions: {
+          width: canvasStore.baseWidth,
+          height: canvasStore.baseHeight,
+        },
+
+        // Processed values (same format as ResultModal uses)
+        processedValues: {
+          pixelPitchOrInch: getPixelPitchOrInch(),
+          unitName: getUnitName(),
+          resolutionDisplay: getResolutionDisplay(),
+          unitConfiguration: getUnitConfiguration(),
+          sqm: sqm,
+          realSize: `${actualScreenSize.width.toFixed(3)} x ${actualScreenSize.height.toFixed(3)} `,
+          weight: totalWeight > 0 ? `${totalWeight.toFixed(0)} kg` : null,
+          powerConsumption: {
+            max: powerConsumption.max,
+            average: powerConsumption.average,
+            maxFormatted:
+              powerConsumption.max > 0
+                ? `${(
+                    Math.ceil(powerConsumption.max / 500) * 500
+                  ).toLocaleString("id-ID")} W`
+                : null,
+            averageFormatted:
+              powerConsumption.average > 0
+                ? `${(
+                    Math.ceil(powerConsumption.average / 500) * 500
+                  ).toLocaleString("id-ID")} W`
+                : null,
+          },
+        },
       },
 
       // Component selection for PDF
@@ -173,7 +265,7 @@ export const UseExportStore = create((set, get) => ({
         specDefault: specDefaultComponent,
       },
 
-      // Additional display info
+      // Additional display info (for other PDF components)
       inch: modelData.inch || "N/A",
       pixelPitch: modelData.pixel_pitch || "N/A",
       brightness: modelData.brightness || "N/A",

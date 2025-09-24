@@ -163,7 +163,7 @@ export const UseHeaderStore = create((set, get) => ({
         });
       }
     }
-  },  
+  },
 
   setScreenHeight: (height) => {
     const canvasStore = UseCanvasStore.getState();
@@ -196,7 +196,7 @@ export const UseHeaderStore = create((set, get) => ({
     const currentState = get();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    // Allow wall to be exactly same size as screen, but minimum 1m
+    // Issue 3 Fix: Wall can be reduced to screen size exactly, minimum 1m
     const minWidth = Math.max(1, actualScreenSize.width);
     const finalWidth = Math.max(minWidth, width);
 
@@ -209,7 +209,7 @@ export const UseHeaderStore = create((set, get) => ({
     const currentState = get();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    // Allow wall to be exactly same size as screen, but minimum 1m
+    // Issue 3 Fix: Wall can be reduced to screen size exactly, minimum 1m
     const minHeight = Math.max(1, actualScreenSize.height);
     const finalHeight = Math.max(minHeight, height);
 
@@ -293,7 +293,9 @@ export const UseHeaderStore = create((set, get) => ({
     const state = get();
     const canvasStore = UseCanvasStore.getState();
     const actualScreenSize = canvasStore.getActualScreenSize();
-    const minHeight = Math.max(1, actualScreenSize.height); // Wall can't be smaller than screen
+
+    // Issue 3 Fix: Use actualScreenSize directly, no buffer
+    const minHeight = Math.max(1, actualScreenSize.height);
     const newHeight = Math.max(
       minHeight,
       Number((state.wallHeight - 0.5).toFixed(1))
@@ -311,7 +313,9 @@ export const UseHeaderStore = create((set, get) => ({
     const state = get();
     const canvasStore = UseCanvasStore.getState();
     const actualScreenSize = canvasStore.getActualScreenSize();
-    const minWidth = Math.max(1, actualScreenSize.width); // Wall can't be smaller than screen
+
+    // Issue 3 Fix: Use actualScreenSize directly, no buffer
+    const minWidth = Math.max(1, actualScreenSize.width);
     const newWidth = Math.max(
       minWidth,
       Number((state.wallWidth - 0.5).toFixed(1))

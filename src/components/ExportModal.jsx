@@ -191,7 +191,7 @@ export const ExportModal = () => {
                 type="tel"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="ex. 0867xxxxxxxx"
+                placeholder="ex. 62815xxxxxxxx"
                 disabled={isProcessing}
                 className="w-full px-3 py-3 border border-gray-300 text-sm font-light lg:font-light rounded-md focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] focus:border-transparent placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
@@ -225,7 +225,7 @@ export const ExportModal = () => {
               >
                 {isProcessing ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    <div className="animate-spin cursor-not-allowed rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                     {isGenerating ? "Generating..." : "Preparing..."}
                   </>
                 ) : (

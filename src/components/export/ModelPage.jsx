@@ -157,44 +157,6 @@ const styles = StyleSheet.create({
     zIndex: 60,
   },
 
-  // Bezel styles
-  bezelOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 30,
-  },
-  bezelLine: {
-    position: "absolute",
-    backgroundColor: "#4A4A4A",
-  },
-
-  // Info displays
-  infoText: {
-    position: "absolute",
-    fontSize: 9,
-    color: "#374151",
-    fontFamily: "Helvetica",
-    zIndex: 60,
-  },
-
-  // Human silhouette
-  humanContainer: {
-    position: "absolute",
-    right: 0,
-    bottom: -10,
-    width: 45,
-    alignItems: "flex-end",
-    zIndex: 70,
-  },
-  humanImage: {
-    width: "auto",
-    maxWidth: 35,
-    objectFit: "contain",
-  },
-
   // Screen size control display styles
   screenControlText: {
     position: "absolute",
@@ -254,19 +216,19 @@ export const ModelPage = ({ data }) => {
     return "Indoor LED Display";
   };
 
-const getPixelPitch = () => {
-  if (!data) return "P 1.8";
+  const getPixelPitch = () => {
+    if (!data) return "P 1.8";
 
-  if (data.pixelPitch && data.pixelPitch !== "N/A") {
-    return data.pixelPitch;
-  }
+    if (data.pixelPitch && data.pixelPitch !== "N/A") {
+      return data.pixelPitch;
+    }
 
-  if (data.inch && data.inch !== "N/A") {
-    return `${data.inch}`;
-  }
+    if (data.inch && data.inch !== "N/A") {
+      return `${data.inch}`;
+    }
 
-  return "1.8";
-};
+    return "1.8";
+  };
 
   // SIMPLIFIED: Calculate canvas data with fixed container dimensions
   const calculateCanvasData = () => {
@@ -350,10 +312,6 @@ const getPixelPitch = () => {
       containerHeight
     );
 
-  const { finalHumanHeight } = CanvasUtils.getHumanDimensions(
-    canvasData.wallHeight
-  );
-
   // PDF Render functions
   const renderMeasurementLines = () => {
     const verticalExtension = 80;
@@ -418,60 +376,6 @@ const getPixelPitch = () => {
         />
       </>
     );
-  };
-
-  const renderBezelOverlay = () => {
-    const { horizontal, vertical } = canvasData.cabinetCount;
-
-    if (horizontal <= 1 && vertical <= 1) {
-      return null;
-    }
-
-    const bezels = [];
-
-    // Vertical bezel lines (between columns)
-    if (horizontal > 1) {
-      for (let i = 1; i < horizontal; i++) {
-        const leftPercentage = (i / horizontal) * 100;
-        bezels.push(
-          <View
-            key={`vertical-${i}`}
-            style={[
-              styles.bezelLine,
-              {
-                left: `${leftPercentage}%`,
-                top: 0,
-                width: 3,
-                height: "100%",
-              },
-            ]}
-          />
-        );
-      }
-    }
-
-    // Horizontal bezel lines (between rows)
-    if (vertical > 1) {
-      for (let i = 1; i < vertical; i++) {
-        const topPercentage = (i / vertical) * 100;
-        bezels.push(
-          <View
-            key={`horizontal-${i}`}
-            style={[
-              styles.bezelLine,
-              {
-                top: `${topPercentage}%`,
-                left: 0,
-                height: 3,
-                width: "100%",
-              },
-            ]}
-          />
-        );
-      }
-    }
-
-    return <View style={styles.bezelOverlay}>{bezels}</View>;
   };
 
   const renderCanvasToWallMeasurements = () => {
@@ -600,41 +504,6 @@ const getPixelPitch = () => {
     );
   };
 
-  const renderInfoDisplays = () => {
-    return (
-      <>
-        {/* Human Info Height */}
-        <Text
-          style={[
-            styles.infoText,
-            {
-              bottom: 25,
-              right: 5,
-            },
-          ]}
-        >
-          1,70 m
-        </Text>
-      </>
-    );
-  };
-
-  const renderHumanSilhouette = () => {
-    return (
-      <View style={styles.humanContainer}>
-        <Image
-          src="/human.png"
-          style={[
-            styles.humanImage,
-            {
-              height: Math.max(finalHumanHeight),
-            },
-          ]}
-        />
-      </View>
-    );
-  };
-
   const renderDecorativeDots = (label) => (
     <View style={styles.sectionHeader}>
       <View style={styles.decorativeContainer}>
@@ -656,7 +525,7 @@ const getPixelPitch = () => {
   const renderCanvas = () => {
     return (
       <View style={styles.canvasOuterWrapper}>
-        {/* Main Canvas Container - Now with fixed dimensions */}
+        {/* Main Canvas Container */}
         <View style={styles.canvasMainContainer}>
           <View style={styles.contentWrapper}>
             <View
@@ -672,7 +541,6 @@ const getPixelPitch = () => {
                 src={canvasData.contentSource}
                 style={styles.contentImage}
               />
-              {renderBezelOverlay()}
             </View>
             {renderMeasurementLines()}
             {renderScreenSizeControls()}
@@ -681,8 +549,6 @@ const getPixelPitch = () => {
 
         {renderCanvasToWallMeasurements()}
         {renderWallMeasurements()}
-        {renderInfoDisplays()}
-        {renderHumanSilhouette()}
       </View>
     );
   };

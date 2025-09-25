@@ -95,7 +95,6 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 11,
-    fontWeight: "bold",
     color: "#374151",
     textAlign: "left",
   },

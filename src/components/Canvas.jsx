@@ -68,9 +68,9 @@ export const Canvas = () => {
   // FIXED: Improved Dynamic Canvas Size Calculator
   const getDynamicCanvasSize = () => {
     const maxWidth =
-      window.innerWidth < 768 ? 300 : window.innerWidth < 1024 ? 450 : 550;
+      window.innerWidth < 768 ? 230 : window.innerWidth < 1024 ? 450 : 550;
     const maxHeight =
-      window.innerWidth < 768 ? 180 : window.innerWidth < 1024 ? 250 : 300;
+      window.innerWidth < 768 ? 138 : window.innerWidth < 1024 ? 250 : 300;
 
     // Calculate wall aspect ratio
     const wallAspectRatio = wallWidth / wallHeight;
@@ -404,7 +404,7 @@ export const Canvas = () => {
   };
 
   const renderWidthControls = () => (
-    <div className="absolute top-1 left-1/2 -translate-x-1/2 hidden lg:flex items-center space-x-2 z-50">
+    <div className="absolute top-3 left-1/2 -translate-x-1/2 hidden lg:flex items-center space-x-2 z-50">
       {renderControlButton(
         handleWidthDecrement,
         !configured || !canDecreaseScreenWidth || resolution !== "Custom",
@@ -481,7 +481,7 @@ export const Canvas = () => {
     const isVerySmallScreen = screenWidth <= 375; // iPhone SE
     const isSmallScreen = screenWidth <= 410; // Small phones
 
-    const containerPadding = isVerySmallScreen ? 40 : isSmallScreen ? 60 : 100;
+    const containerPadding = isVerySmallScreen ? 90 : isSmallScreen ? 60 : 100;
     const screenMargin = isVerySmallScreen ? 15 : isSmallScreen ? 20 : 40;
 
     return (
@@ -574,7 +574,7 @@ export const Canvas = () => {
             <>
               {/* Total Wall Width */}
               <div
-                className="absolute top-0 lg:-top-3 left-[50%] border-t z-50 border-teal-400 pointer-events-none"
+                className="absolute -top-3 lg:-top-3 left-[50%] border-t z-50 border-teal-400 pointer-events-none"
                 style={{
                   transform: "translateX(-50%)",
                   width: `${dynamicCanvas.width}px`,
@@ -589,9 +589,12 @@ export const Canvas = () => {
               <div
                 className="absolute border-l z-50 border-teal-400 pointer-events-none"
                 style={{
-                  // Hitung 2% dari lebar canvas, bukan viewport
                   left: `calc(45% - ${dynamicCanvas.width / 2}px - ${
-                    dynamicCanvas.width * 0.02
+                    window.innerWidth < 350
+                      ? dynamicCanvas.width * 0.11  
+                      : window.innerWidth <= 768
+                      ? dynamicCanvas.width * 0.15
+                      : dynamicCanvas.width * 0.02
                   }px)`,
                   top: "50%",
                   transform: "translateY(-50%)",

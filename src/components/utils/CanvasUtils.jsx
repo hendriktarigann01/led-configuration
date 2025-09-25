@@ -14,7 +14,7 @@ export const CanvasUtils = {
 
     switch (deviceType) {
       case "mobile":
-        return { containerWidth: 300, containerHeight: 180 };
+        return { containerWidth: 230, containerHeight: 138 };
       case "tablet":
         return { containerWidth: 450, containerHeight: 250 };
       default: // desktop
@@ -265,102 +265,102 @@ export const CanvasUtils = {
     );
   },
 
-renderCanvasToWallMeasurements: (
-  effectiveCanvasWidth,
-  effectiveCanvasHeight
-) => {
-  const deviceType = CanvasUtils.getDeviceType();
+  renderCanvasToWallMeasurements: (
+    effectiveCanvasWidth,
+    effectiveCanvasHeight
+  ) => {
+    const deviceType = CanvasUtils.getDeviceType();
 
-  // Extensions tetap sama seperti original
-  let horizontalExtension, verticalExtension;
-  switch (deviceType) {
-    case "mobile":
-      horizontalExtension = 100;
-      verticalExtension = 100;
-      break;
-    case "tablet":
-      horizontalExtension = 80;
-      verticalExtension = 80;
-      break;
-    default: // desktop
-      horizontalExtension = 100;
-      verticalExtension = 100;
-  }
+    // Extensions tetap sama seperti original
+    let horizontalExtension, verticalExtension;
+    switch (deviceType) {
+      case "mobile":
+        horizontalExtension = 100;
+        verticalExtension = 100;
+        break;
+      case "tablet":
+        horizontalExtension = 80;
+        verticalExtension = 80;
+        break;
+      default: // desktop
+        horizontalExtension = 100;
+        verticalExtension = 100;
+    }
 
-  // KUNCI SOLUSI: Hitung dynamic offset berdasarkan effectiveCanvasWidth
-  const getVerticalOffset = () => {
-    // Dapatkan container width untuk setiap device
-    const { containerWidth } = CanvasUtils.getResponsiveContainerDimensions();
-    
-    // Hitung selisih antara container width dan effective canvas width
-    const widthDifference = effectiveCanvasWidth;
-    
-    // Base offset untuk setiap device
-    const baseOffset = deviceType === "mobile" ? 45 : 
-                      deviceType === "tablet" ? 52 : 50;
-    
-    // Offset dinamis = base offset + adjustment berdasarkan canvas size
-    return baseOffset + widthDifference;
-  };
+    // KUNCI SOLUSI: Hitung dynamic offset berdasarkan effectiveCanvasWidth
+    const getVerticalOffset = () => {
+      // Dapatkan container width untuk setiap device
+      const { containerWidth } = CanvasUtils.getResponsiveContainerDimensions();
 
-  const dynamicOffset = getVerticalOffset();
+      // Hitung selisih antara container width dan effective canvas width
+      const widthDifference = effectiveCanvasWidth;
 
-  return (
-    <>
-      {/* Horizontal Bottom Measure Screen - TIDAK BERUBAH */}
-      <div
-        className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
-        style={{
-          bottom: "51px",
-          transform: "translateX(-75%) translateY(100%)",
-          width: `${effectiveCanvasWidth + horizontalExtension}px`,
-        }}
-      />
+      // Base offset untuk setiap device
+      const baseOffset =
+        deviceType === "mobile" ? 48 : deviceType === "tablet" ? 50 : 50;
 
-      {/* Horizontal Top Measure Screen - TIDAK BERUBAH */}
-      <div
-        className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
-        style={{
-          top: "50px",
-          transform: "translateX(-75%) translateY(100%)",
-          width: `${effectiveCanvasWidth + horizontalExtension}px`,
-        }}
-      />
+      // Offset dinamis = base offset + adjustment berdasarkan canvas size
+      return baseOffset + widthDifference;
+    };
 
-      {/* PERBAIKAN: Vertical Right Measure Screen - RESPONSIF */}
-      <div
-        className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
-        style={{
-          right: `${dynamicOffset}px`, // ✅ DINAMIS berdasarkan canvas size
-          transform: "translateX(100%) translateY(-75%)",
-          height: `${effectiveCanvasHeight + verticalExtension}px`,
-        }}
-      />
+    const dynamicOffset = getVerticalOffset();
 
-      {/* PERBAIKAN: Vertical Left Measure Screen - RESPONSIF */}
-      <div
-        className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
-        style={{
-          left: `${dynamicOffset}px`, // ✅ DINAMIS berdasarkan canvas size  
-          transform: "translateX(-100%) translateY(-75%)",
-          height: `${effectiveCanvasHeight + verticalExtension}px`,
-        }}
-      />
-    </>
-  );
-},
+    return (
+      <>
+        {/* Horizontal Bottom Measure Screen - TIDAK BERUBAH */}
+        <div
+          className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
+          style={{
+            bottom: "51px",
+            transform: "translateX(-75%) translateY(100%)",
+            width: `${effectiveCanvasWidth + horizontalExtension}px`,
+          }}
+        />
+
+        {/* Horizontal Top Measure Screen - TIDAK BERUBAH */}
+        <div
+          className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
+          style={{
+            top: "50px",
+            transform: "translateX(-75%) translateY(100%)",
+            width: `${effectiveCanvasWidth + horizontalExtension}px`,
+          }}
+        />
+
+        {/* PERBAIKAN: Vertical Right Measure Screen - RESPONSIF */}
+        <div
+          className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
+          style={{
+            right: `${dynamicOffset}px`, 
+            transform: "translateX(100%) translateY(-75%)",
+            height: `${effectiveCanvasHeight + verticalExtension}px`,
+          }}
+        />
+
+        {/* PERBAIKAN: Vertical Left Measure Screen - RESPONSIF */}
+        <div
+          className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
+          style={{
+            left: `${dynamicOffset}px`, 
+            transform: "translateX(-100%) translateY(-75%)",
+            height: `${effectiveCanvasHeight + verticalExtension}px`,
+          }}
+        />
+      </>
+    );
+  },
   // Render wall measurements with centered values and responsive positioning
   renderWallMeasurements: (remainingWallHeight, remainingWallWidth) => {
     const deviceType = CanvasUtils.getDeviceType();
 
     // Adjust positioning based on device
-    const leftOffset = deviceType === "mobile" ? "left-2" : "left-4";
+    const leftOffset = deviceType === "mobile" ? "left-4" : "left-4";
     const topOffset =
       deviceType === "mobile"
-        ? "top-8"
+        ? "top-4"
         : deviceType === "tablet"
-        ? "top-1.5"
-        : "top-2 lg:top-2";
+        ? "top-4  "
+        : "top-4";
 
     return (
       <>
@@ -422,7 +422,7 @@ renderCanvasToWallMeasurements: (
     // Adjust positioning and spacing based on device
     const leftPosition = deviceType === "mobile" ? "left-12" : "left-13";
     const rightPosition = deviceType === "mobile" ? "right-0" : "right-1";
-    const bottomPosition = deviceType === "mobile" ? "bottom-5" : "bottom-1";
+    const bottomPosition = deviceType === "mobile" ? "bottom-5" : "bottom-5";
 
     return (
       <>
@@ -458,8 +458,8 @@ renderCanvasToWallMeasurements: (
         maxWidth = "50px";
         break;
       case "tablet":
-        rightPosition = "-right-35";
-        bottomPosition = "bottom-8";
+        rightPosition = "-right-37";
+        bottomPosition = "bottom-10";
         maxWidth = "65px";
         break;
       default: // desktop

@@ -100,8 +100,6 @@ const styles = StyleSheet.create({
     color: "#4B5563",
     fontFamily: "Helvetica-Bold",
   },
-
-  // Canvas section - SIMPLIFIED with fixed dimensions
   canvasOuterWrapper: {
     position: "relative",
     width: 388,
@@ -122,7 +120,6 @@ const styles = StyleSheet.create({
     width: 295,
     height: 175,
   },
-
   // Content styles
   contentWrapper: {
     position: "relative",
@@ -155,6 +152,62 @@ const styles = StyleSheet.create({
     color: "#374151",
     fontFamily: "Helvetica",
     zIndex: 60,
+  },
+
+  // BEZEL STYLES - PRODUCTION VERSION (MENGGUNAKAN BORDER)
+  bezelContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 999,
+  },
+
+  bezelVertical: {
+    position: "absolute",
+    top: 0,
+    width: 1, // ✅ BERIKAN WIDTH EKSPLISIT
+    height: "100%",
+    backgroundColor: "#D9D9D9", // ✅ GUNAKAN BACKGROUND COLOR SEBAGAI ALTERNATIF
+    opacity: 0.6,
+    zIndex: 999,
+  },
+
+  bezelHorizontal: {
+    position: "absolute",
+    left: 0,
+    width: "100%",
+    height: 1, // ✅ BERIKAN HEIGHT EKSPLISIT
+    backgroundColor: "#D9D9D9", // ✅ GUNAKAN BACKGROUND COLOR SEBAGAI ALTERNATIF
+    opacity: 0.6,
+    zIndex: 999,
+  },
+
+  // Info displays
+  infoText: {
+    position: "absolute",
+    fontSize: 9,
+    color: "#374151",
+    fontFamily: "Helvetica",
+    zIndex: 60,
+  },
+
+  // Human silhouette
+  humanContainer: {
+    position: "absolute",
+    right: 0,
+    bottom: -10,
+    width: 45,
+    height: 140,
+    alignItems: "center",
+    zIndex: 70,
+  },
+  humanImage: {
+    width: "auto",
+    height: "auto",
+    objectFit: "contain",
+    alignItems: "flex-end",
   },
 
   // Screen size control display styles
@@ -312,6 +365,64 @@ export const ModelPage = ({ data }) => {
       containerHeight
     );
 
+  const { finalHumanHeight } = CanvasUtils.getHumanDimensions(
+    canvasData.wallHeight
+  );
+
+  // BEZEL RENDER FUNCTION - PRODUCTION VERSION
+  const renderBezelOverlay = () => {
+    const { horizontal, vertical } = canvasData.cabinetCount;
+
+    console.log("PDF Cabinet Count:", { horizontal, vertical });
+
+    if (horizontal <= 1 && vertical <= 1) {
+      return null;
+    }
+
+    const bezels = [];
+
+    // Generate vertical bezels (antara kolom)
+    if (horizontal > 1) {
+      for (let i = 1; i < horizontal; i++) {
+        const leftPercentage = (i / horizontal) * 100;
+        bezels.push(
+          <View
+            key={`vertical-${i}`}
+            style={[
+              styles.bezelVertical,
+              {
+                left: `${leftPercentage}%`,
+                // ✅ HAPUS transform yang bermasalah
+                marginLeft: -0.5, // ✅ GUNAKAN MARGIN SEBAGAI ALTERNATIF
+              },
+            ]}
+          />
+        );
+      }
+    }
+
+    // Generate horizontal bezels (antara baris)
+    if (vertical > 1) {
+      for (let i = 1; i < vertical; i++) {
+        const topPercentage = (i / vertical) * 100;
+        bezels.push(
+          <View
+            key={`horizontal-${i}`}
+            style={[
+              styles.bezelHorizontal,
+              {
+                top: `${topPercentage}%`,
+                marginTop: -0.5, // ✅ GUNAKAN MARGIN SEBAGAI ALTERNATIF
+              },
+            ]}
+          />
+        );
+      }
+    }
+
+    return <View style={styles.bezelContainer}>{bezels}</View>;
+  };
+
   // PDF Render functions
   const renderMeasurementLines = () => {
     const verticalExtension = 80;
@@ -386,7 +497,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.measurementLine,
             {
-              bottom: 45,
+              bottom: 37,
               left: 0,
               height: 1,
               borderTopWidth: 1,
@@ -401,7 +512,7 @@ export const ModelPage = ({ data }) => {
             styles.measurementLine,
             {
               top: 0,
-              right: 47,
+              right: 38,
               width: 1,
               borderLeftWidth: 1,
               height: containerHeight,
@@ -478,7 +589,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.screenControlText,
             {
-              top: -55,
+              top: -40,
               left: "45%",
               transform: [{ translateX: "-50%" }],
             },
@@ -492,7 +603,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.screenControlText,
             {
-              left: -80,
+              left: -60,
               top: "50%",
               transform: [{ translateY: "-50%" }, { rotate: "90deg" }],
             },
@@ -501,6 +612,41 @@ export const ModelPage = ({ data }) => {
           {parseFloat(canvasData.screenHeight.toFixed(3)).toString()} m
         </Text>
       </>
+    );
+  };
+
+  const renderInfoDisplays = () => {
+    return (
+      <>
+        {/* Human Info Height */}
+        <Text
+          style={[
+            styles.infoText,
+            {
+              bottom: 25,
+              right: 5,
+            },
+          ]}
+        >
+          1,70 m
+        </Text>
+      </>
+    );
+  };
+
+  const renderHumanSilhouette = () => {
+    return (
+      <View style={styles.humanContainer}>
+        <Image
+          src="/human.png"
+          style={[
+            styles.humanImage,
+            {
+              height: Math.max(finalHumanHeight, 40),
+            },
+          ]}
+        />
+      </View>
     );
   };
 
@@ -541,6 +687,8 @@ export const ModelPage = ({ data }) => {
                 src={canvasData.contentSource}
                 style={styles.contentImage}
               />
+              {/* BEZEL OVERLAY - StyleSheet Version */}
+              {renderBezelOverlay()}
             </View>
             {renderMeasurementLines()}
             {renderScreenSizeControls()}
@@ -549,6 +697,8 @@ export const ModelPage = ({ data }) => {
 
         {renderCanvasToWallMeasurements()}
         {renderWallMeasurements()}
+        {renderInfoDisplays()}
+        {renderHumanSilhouette()}
       </View>
     );
   };

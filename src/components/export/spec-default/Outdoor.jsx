@@ -235,7 +235,7 @@ export const Outdoor = ({ data }) => {
         },
         {
           label: "Life span",
-          value: "≥ 100,000 Hours",
+          value: ">100,000 Hours",
         },
         {
           label: "Cabinet weight",

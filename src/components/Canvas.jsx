@@ -468,7 +468,7 @@ export const Canvas = () => {
         }}
       >
         {/* LED Screen Content */}
-        <div className="relative z-20 pointer-events-none">
+        <div className="relative z-20 pointer-events-none mt-1.5">
           {isVideo ? renderVideoContent() : renderImageContent()}
         </div>
       </div>

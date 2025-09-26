@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
 import { UseModalStore } from "../store/UseModalStore";
 
@@ -89,6 +89,7 @@ const getTableRowData = (config, selectedDisplayType, selectedSubTypeId) => {
 
 export const ConfigurationModal = () => {
   const [expandedRow, setExpandedRow] = useState(null);
+  const scrollContainerRef = useRef(null);
 
   const {
     isOpen,
@@ -129,6 +130,22 @@ export const ConfigurationModal = () => {
   // Toggle row expansion for mobile
   const toggleRowExpansion = (index) => {
     setExpandedRow(expandedRow === index ? null : index);
+  };
+
+  // Handle model selection with scroll position preservation
+  const handleSelectModel = (config) => {
+    // Store current scroll position
+    const currentScrollTop = scrollContainerRef.current?.scrollTop || 0;
+    
+    // Select the model
+    selectModel(config);
+    
+    // Restore scroll position after state update
+    setTimeout(() => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = currentScrollTop;
+      }
+    }, 0);
   };
 
   // Get all row data for expanded view
@@ -365,6 +382,7 @@ export const ConfigurationModal = () => {
       </p>
       <div className="bg-white overflow-hidden mb-4 flex-1 mt-0 lg:mt-10">
         <div
+          ref={scrollContainerRef}
           className="overflow-y-auto max-h-96 lg:max-h-full 
                     [&::-webkit-scrollbar]:w-1 
                     [&::-webkit-scrollbar-track]:bg-gray-200 
@@ -392,7 +410,7 @@ export const ConfigurationModal = () => {
               {configurations.map((config, index) => (
                 <React.Fragment key={index}>
                   <tr
-                    onClick={() => selectModel(config)}
+                    onClick={() => handleSelectModel(config)}
                     className={`cursor-pointer transition-colors ${
                       selectedModel === config
                         ? "bg-[#E0F2F0]"
@@ -432,7 +450,7 @@ export const ConfigurationModal = () => {
                   {/* Mobile: Expanded row details */}
                   {expandedRow === index && window.innerWidth < 1024 && (
                     <tr
-                      onClick={() => selectModel(config)}
+                      onClick={() => handleSelectModel(config)}
                       className={`lg:hidden cursor-pointer transition-colors ${
                         selectedModel === config
                           ? "bg-[#E0F2F0]"

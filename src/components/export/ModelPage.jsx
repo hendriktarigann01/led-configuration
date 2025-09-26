@@ -100,8 +100,6 @@ const styles = StyleSheet.create({
     color: "#4B5563",
     fontFamily: "Helvetica-Bold",
   },
-
-  // Canvas section - SIMPLIFIED with fixed dimensions
   canvasOuterWrapper: {
     position: "relative",
     width: 388,
@@ -122,7 +120,6 @@ const styles = StyleSheet.create({
     width: 295,
     height: 175,
   },
-
   // Content styles
   contentWrapper: {
     position: "relative",
@@ -157,6 +154,57 @@ const styles = StyleSheet.create({
     zIndex: 60,
   },
 
+  // BEZEL STYLES - PRODUCTION VERSION (MENGGUNAKAN BORDER)
+  bezelContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 999,
+  },
+
+  bezelVertical: {
+    position: "absolute",
+    top: 0,
+    width: 1, // ✅ BERIKAN WIDTH EKSPLISIT
+    height: "100%",
+    backgroundColor: "#D9D9D9", // ✅ GUNAKAN BACKGROUND COLOR SEBAGAI ALTERNATIF
+    opacity: 0.6,
+    zIndex: 999,
+  },
+
+  bezelHorizontal: {
+    position: "absolute",
+    left: 0,
+    width: "100%",
+    height: 1, // ✅ BERIKAN HEIGHT EKSPLISIT
+    backgroundColor: "#D9D9D9", // ✅ GUNAKAN BACKGROUND COLOR SEBAGAI ALTERNATIF
+    opacity: 0.6,
+    zIndex: 999,
+  },
+  infoText: {
+    position: "absolute",
+    fontSize: 9,
+    color: "#374151",
+    fontFamily: "Helvetica",
+    zIndex: 60,
+  },
+  humanContainer: {
+    position: "absolute",
+    right: 0,
+    bottom: 45,
+    width: 45,
+    height: 175,
+    zIndex: 70,
+    alignItems: "center",
+    justifyContent: "flex-end", // ✅ backup align
+  },
+  humanImage: {
+    width: 40,
+    height: "auto",
+    objectFit: "contain",
+  },
   // Screen size control display styles
   screenControlText: {
     position: "absolute",
@@ -311,6 +359,67 @@ export const ModelPage = ({ data }) => {
       containerWidth,
       containerHeight
     );
+
+  let { finalHumanHeight } = CanvasUtils.getHumanDimensions(
+    canvasData.wallHeight
+  );
+
+  // kurangi 120 px
+  finalHumanHeight = Math.max(finalHumanHeight - 80, 0);
+
+  // BEZEL RENDER FUNCTION - PRODUCTION VERSION
+  const renderBezelOverlay = () => {
+    const { horizontal, vertical } = canvasData.cabinetCount;
+
+    console.log("PDF Cabinet Count:", { horizontal, vertical });
+
+    if (horizontal <= 1 && vertical <= 1) {
+      return null;
+    }
+
+    const bezels = [];
+
+    // Generate vertical bezels (antara kolom)
+    if (horizontal > 1) {
+      for (let i = 1; i < horizontal; i++) {
+        const leftPercentage = (i / horizontal) * 100;
+        bezels.push(
+          <View
+            key={`vertical-${i}`}
+            style={[
+              styles.bezelVertical,
+              {
+                left: `${leftPercentage}%`,
+                // ✅ HAPUS transform yang bermasalah
+                marginLeft: -0.5, // ✅ GUNAKAN MARGIN SEBAGAI ALTERNATIF
+              },
+            ]}
+          />
+        );
+      }
+    }
+
+    // Generate horizontal bezels (antara baris)
+    if (vertical > 1) {
+      for (let i = 1; i < vertical; i++) {
+        const topPercentage = (i / vertical) * 100;
+        bezels.push(
+          <View
+            key={`horizontal-${i}`}
+            style={[
+              styles.bezelHorizontal,
+              {
+                top: `${topPercentage}%`,
+                marginTop: -0.5, // ✅ GUNAKAN MARGIN SEBAGAI ALTERNATIF
+              },
+            ]}
+          />
+        );
+      }
+    }
+
+    return <View style={styles.bezelContainer}>{bezels}</View>;
+  };
 
   // PDF Render functions
   const renderMeasurementLines = () => {
@@ -470,7 +579,7 @@ export const ModelPage = ({ data }) => {
     );
   };
 
-  const renderScreenSizeControls = () => {
+ const renderScreenSizeControls = () => {
     return (
       <>
         {/* Width Control Display */}
@@ -478,7 +587,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.screenControlText,
             {
-              top: -55,
+              top: 12,
               left: "45%",
               transform: [{ translateX: "-50%" }],
             },
@@ -492,7 +601,7 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.screenControlText,
             {
-              left: -80,
+              left: 10,
               top: "50%",
               transform: [{ translateY: "-50%" }, { rotate: "90deg" }],
             },
@@ -503,6 +612,46 @@ export const ModelPage = ({ data }) => {
       </>
     );
   };
+
+const renderInfoDisplays = () => {
+  return (
+    <>
+      {/* Human Info Height - Positioned consistently with human silhouette */}
+      <Text
+        style={[
+          styles.infoText,
+          {
+            bottom: 25,
+            right: 7, // Sejajarkan dengan base human silhouette
+          },
+        ]}
+      >
+        1,70 m
+      </Text>
+   
+    </>
+  );
+};
+
+const renderHumanSilhouette = () => {
+  const imageHeight = Math.max(finalHumanHeight, 35);
+
+  return (
+    <View style={styles.humanContainer}>
+      <Image
+        src="/human.png"
+        style={[
+          styles.humanImage,
+          {
+            height: imageHeight,
+            position: "absolute",
+            bottom: 0,   // ✅ Selalu nempel di bawah
+          },
+        ]}
+      />
+    </View>
+  );
+};
 
   const renderDecorativeDots = (label) => (
     <View style={styles.sectionHeader}>
@@ -522,36 +671,43 @@ export const ModelPage = ({ data }) => {
     </View>
   );
 
-  const renderCanvas = () => {
-    return (
-      <View style={styles.canvasOuterWrapper}>
-        {/* Main Canvas Container */}
-        <View style={styles.canvasMainContainer}>
-          <View style={styles.contentWrapper}>
-            <View
-              style={[
-                styles.imageContainer,
-                {
-                  width: imageWidth,
-                  height: imageHeight,
-                },
-              ]}
-            >
-              <Image
-                src={canvasData.contentSource}
-                style={styles.contentImage}
-              />
-            </View>
-            {renderMeasurementLines()}
-            {renderScreenSizeControls()}
+const renderCanvas = () => {
+  return (
+    <View style={styles.canvasOuterWrapper}>
+      {/* Main Canvas Container */}
+      <View style={styles.canvasMainContainer}>
+        <View style={styles.contentWrapper}>
+          <View
+            style={[
+              styles.imageContainer,
+              {
+                width: imageWidth,
+                height: imageHeight,
+              },
+            ]}
+          >
+            <Image
+              src={canvasData.contentSource}
+              style={styles.contentImage}
+            />
+            {renderBezelOverlay()}
           </View>
+          {renderMeasurementLines()}
         </View>
-
-        {renderCanvasToWallMeasurements()}
-        {renderWallMeasurements()}
+        
       </View>
-    );
-  };
+
+      {/* Canvas measurements */} 
+      {renderScreenSizeControls()}
+      {renderCanvasToWallMeasurements()}
+      {renderWallMeasurements()}
+      
+      {/* Info displays dan human di-render di level yang sama */}
+      {renderInfoDisplays()}
+      {renderHumanSilhouette()}
+    </View>
+  );
+};
 
   return (
     <BasePage>

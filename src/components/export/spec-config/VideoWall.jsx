@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: "auto",
-    height: 40,
+    height: 25,
   },
   content: {
     paddingHorizontal: 64,
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
   },
   categoryText: {
-    fontSize: 11,
+    fontSize: 9,
     color: "#374151",
     textAlign: "left",
   },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   labelText: {
-    fontSize: 10,
+    fontSize: 9,
     color: "#374151",
     textAlign: "left",
   },
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   valueText: {
-    fontSize: 10,
+    fontSize: 9,
     color: "#374151",
     textAlign: "left",
     fontWeight: "medium",
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 24,
     left: 32,
-    fontSize: 10,
+    fontSize: 9,
     color: "#666",
   },
   footerTitle: {

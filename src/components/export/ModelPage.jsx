@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: "auto",
-    height: 40,
+    height: 25,
   },
   mainContent: {
     paddingHorizontal: 64,
@@ -76,6 +76,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 5,
     gap: 20,
+  },
+
+  canvasSection: {
+    marginBottom: 25,
+    marginTop: 15,
   },
   productImageContainer: {
     margin: 32,
@@ -143,6 +148,21 @@ const styles = StyleSheet.create({
     borderColor: "#5EEAD4",
     borderStyle: "dashed",
     zIndex: 50,
+  },
+
+  // Total Wall Dimensions - NEW STYLES
+  totalWallLine: {
+    position: "absolute",
+    borderColor: "#3AAFA9", // Teal color matching Canvas.jsx
+    borderStyle: "solid",
+    zIndex: 50,
+  },
+  totalWallText: {
+    position: "absolute",
+    fontSize: 9,
+    color: "#3AAFA9", // Teal color matching Canvas.jsx
+    fontFamily: "Helvetica",
+    zIndex: 60,
   },
 
   // Text styles
@@ -521,6 +541,75 @@ export const ModelPage = ({ data }) => {
     );
   };
 
+  // NEW FUNCTION: Render Total Wall Dimensions (similar to Canvas.jsx)
+  const renderTotalWallDimensions = () => {
+    return (
+      <>
+        {/* Total Wall Width - Top border line */}
+        <View
+          style={[
+            styles.totalWallLine,
+            {
+              top: 45,
+              left: 87,
+              height: 1,
+              borderTopWidth: 1,
+              width: containerWidth,
+            },
+          ]}
+        />
+
+        {/* Total Wall Width - Text */}
+        <Text
+          style={[
+            styles.totalWallText,
+            {
+              top: 35,
+              left: "50%",
+              transform: [{ translateX: "-50%" }],
+            },
+          ]}
+        >
+          {parseFloat(
+            (Math.floor(canvasData.wallWidth * 1000) / 1000).toString()
+          )}{" "}
+          m
+        </Text>
+
+        {/* Total Wall Height - Left border line */}
+        <View
+          style={[
+            styles.totalWallLine,
+            {
+              bottom: 45,
+              left: 30,
+              width: 1,
+              borderLeftWidth: 1,
+              height: containerHeight,
+            },
+          ]}
+        />
+
+        {/* Total Wall Height - Text */}
+        <Text
+          style={[
+            styles.totalWallText,
+            {
+              bottom: 123,
+              left: 10,
+              transform: [{ translateY: "-50%" }, { rotate: "90deg" }],
+            },
+          ]}
+        >
+          {parseFloat(
+            (Math.floor(canvasData.wallHeight * 1000) / 1000).toString()
+          )}{" "}
+          m
+        </Text>
+      </>
+    );
+  };
+
   const renderWallMeasurements = () => {
     return (
       <>
@@ -579,7 +668,7 @@ export const ModelPage = ({ data }) => {
     );
   };
 
- const renderScreenSizeControls = () => {
+  const renderScreenSizeControls = () => {
     return (
       <>
         {/* Width Control Display */}
@@ -588,7 +677,7 @@ export const ModelPage = ({ data }) => {
             styles.screenControlText,
             {
               top: 12,
-              left: "45%",
+              left: "50%",
               transform: [{ translateX: "-50%" }],
             },
           ]}
@@ -613,45 +702,44 @@ export const ModelPage = ({ data }) => {
     );
   };
 
-const renderInfoDisplays = () => {
-  return (
-    <>
-      {/* Human Info Height - Positioned consistently with human silhouette */}
-      <Text
-        style={[
-          styles.infoText,
-          {
-            bottom: 25,
-            right: 7, // Sejajarkan dengan base human silhouette
-          },
-        ]}
-      >
-        1,70 m
-      </Text>
-   
-    </>
-  );
-};
+  const renderInfoDisplays = () => {
+    return (
+      <>
+        {/* Human Info Height - Positioned consistently with human silhouette */}
+        <Text
+          style={[
+            styles.infoText,
+            {
+              bottom: 25,
+              right: 7, // Sejajarkan dengan base human silhouette
+            },
+          ]}
+        >
+          1,70 m
+        </Text>
+      </>
+    );
+  };
 
-const renderHumanSilhouette = () => {
-  const imageHeight = Math.max(finalHumanHeight, 35);
+  const renderHumanSilhouette = () => {
+    const imageHeight = Math.max(finalHumanHeight, 35);
 
-  return (
-    <View style={styles.humanContainer}>
-      <Image
-        src="/human.png"
-        style={[
-          styles.humanImage,
-          {
-            height: imageHeight,
-            position: "absolute",
-            bottom: 0,   // ✅ Selalu nempel di bawah
-          },
-        ]}
-      />
-    </View>
-  );
-};
+    return (
+      <View style={styles.humanContainer}>
+        <Image
+          src="/human.png"
+          style={[
+            styles.humanImage,
+            {
+              height: imageHeight,
+              position: "absolute",
+              bottom: 0, // ✅ Selalu nempel di bawah
+            },
+          ]}
+        />
+      </View>
+    );
+  };
 
   const renderDecorativeDots = (label) => (
     <View style={styles.sectionHeader}>
@@ -671,43 +759,41 @@ const renderHumanSilhouette = () => {
     </View>
   );
 
-const renderCanvas = () => {
-  return (
-    <View style={styles.canvasOuterWrapper}>
-      {/* Main Canvas Container */}
-      <View style={styles.canvasMainContainer}>
-        <View style={styles.contentWrapper}>
-          <View
-            style={[
-              styles.imageContainer,
-              {
-                width: imageWidth,
-                height: imageHeight,
-              },
-            ]}
-          >
-            <Image
-              src={canvasData.contentSource}
-              style={styles.contentImage}
-            />
-            {renderBezelOverlay()}
+  const renderCanvas = () => {
+    return (
+      <View style={styles.canvasOuterWrapper}>
+        {/* Main Canvas Container */}
+        <View style={styles.canvasMainContainer}>
+          <View style={styles.contentWrapper}>
+            <View
+              style={[
+                styles.imageContainer,
+                {
+                  width: imageWidth,
+                  height: imageHeight,
+                },
+              ]}
+            >
+              <Image
+                src={canvasData.contentSource}
+                style={styles.contentImage}
+              />
+              {renderBezelOverlay()}
+            </View>
+            {renderMeasurementLines()}
           </View>
-          {renderMeasurementLines()}
         </View>
-        
-      </View>
+        {/* Canvas measurements */}
+        {renderScreenSizeControls()}
+        {renderCanvasToWallMeasurements()}
+        {renderWallMeasurements()}
 
-      {/* Canvas measurements */} 
-      {renderScreenSizeControls()}
-      {renderCanvasToWallMeasurements()}
-      {renderWallMeasurements()}
-      
-      {/* Info displays dan human di-render di level yang sama */}
-      {renderInfoDisplays()}
-      {renderHumanSilhouette()}
-    </View>
-  );
-};
+        {/* Info displays dan human di-render di level yang sama */}
+        {renderInfoDisplays()}
+        {renderHumanSilhouette()}
+      </View>
+    );
+  };
 
   return (
     <BasePage>
@@ -731,6 +817,7 @@ const renderCanvas = () => {
         {/* Canvas Section */}
         <View style={styles.canvasSection}>
           {renderDecorativeDots("Led Configuration Rendering")}
+          {renderTotalWallDimensions()}
           {renderCanvas()}
         </View>
       </View>

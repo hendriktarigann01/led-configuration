@@ -97,7 +97,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
     return `${unitCount.horizontal}(W) x ${unitCount.vertical}(H) ${totalUnits} Pcs`;
   };
 
-  // Calculate power consumption using corrected formula
+  // Calculate power consumption - DIFFERENT for Video Wall
   const calculatePowerConsumption = () => {
     if (!modelData.power_consumption) return { max: 0, average: 0 };
 
@@ -105,16 +105,26 @@ export const ResultModal = ({ isOpen, onClose }) => {
       modelData.power_consumption
     );
 
-    // Calculate screen area in square meters
-    const screenArea = actualScreenSize.width * actualScreenSize.height;
+    // For Video Wall: totalUnits x powerConsumption
+    // For other types: screenArea x powerConsumption
+    if (isVideoWall) {
+      return {
+        max: totalUnits * powerData.max,
+        average: totalUnits * powerData.average,
+      };
+    } else {
+      // Calculate screen area in square meters
+      const screenArea = actualScreenSize.width * actualScreenSize.height;
 
-    return {
-      max: screenArea * powerData.max,
-      average: screenArea * powerData.average,
-    };
+      return {
+        max: screenArea * powerData.max,
+        average: screenArea * powerData.average,
+      };
+    }
   };
 
   const powerConsumption = calculatePowerConsumption();
+  console.log(">>> powerConsumption:", powerConsumption);
 
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
@@ -170,20 +180,26 @@ export const ResultModal = ({ isOpen, onClose }) => {
                     </div>
                   </div>
 
-                  <div>
-                    <div className="text-gray-600 mb-1">SQM</div>
-                    <div className="text-gray-800">{sqm} m2</div>
-                  </div>
-
-                  <div>
-                    <div className="text-gray-600 mb-1">Real Size</div>
-                    <div className="text-gray-800">
-                      {actualScreenSize.width.toFixed(3)} (
-                      {baseWidth.toFixed(3)}) x{" "}
-                      {actualScreenSize.height.toFixed(3)} (
-                      {baseHeight.toFixed(3)})
+                  {/* SQM - HIDDEN for Video Wall */}
+                  {!isVideoWall && (
+                    <div>
+                      <div className="text-gray-600 mb-1">SQM</div>
+                      <div className="text-gray-800">{sqm} m2</div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Real Size - HIDDEN for Video Wall */}
+                  {!isVideoWall && (
+                    <div>
+                      <div className="text-gray-600 mb-1">Real Size</div>
+                      <div className="text-gray-800">
+                        {actualScreenSize.width.toFixed(3)} (
+                        {baseWidth.toFixed(3)}) x{" "}
+                        {actualScreenSize.height.toFixed(3)} (
+                        {baseHeight.toFixed(3)})
+                      </div>
+                    </div>
+                  )}
 
                   {/* Weight - only for non-Video Wall types */}
                   {!isVideoWall && totalWeight > 0 && (
@@ -198,7 +214,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Power Consumption - only if available */}
+            {/* Power Consumption - SHOW for ALL types including Video Wall */}
             {modelData.power_consumption && (
               <div className="grid grid-cols-12 gap-x-4 text-sm border-t border-gray-100 mt-4">
                 {/* Power Label with Rowspan Effect */}
@@ -213,25 +229,28 @@ export const ResultModal = ({ isOpen, onClose }) => {
                       <div className="text-gray-600 mb-1">Max Power</div>
                       <div className="text-gray-800">
                         {powerConsumption.max > 0
-                          ? `${(
-                              Math.ceil(powerConsumption.max / 500) * 500
-                            ).toLocaleString("id-ID")} W`
+                          ? isVideoWall
+                            ? `${Math.round(powerConsumption.max).toLocaleString("id-ID")} W`
+                            : `${(
+                                Math.ceil(powerConsumption.max / 500) * 500
+                              ).toLocaleString("id-ID")} W`
                           : "N/A"}
                       </div>
                     </div>
 
-                    {!isVideoWall && (
-                      <div>
-                        <div className="text-gray-600 mb-1">Average Power</div>
-                        <div className="text-gray-800">
-                          {powerConsumption.average > 0
-                            ? `${(
+                    {/* Average Power - SHOW for ALL types including Video Wall */}
+                    <div>
+                      <div className="text-gray-600 mb-1">Average Power</div>
+                      <div className="text-gray-800">
+                        {powerConsumption.average > 0
+                          ? isVideoWall
+                            ? `${Math.round(powerConsumption.average).toLocaleString("id-ID")} W`
+                            : `${(
                                 Math.ceil(powerConsumption.average / 500) * 500
                               ).toLocaleString("id-ID")} W`
-                            : "N/A"}
-                        </div>
+                          : "N/A"}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>

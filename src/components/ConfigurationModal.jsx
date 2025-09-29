@@ -380,7 +380,7 @@ export const ConfigurationModal = () => {
       <p className="mb-4 lg:hidden font-light text-center">
         {selectedDisplayType?.name}
       </p>
-      <div className="bg-white overflow-hidden mb-4 flex-1 mt-0 lg:mt-10">
+      <div className="bg-white overflow-auto mb-4 flex-1 mt-0 lg:mt-10">
         <div
           ref={scrollContainerRef}
           className="overflow-y-auto max-h-96 lg:max-h-full 
@@ -414,7 +414,7 @@ export const ConfigurationModal = () => {
                     className={`cursor-pointer transition-colors ${
                       selectedModel === config
                         ? "bg-[#E0F2F0]"
-                        : "hover:bg-[#E0F2F0]"
+                        : "hover:bg-[#c5e1de]"
                     }`}
                   >
                     {getTableRowData(
@@ -502,7 +502,7 @@ export const ConfigurationModal = () => {
             disabled={!selectedModel}
             className={`flex-1 py-2 rounded-lg text-sm w-full font-medium transition-colors ${
               selectedModel
-                ? "bg-[#3AAFA9] text-white hover:bg-teal-600"
+                ? "bg-[#3AAFA9] text-white hover:bg-teal-600 cursor-pointer"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
           >
@@ -514,7 +514,7 @@ export const ConfigurationModal = () => {
             disabled={!selectedModel}
             className={`flex-1 py-2 rounded-lg text-sm w-full font-medium transition-colors ${
               selectedModel
-                ? "bg-[#3AAFA9] text-white hover:bg-teal-600"
+                ? "bg-[#3AAFA9] text-white hover:bg-teal-600 cursor-pointer"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
           >
@@ -599,7 +599,7 @@ export const ConfigurationModal = () => {
 
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-50 overflow-hidden">
-      <div className="bg-white mx-5 rounded-xl shadow-2xl w-[380px] lg:w-full max-w-[820px] h-[90vh] max-h-[600px] overflow-hidden">
+      <div className="bg-white mx-5 rounded-xl shadow-2xl w-[380px] lg:w-full max-w-[820px] h-[90vh] max-h-[600px] overflow-auto">
         <div className="p-6 h-full">
           {currentStep === "select" && renderSelectStep()}
           {currentStep === "configure" && renderConfigureStep()}

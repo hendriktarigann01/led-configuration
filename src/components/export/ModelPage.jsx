@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { BasePage } from "./BasePage";
 import { CanvasUtils } from "../utils/CanvasUtils";
+import { Svg, Line } from '@react-pdf/renderer';
 
 // PDF-specific styles
 const styles = StyleSheet.create({
@@ -77,11 +78,6 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     gap: 20,
   },
-
-  canvasSection: {
-    marginBottom: 25,
-    marginTop: 15,
-  },
   productImageContainer: {
     margin: 32,
     alignItems: "center",
@@ -107,6 +103,7 @@ const styles = StyleSheet.create({
   },
   canvasOuterWrapper: {
     position: "relative",
+    marginTop: 15,
     width: 388,
     height: 265,
     alignSelf: "center",
@@ -140,6 +137,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     objectFit: "fill",
+    zIndex: 20,
   },
 
   // Measurement lines
@@ -181,28 +179,32 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 999,
+    zIndex: 30,
   },
 
-  bezelVertical: {
-    position: "absolute",
-    top: 0,
-    width: 1, // ✅ BERIKAN WIDTH EKSPLISIT
-    height: "100%",
-    backgroundColor: "#D9D9D9", // ✅ GUNAKAN BACKGROUND COLOR SEBAGAI ALTERNATIF
-    opacity: 0.6,
-    zIndex: 999,
-  },
+// BEZEL STYLES - MATCH Canvas.jsx approach
+bezelVertical: {
+  position: "absolute",
+  top: 0,
+  bottom: 0,
+  width: 0, // ✅ CRITICAL: Set to 0, let border create the line
+  borderLeftWidth: 1,
+  borderLeftColor: "#D9D9D9",
+  borderLeftStyle: "solid",
+  zIndex: 999,
+},
 
-  bezelHorizontal: {
-    position: "absolute",
-    left: 0,
-    width: "100%",
-    height: 1, // ✅ BERIKAN HEIGHT EKSPLISIT
-    backgroundColor: "#D9D9D9", // ✅ GUNAKAN BACKGROUND COLOR SEBAGAI ALTERNATIF
-    opacity: 0.6,
-    zIndex: 999,
-  },
+bezelHorizontal: {
+  position: "absolute",
+  left: 0,
+  right: 0,
+  height: 0, // ✅ CRITICAL: Set to 0, let border create the line
+  borderTopWidth: 1,
+  borderTopColor: "#D9D9D9",
+  borderTopStyle: "solid",
+  zIndex: 999,
+},
+
   infoText: {
     position: "absolute",
     fontSize: 9,
@@ -387,59 +389,62 @@ export const ModelPage = ({ data }) => {
   // kurangi 120 px
   finalHumanHeight = Math.max(finalHumanHeight - 80, 0);
 
-  // BEZEL RENDER FUNCTION - PRODUCTION VERSION
-  const renderBezelOverlay = () => {
-    const { horizontal, vertical } = canvasData.cabinetCount;
+const renderBezelOverlay = () => {
+  const { horizontal, vertical } = canvasData.cabinetCount;
 
-    console.log("PDF Cabinet Count:", { horizontal, vertical });
+  console.log("PDF Cabinet Count:", { horizontal, vertical, imageWidth, imageHeight });
 
-    if (horizontal <= 1 && vertical <= 1) {
-      return null;
-    }
+  if (horizontal <= 1 && vertical <= 1) {
+    return null;
+  }
 
-    const bezels = [];
+  const lines = [];
 
-    // Generate vertical bezels (antara kolom)
-    if (horizontal > 1) {
-      for (let i = 1; i < horizontal; i++) {
-        const leftPercentage = (i / horizontal) * 100;
-        bezels.push(
-          <View
-            key={`vertical-${i}`}
-            style={[
-              styles.bezelVertical,
-              {
-                left: `${leftPercentage}%`,
-                // ✅ HAPUS transform yang bermasalah
-                marginLeft: -0.5, // ✅ GUNAKAN MARGIN SEBAGAI ALTERNATIF
-              },
-            ]}
-          />
-        );
-      }
-    }
+  // Vertical lines
+  for (let i = 1; i < horizontal; i++) {
+    const leftPosition = (imageWidth / horizontal) * i;
+    lines.push(
+      <View
+        key={`v-${i}`}
+        style={{
+          position: "absolute",
+          left: leftPosition,
+          top: 0,
+          height: imageHeight,
+          borderLeftWidth: 0.5,
+          borderLeftColor: "#D9D9D9",
+          opacity: 0.4,
+          borderLeftStyle: "solid",
+          zIndex: 999
+        }}
+      />
+    );
+  }
 
-    // Generate horizontal bezels (antara baris)
-    if (vertical > 1) {
-      for (let i = 1; i < vertical; i++) {
-        const topPercentage = (i / vertical) * 100;
-        bezels.push(
-          <View
-            key={`horizontal-${i}`}
-            style={[
-              styles.bezelHorizontal,
-              {
-                top: `${topPercentage}%`,
-                marginTop: -0.5, // ✅ GUNAKAN MARGIN SEBAGAI ALTERNATIF
-              },
-            ]}
-          />
-        );
-      }
-    }
+  // Horizontal lines
+  for (let i = 1; i < vertical; i++) {
+    const topPosition = (imageHeight / vertical) * i;
+    lines.push(
+      <View
+        key={`h-${i}`}
+        style={{
+          position: "absolute",
+          top: topPosition,
+          left: 0,
+          width: imageWidth,
+          borderTopWidth: 0.5,
+          borderTopColor: "#D9D9D9",
+          opacity: 0.4,
+          borderTopStyle: "solid",
+          zIndex: 999
+        }}
+      />
+    );
+  }
 
-    return <View style={styles.bezelContainer}>{bezels}</View>;
-  };
+  // Return fragments langsung, tanpa wrapper
+  return <>{lines}</>;
+};
 
   // PDF Render functions
   const renderMeasurementLines = () => {
@@ -550,8 +555,8 @@ export const ModelPage = ({ data }) => {
           style={[
             styles.totalWallLine,
             {
-              top: 45,
-              left: 87,
+              top: 47,
+              left: 85,
               height: 1,
               borderTopWidth: 1,
               width: containerWidth,
@@ -677,7 +682,7 @@ export const ModelPage = ({ data }) => {
             styles.screenControlText,
             {
               top: 12,
-              left: "50%",
+              left: "49%",
               transform: [{ translateX: "-50%" }],
             },
           ]}
@@ -759,30 +764,46 @@ export const ModelPage = ({ data }) => {
     </View>
   );
 
-  const renderCanvas = () => {
-    return (
-      <View style={styles.canvasOuterWrapper}>
-        {/* Main Canvas Container */}
-        <View style={styles.canvasMainContainer}>
-          <View style={styles.contentWrapper}>
+const renderCanvas = () => {
+  return (
+    <View style={styles.canvasOuterWrapper}>
+      <View style={styles.canvasMainContainer}>
+        <View style={styles.contentWrapper}>
+          <View
+            style={{
+              position: "relative",
+              width: imageWidth,
+              height: imageHeight,
+            }}
+          >
+            {/* Layer 1: Image content - Rendered FIRST */}
+            <Image
+              src={canvasData.contentSource}
+              style={{
+                width: imageWidth,
+                height: imageHeight,
+                objectFit: "fill",
+              }}
+            />
+
+            {/* Layer 2: Bezel overlay - Rendered AFTER image, absolute positioned on top */}
             <View
-              style={[
-                styles.imageContainer,
-                {
-                  width: imageWidth,
-                  height: imageHeight,
-                },
-              ]}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: imageWidth,
+                height: imageHeight,
+                pointerEvents: "none",
+              }}
             >
-              <Image
-                src={canvasData.contentSource}
-                style={styles.contentImage}
-              />
               {renderBezelOverlay()}
             </View>
-            {renderMeasurementLines()}
           </View>
+
+          {renderMeasurementLines()}
         </View>
+      </View>
         {/* Canvas measurements */}
         {renderScreenSizeControls()}
         {renderCanvasToWallMeasurements()}

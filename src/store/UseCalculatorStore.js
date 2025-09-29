@@ -45,7 +45,7 @@ export const UseCalculatorStore = create((set, get) => ({
     let cleanResolution = resolutionString.toLowerCase();
 
     // Extract numbers from string
-    const numberMatch = cleanResolution.match(/(\d+)\s*[xÃ—]\s*(\d+)/);
+    const numberMatch = cleanResolution.match(/(\d+)\s*[xÃƒÆ'Ã¢â‚¬"]\s*(\d+)/);
 
     if (numberMatch) {
       return {
@@ -61,25 +61,14 @@ export const UseCalculatorStore = create((set, get) => ({
   parsePowerConsumption: (powerString) => {
     if (!powerString) return { max: 0, average: 0 };
 
-    // Handle LED format: "Max: 650W/m², Average: 300W/m²"
-    const ledPattern = /Max:\s*(\d+)W\/m².*?Average[;:]?\s*(\d+)W\/m²/i;
-    const ledMatch = powerString.match(ledPattern);
+    // Handle format: "Max: 650W/m², Average: 300W/m²"
+    const pattern = /Max:\s*(\d+)W\/m².*?Average[;:]?\s*(\d+)W\/m²/i;
+    const match = powerString.match(pattern);
 
-    if (ledMatch) {
+    if (match) {
       return {
-        max: parseFloat(ledMatch[1]),
-        average: parseFloat(ledMatch[2]),
-      };
-    }
-
-    // Handle Video Wall format: "180 W" or "<=180 W"
-    const videoWallPattern = /[<≤=]\s*(\d+)\s*W/i;
-    const videoWallMatch = powerString.match(videoWallPattern);
-
-    if (videoWallMatch) {
-      const maxPower = parseFloat(videoWallMatch[1]);
-      return {
-        max: maxPower,
+        max: parseFloat(match[1]),
+        average: parseFloat(match[2]),
       };
     }
 

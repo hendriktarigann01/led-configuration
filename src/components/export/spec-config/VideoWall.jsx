@@ -1,3 +1,4 @@
+// spec-config/VideoWall.jsx
 import React from "react";
 import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { BasePage } from "../BasePage";
@@ -181,7 +182,7 @@ export const VideoWallConfig = ({ data }) => {
   const { processedValues } = data.calculations;
   const { isVideoWall } = data;
 
-  // Build specifications using processed values from export store (same as IndoorOutdoor)
+  // Build specifications using processed values from export store
   const productItems = [
     {
       label: isVideoWall ? "Inch" : "Pixel Pitch",
@@ -198,15 +199,23 @@ export const VideoWallConfig = ({ data }) => {
       label: `Number of ${processedValues.unitName}`,
       value: processedValues.unitConfiguration,
     },
-    {
+  ];
+
+  // Add SQM only for non-Video Wall types
+  if (!isVideoWall && processedValues.sqm) {
+    productItems.push({
       label: "SQM",
-      value: processedValues.sqm ? `${processedValues.sqm} m²` : null,
-    },
-    {
+      value: `${processedValues.sqm} m²`,
+    });
+  }
+
+  // Add Real Size only for non-Video Wall types
+  if (!isVideoWall && processedValues.realSize) {
+    productItems.push({
       label: "Real Size",
       value: processedValues.realSize,
-    },
-  ];
+    });
+  }
 
   // Add weight only for non-Video Wall types and when weight exists
   if (!isVideoWall && processedValues.weight) {
@@ -226,12 +235,16 @@ export const VideoWallConfig = ({ data }) => {
     },
   ];
 
-  // Add power consumption only if available (same logic as IndoorOutdoor)
+  // Add power consumption only if available - SHOW AVERAGE POWER FOR ALL TYPES
   if (data?.modelData?.power_consumption && processedValues.powerConsumption) {
     const powerItems = [
       {
         label: "Max Power",
         value: processedValues.powerConsumption.maxFormatted,
+      },
+      {
+        label: "Average Power",
+        value: processedValues.powerConsumption.averageFormatted,
       },
     ];
 

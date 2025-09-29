@@ -209,12 +209,11 @@ export const Header = () => {
           step={step}
           disabled={disabled || isInteger || !isCustomMode}
           className={`w-full text-center border-none outline-none text-xs
-                     
                       [&::-webkit-inner-spin-button]:appearance-none
                       [&::-webkit-outer-spin-button]:appearance-none
                       ${
                         disabled || (isInteger && !isCustomMode)
-                          ? "bg-gray-50 text-gray-400 cursor-not-allowed"
+                          ? " text-gray-400 cursor-not-allowed"
                           : "text-gray-600"
                       }`}
         />

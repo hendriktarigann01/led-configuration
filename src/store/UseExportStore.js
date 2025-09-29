@@ -167,13 +167,22 @@ export const UseExportStore = create((set, get) => ({
         modelData.power_consumption
       );
 
-      // Calculate screen area in square meters (same as ResultModal)
-      const screenArea = actualScreenSize.width * actualScreenSize.height;
+      // For Video Wall: totalUnits x powerConsumption
+      // For other types: screenArea x powerConsumption
+      if (isVideoWall) {
+        return {
+          max: totalUnits * powerData.max,
+          average: totalUnits * powerData.average,
+        };
+      } else {
+        // Calculate screen area in square meters
+        const screenArea = actualScreenSize.width * actualScreenSize.height;
 
-      return {
-        max: screenArea * powerData.max,
-        average: screenArea * powerData.average,
-      };
+        return {
+          max: screenArea * powerData.max,
+          average: screenArea * powerData.average,
+        };
+      }
     };
 
     const powerConsumption = calculatePowerConsumption();
@@ -237,23 +246,29 @@ export const UseExportStore = create((set, get) => ({
           unitName: getUnitName(),
           resolutionDisplay: getResolutionDisplay(),
           unitConfiguration: getUnitConfiguration(),
-          sqm: sqm,
-          realSize: `${actualScreenSize.width.toFixed(3)} x ${actualScreenSize.height.toFixed(3)} `,
-          weight: totalWeight > 0 ? `${totalWeight.toFixed(0)} kg` : null,
+          sqm: isVideoWall ? null : sqm, // Hide SQM for Video Wall
+          realSize: isVideoWall
+            ? null // Hide Real Size for Video Wall
+            : `${actualScreenSize.width.toFixed(3)} x ${actualScreenSize.height.toFixed(3)} `,
+          weight: !isVideoWall && totalWeight > 0 ? `${totalWeight.toFixed(0)} kg` : null,
           powerConsumption: {
             max: powerConsumption.max,
             average: powerConsumption.average,
             maxFormatted:
               powerConsumption.max > 0
-                ? `${(
-                    Math.ceil(powerConsumption.max / 500) * 500
-                  ).toLocaleString("id-ID")} W`
+                ? isVideoWall
+                  ? `${Math.round(powerConsumption.max).toLocaleString("id-ID")} W`
+                  : `${(
+                      Math.ceil(powerConsumption.max / 500) * 500
+                    ).toLocaleString("id-ID")} W`
                 : null,
             averageFormatted:
               powerConsumption.average > 0
-                ? `${(
-                    Math.ceil(powerConsumption.average / 500) * 500
-                  ).toLocaleString("id-ID")} W`
+                ? isVideoWall
+                  ? `${Math.round(powerConsumption.average).toLocaleString("id-ID")} W`
+                  : `${(
+                      Math.ceil(powerConsumption.average / 500) * 500
+                    ).toLocaleString("id-ID")} W`
                 : null,
           },
         },

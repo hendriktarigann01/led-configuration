@@ -99,19 +99,6 @@ export const Header = () => {
     }
   };
 
-  // Enhanced manual input handlers
-  const handleScreenWidthChange = (value) => {
-    if (!isCustomMode) return;
-    const validatedValue = validateScreenInput(value, "width");
-    setScreenWidth(validatedValue);
-  };
-
-  const handleScreenHeightChange = (value) => {
-    if (!isCustomMode) return;
-    const validatedValue = validateScreenInput(value, "height");
-    setScreenHeight(validatedValue);
-  };
-
   // Enhanced manual input handlers for cabinet count
   const handleCabinetWidthChange = (value) => {
     if (!isCustomMode) return;
@@ -135,21 +122,22 @@ export const Header = () => {
     setScreenHeight(newScreenHeight);
   };
 
-  // Calculate maximum possible screen dimensions based on current wall
-  const getMaxScreenDimensions = () => {
-    const maxWidth = Math.floor(wallWidth / baseWidth) * baseWidth;
-    const maxHeight = Math.floor(wallHeight / baseHeight) * baseHeight;
-    return { maxWidth, maxHeight };
+  // Wall dimension handlers - OPSI 2: Real-time update tanpa pembulatan
+  const handleWallWidthChange = (value) => {
+    const parsedValue = parseFloat(value);
+    if (!isNaN(parsedValue) && parsedValue > 0) {
+      setWallWidth(parsedValue);
+    }
   };
 
-  // Calculate maximum cabinet count
-  const getMaxCabinetCount = () => {
-    const maxColumns = Math.floor(wallWidth / baseWidth);
-    const maxRows = Math.floor(wallHeight / baseHeight);
-    return { maxColumns, maxRows };
+  const handleWallHeightChange = (value) => {
+    const parsedValue = parseFloat(value);
+    if (!isNaN(parsedValue) && parsedValue > 0) {
+      setWallHeight(parsedValue);
+    }
   };
 
-  // Enhanced increment handlers - removed warning, just prevent increment
+  // Enhanced increment handlers
   const handleScreenWidthIncrement = () => {
     if (!canIncreaseScreenWidth) return;
     incrementScreenWidth();
@@ -181,6 +169,7 @@ export const Header = () => {
     canIncrease = true,
     canDecrease = true,
     isInteger = false,
+    readOnly = false,
   }) => (
     <div className="flex flex-col space-y-1">
       <div className="flex items-center space-x-2">
@@ -202,18 +191,20 @@ export const Header = () => {
         >
           −
         </button>
+
         <input
           type="number"
           value={isInteger ? Math.round(value) : value}
           onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
           step={step}
-          disabled={disabled || isInteger || !isCustomMode}
+          disabled={disabled}
+          readOnly={readOnly || (isInteger && !isCustomMode)}
           className={`w-full text-center border-none outline-none text-xs
                       [&::-webkit-inner-spin-button]:appearance-none
                       [&::-webkit-outer-spin-button]:appearance-none
                       ${
-                        disabled || (isInteger && !isCustomMode)
-                          ? " text-gray-400 cursor-not-allowed"
+                        disabled || readOnly || (isInteger && !isCustomMode)
+                          ? "text-gray-400 cursor-not-allowed"
                           : "text-gray-600"
                       }`}
         />
@@ -299,57 +290,57 @@ export const Header = () => {
 
             <div className="flex gap-5 lg:gap-0 lg:flex-row lg:items-end space-y-4 lg:space-y-0 lg:space-x-6">
               {isCabinetMode ? (
-                // Cabinet Mode - Show cabinet counts with enhanced handlers
+                // Cabinet Mode - Show cabinet counts (CAN BE MANUALLY INPUT)
                 <>
                   <NumberInput
                     label="Column Count"
                     value={cabinetCount.horizontal}
                     onIncrement={handleCabinetWidthIncrement}
                     onDecrement={decrementCabinetWidth}
-                    onChange={handleCabinetWidthChange} // Tambahkan fungsi ini
+                    onChange={handleCabinetWidthChange}
                     disabled={controlsDisabled}
                     canIncrease={canIncreaseCabinetWidth && isCustomMode}
                     canDecrease={canDecreaseCabinetWidth && isCustomMode}
                     isInteger={true}
-                    showResolutionInfo={true}
+                    readOnly={false}
                   />
                   <NumberInput
                     label="Row Count"
                     value={cabinetCount.vertical}
                     onIncrement={handleCabinetHeightIncrement}
                     onDecrement={decrementCabinetHeight}
-                    onChange={handleCabinetHeightChange} // Tambahkan fungsi ini
+                    onChange={handleCabinetHeightChange}
                     disabled={controlsDisabled}
                     canIncrease={canIncreaseCabinetHeight && isCustomMode}
                     canDecrease={canDecreaseCabinetHeight && isCustomMode}
                     isInteger={true}
-                    showResolutionInfo={true}
+                    readOnly={false}
                   />
                 </>
               ) : (
-                // Area Mode - Show screen dimensions with enhanced handlers
+                // Area Mode - Show screen dimensions (READ ONLY - cannot be manually input)
                 <>
                   <NumberInput
                     label="Screen Width(m)"
                     value={screenWidth}
                     onIncrement={handleScreenWidthIncrement}
                     onDecrement={decrementScreenWidth}
-                    onChange={handleScreenWidthChange}
+                    onChange={() => {}} // no-op
                     disabled={controlsDisabled}
                     canIncrease={canIncreaseScreenWidth && isCustomMode}
                     canDecrease={canDecreaseScreenWidth && isCustomMode}
-                    showResolutionInfo={true}
+                    readOnly={true}
                   />
                   <NumberInput
                     label="Screen Height(m)"
                     value={screenHeight}
                     onIncrement={handleScreenHeightIncrement}
                     onDecrement={decrementScreenHeight}
-                    onChange={handleScreenHeightChange}
+                    onChange={() => {}} // no-op
                     disabled={controlsDisabled}
                     canIncrease={canIncreaseScreenHeight && isCustomMode}
                     canDecrease={canDecreaseScreenHeight && isCustomMode}
-                    showResolutionInfo={true}
+                    readOnly={true}
                   />
                 </>
               )}
@@ -379,22 +370,24 @@ export const Header = () => {
                     value={wallWidth}
                     onIncrement={incrementWallWidth}
                     onDecrement={decrementWallWidth}
-                    onChange={setWallWidth}
+                    onChange={handleWallWidthChange}
                     step={0.1}
                     disabled={!wallControlsEnabled}
                     canIncrease={canIncreaseWallWidth}
                     canDecrease={canDecreaseWallWidth}
+                    readOnly={false}
                   />
                   <NumberInput
                     label="Wall Height(m)"
                     value={wallHeight}
                     onIncrement={incrementWallHeight}
                     onDecrement={decrementWallHeight}
-                    onChange={setWallHeight}
+                    onChange={handleWallHeightChange}
                     step={0.1}
                     disabled={!wallControlsEnabled}
                     canIncrease={canIncreaseWallHeight}
                     canDecrease={canDecreaseWallHeight}
+                    readOnly={false}
                   />
                 </div>
               </div>
@@ -406,22 +399,24 @@ export const Header = () => {
                   value={wallWidth}
                   onIncrement={incrementWallWidth}
                   onDecrement={decrementWallWidth}
-                  onChange={setWallWidth}
+                  onChange={handleWallWidthChange}
                   step={0.1}
                   disabled={!wallControlsEnabled}
                   canIncrease={canIncreaseWallWidth}
                   canDecrease={canDecreaseWallWidth}
+                  readOnly={false}
                 />
                 <NumberInput
                   label="Wall Height(m)"
                   value={wallHeight}
                   onIncrement={incrementWallHeight}
                   onDecrement={decrementWallHeight}
-                  onChange={setWallHeight}
+                  onChange={handleWallHeightChange}
                   step={0.1}
                   disabled={!wallControlsEnabled}
                   canIncrease={canIncreaseWallHeight}
                   canDecrease={canDecreaseWallHeight}
+                  readOnly={false}
                 />
               </div>
             </div>

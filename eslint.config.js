@@ -4,6 +4,8 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
+const isProd = process.env.NODE_ENV === 'production'
+
 export default defineConfig([
   globalIgnores(['dist']),
   {
@@ -24,6 +26,7 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-console': isProd ? 'error' : 'off', 
     },
   },
 ])

@@ -196,7 +196,7 @@ export const UseHeaderStore = create((set, get) => ({
     const currentState = get();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    // Issue 3 Fix: Wall can be reduced to screen size exactly, minimum 1m
+    // Wall can be reduced to screen size exactly, minimum 1m
     const minWidth = Math.max(1, actualScreenSize.width);
     const finalWidth = Math.max(minWidth, width);
 
@@ -209,7 +209,7 @@ export const UseHeaderStore = create((set, get) => ({
     const currentState = get();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    // Issue 3 Fix: Wall can be reduced to screen size exactly, minimum 1m
+    // Wall can be reduced to screen size exactly, minimum 1m
     const minHeight = Math.max(1, actualScreenSize.height);
     const finalHeight = Math.max(minHeight, height);
 
@@ -282,10 +282,12 @@ export const UseHeaderStore = create((set, get) => ({
   incrementCabinetWidth: () => get().incrementScreenWidth(),
   decrementCabinetWidth: () => get().decrementScreenWidth(),
 
-  // Wall increment/decrement utilities
+  // Wall increment/decrement utilities - FIXED: Round to nearest 0.5 first
   incrementWallHeight: () => {
     const state = get();
-    const newHeight = Number((state.wallHeight + 0.5).toFixed(1));
+    // Round to nearest 0.5, then add 0.5
+    const rounded = Math.round(state.wallHeight * 2) / 2;
+    const newHeight = Number((rounded + 0.5).toFixed(1));
     state.setWallHeight(newHeight);
   },
 
@@ -294,18 +296,21 @@ export const UseHeaderStore = create((set, get) => ({
     const canvasStore = UseCanvasStore.getState();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    // Issue 3 Fix: Use actualScreenSize directly, no buffer
     const minHeight = Math.max(1, actualScreenSize.height);
+    // Round to nearest 0.5, then subtract 0.5
+    const rounded = Math.round(state.wallHeight * 2) / 2;
     const newHeight = Math.max(
       minHeight,
-      Number((state.wallHeight - 0.5).toFixed(1))
+      Number((rounded - 0.5).toFixed(1))
     );
     state.setWallHeight(newHeight);
   },
 
   incrementWallWidth: () => {
     const state = get();
-    const newWidth = Number((state.wallWidth + 0.5).toFixed(1));
+    // Round to nearest 0.5, then add 0.5
+    const rounded = Math.round(state.wallWidth * 2) / 2;
+    const newWidth = Number((rounded + 0.5).toFixed(1));
     state.setWallWidth(newWidth);
   },
 
@@ -314,11 +319,12 @@ export const UseHeaderStore = create((set, get) => ({
     const canvasStore = UseCanvasStore.getState();
     const actualScreenSize = canvasStore.getActualScreenSize();
 
-    // Issue 3 Fix: Use actualScreenSize directly, no buffer
     const minWidth = Math.max(1, actualScreenSize.width);
+    // Round to nearest 0.5, then subtract 0.5
+    const rounded = Math.round(state.wallWidth * 2) / 2;
     const newWidth = Math.max(
       minWidth,
-      Number((state.wallWidth - 0.5).toFixed(1))
+      Number((rounded - 0.5).toFixed(1))
     );
     state.setWallWidth(newWidth);
   },

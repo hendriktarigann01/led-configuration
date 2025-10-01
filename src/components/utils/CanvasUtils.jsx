@@ -268,7 +268,7 @@ export const CanvasUtils = {
   renderCanvasToWallMeasurements: (
     effectiveCanvasWidth,
     effectiveCanvasHeight
-  ) => {
+  ) => {  
     const deviceType = CanvasUtils.getDeviceType();
 
     // Extensions tetap sama seperti original
@@ -289,9 +289,6 @@ export const CanvasUtils = {
 
     // KUNCI SOLUSI: Hitung dynamic offset berdasarkan effectiveCanvasWidth
     const getVerticalOffset = () => {
-      // Dapatkan container width untuk setiap device
-      const { containerWidth } = CanvasUtils.getResponsiveContainerDimensions();
-
       // Hitung selisih antara container width dan effective canvas width
       const widthDifference = effectiveCanvasWidth;
 
@@ -307,7 +304,7 @@ export const CanvasUtils = {
 
     return (
       <>
-        {/* Horizontal Bottom Measure Screen - TIDAK BERUBAH */}
+        {/* Horizontal Bottom Measure Screen */}
         <div
           className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
           style={{
@@ -317,7 +314,7 @@ export const CanvasUtils = {
           }}
         />
 
-        {/* Horizontal Top Measure Screen - TIDAK BERUBAH */}
+        {/* Horizontal Top Measure Screen */}
         <div
           className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
           style={{
@@ -327,7 +324,7 @@ export const CanvasUtils = {
           }}
         />
 
-        {/* PERBAIKAN: Vertical Right Measure Screen - RESPONSIF */}
+        {/* Vertical Left Measure Screen */}
         <div
           className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
           style={{
@@ -337,7 +334,7 @@ export const CanvasUtils = {
           }}
         />
 
-        {/* PERBAIKAN: Vertical Left Measure Screen - RESPONSIF */}
+        {/* Vertical Right Measure Screen */}
         <div
           className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
           style={{
@@ -349,24 +346,66 @@ export const CanvasUtils = {
       </>
     );
   },
-  // Render wall measurements with centered values and responsive positioning
-  renderWallMeasurements: (remainingWallHeight, remainingWallWidth) => {
-    const deviceType = CanvasUtils.getDeviceType();
 
-    // Adjust positioning based on device
-    const leftOffset = deviceType === "mobile" ? "left-4" : "left-4";
-    const topOffset =
-      deviceType === "mobile"
-        ? "top-4"
-        : deviceType === "tablet"
-        ? "top-4  "
-        : "top-4";
+  // FIXED: Render wall measurements with dynamic positioning based on screen-to-wall ratio
+  renderWallMeasurements: (
+    remainingWallHeight,
+    remainingWallWidth,
+    actualScreenSize,
+    wallWidth,
+    wallHeight
+  ) => {
+    // Calculate screen-to-wall ratios
+    const screenToWallRatioX = actualScreenSize.width / wallWidth;
+    const screenToWallRatioY = actualScreenSize.height / wallHeight;
+
+    // Calculate remaining space ratio (space on each side)
+    const remainingSpaceRatioX = (1 - screenToWallRatioX) / 2;
+    const remainingSpaceRatioY = (1 - screenToWallRatioY) / 2;
+
+    // Calculate center position of remaining space (midpoint between outer and inner lines)
+    // Add constraints to keep text within boundaries
+    const rawLeftPercentage = (remainingSpaceRatioX / 2) * 115;
+    const rawRightPercentage = (1 - (remainingSpaceRatioX / 2)) * 95;
+    const rawTopPercentage = (remainingSpaceRatioY / 2) * 120;
+    const rawBottomPercentage = (1 - (remainingSpaceRatioY / 2)) * 100;
+    
+    // Calculate min and max boundaries based on remaining space
+    // Need extra margin to account for text width/height
+    const textMarginHorizontal = 15; // Extra margin to prevent text from crossing lines
+    const textMarginVertical = 10; // Extra margin to prevent text from crossing lines
+
+    // Left boundary: between 0% and remainingSpaceRatioX * 100%
+    const minLeftPercentage = textMarginVertical; 
+    const maxLeftPercentage = Math.max(textMarginVertical, remainingSpaceRatioX * 100 - textMarginVertical );
+    
+    // Right boundary: between (100 - remainingSpaceRatioX * 100)% and 100%
+    const minRightPercentage = Math.min(100 - textMarginVertical, (1 - remainingSpaceRatioX) * 100 + textMarginVertical);
+    const maxRightPercentage = 100 - textMarginVertical;
+    
+    // Top boundary: between 0% and remainingSpaceRatioY * 100%
+    const minTopPercentage = textMarginHorizontal;
+    const maxTopPercentage = Math.max(textMarginHorizontal, remainingSpaceRatioY * 100 - textMarginHorizontal);
+    
+    // Bottom boundary: between (100 - remainingSpaceRatioY * 100)% and 100%
+    const minBottomPercentage = Math.min(100 - textMarginHorizontal, (1 - remainingSpaceRatioY) * 100 + textMarginHorizontal);
+    const maxBottomPercentage = 100 - textMarginHorizontal;
+    
+    // Constrain percentages to stay within boundaries
+    const leftPercentage = Math.max(minLeftPercentage, Math.min(rawLeftPercentage, maxLeftPercentage));
+    const rightPercentage = Math.max(minRightPercentage, Math.min(rawRightPercentage, maxRightPercentage));
+    const topPercentage = Math.max(minTopPercentage, Math.min(rawTopPercentage, maxTopPercentage));
+    const bottomPercentage = Math.max(minBottomPercentage, Math.min(rawBottomPercentage, maxBottomPercentage));
 
     return (
       <>
-        {/* Height measurements - Left Side */}
+        {/* Height measurements - Left Top */}
         <div
-          className={`absolute ${leftOffset} top-[28%] -translate-y-1/2 flex flex-col items-center justify-center z-50`}
+          className="absolute left-4 flex flex-col items-center justify-center z-50"
+          style={{
+            top: `${topPercentage}%`,
+            transform: 'translateY(-50%)'
+          }}
         >
           <span
             className="text-[10px] lg:text-xs text-gray-700 text-center"
@@ -379,8 +418,13 @@ export const CanvasUtils = {
           </span>
         </div>
 
+        {/* Height measurements - Left Bottom */}
         <div
-          className={`absolute ${leftOffset} top-[72%] -translate-y-1/2 flex flex-col items-center justify-center z-50`}
+          className="absolute left-4 flex flex-col items-center justify-center z-50"
+          style={{
+            top: `${bottomPercentage}%`,
+            transform: 'translateY(-50%)'
+          }}
         >
           <span
             className="text-[10px] lg:text-xs text-gray-700 text-center"
@@ -394,9 +438,12 @@ export const CanvasUtils = {
         </div>
 
         {/* Width measurements - Top Left */}
-
         <div
-          className={`absolute ${topOffset} left-[27%] -translate-x-1/2 flex flex-col items-center justify-center z-50`}
+          className="absolute top-4 flex flex-col items-center justify-center z-50"
+          style={{
+            left: `${leftPercentage}%`,
+            transform: 'translateX(-50%)'
+          }}
         >
           <span className="text-[10px] lg:text-xs text-gray-700 text-center">
             {remainingWallWidth.toFixed(2)} m
@@ -405,7 +452,11 @@ export const CanvasUtils = {
 
         {/* Width measurements - Top Right */}
         <div
-          className={`absolute ${topOffset} right-[27%] translate-x-1/2 flex flex-col items-center justify-center z-50`}
+          className="absolute top-4 flex flex-col items-center justify-center z-50"
+          style={{
+            left: `${rightPercentage}%`,
+            transform: 'translateX(-50%)'
+          }}
         >
           <span className="text-[10px] lg:text-xs text-gray-700 text-center">
             {remainingWallWidth.toFixed(2)} m

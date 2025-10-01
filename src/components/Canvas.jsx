@@ -513,9 +513,12 @@ export const Canvas = () => {
         )}
 
         {/* Wall Measurements */}
-        {CanvasUtils.renderWallMeasurements(
+       {CanvasUtils.renderWallMeasurements(
           remainingWallHeight,
-          remainingWallWidth
+          remainingWallWidth,
+          actualScreenSize,
+          wallWidth,
+          wallHeight
         )}
 
         {/* Info Displays */}

@@ -16,7 +16,6 @@ const Layout = () => {
     screenWidth,
     wallHeight,
     wallWidth,
-    resolution,
     syncWithCanvas,
   } = UseHeaderStore();
 

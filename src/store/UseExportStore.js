@@ -2,7 +2,8 @@ import { create } from "zustand";
 import { UseCanvasStore } from "./UseCanvasStore";
 import { UseCalculatorStore } from "./UseCalculatorStore";
 import { UseNavbarStore } from "./UseNavbarStore";
-import { model as allModels, model } from "../data/model";
+import { model as allModels } from "../data/model";
+import { formatPhoneForStorage, isValidPhoneNumber } from "../utils/PhoneUtils";
 
 export const UseExportStore = create((set, get) => ({
   isOpen: false,
@@ -10,7 +11,7 @@ export const UseExportStore = create((set, get) => ({
   // Form
   projectName: "",
   userName: "",
-  phoneNumber: "", // Added phone number field
+  phoneNumber: "",
   email: "",
 
   isExporting: false,
@@ -23,17 +24,12 @@ export const UseExportStore = create((set, get) => ({
   closeModal: () =>
     set({
       isOpen: false,
-      // Optionally reset form when closing
-      // projectName: "",
-      // userName: "",
-      // phoneNumber: "",
-      // email: "",
     }),
 
   // Form field setters
   setProjectName: (projectName) => set({ projectName }),
   setUserName: (userName) => set({ userName }),
-  setPhoneNumber: (phoneNumber) => set({ phoneNumber }), // Added phone number setter
+  setPhoneNumber: (phoneNumber) => set({ phoneNumber }),
   setEmail: (email) => set({ email }),
 
   resetForm: () =>
@@ -57,14 +53,14 @@ export const UseExportStore = create((set, get) => ({
 
     const cleanProjectName = projectName
       .replace(/\s+/g, "-")
-      .replace(/[^a-zA-Z0-9\-]/g, "")
+      .replace(/[^a-zA-Z0-9-]/g, "")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
 
     return `${cleanProjectName}_${pixelPitch}_ByMJSolutionIndonesia`;
   },
 
-  // Get comprehensive data for PDF export - UPDATED TO MATCH RESULTMODAL
+  // Get comprehensive data for PDF export
   getPdfExportData: () => {
     const canvasStore = UseCanvasStore.getState();
     const calculatorStore = UseCalculatorStore.getState();
@@ -93,9 +89,7 @@ export const UseExportStore = create((set, get) => ({
       }
     }
 
-    // ==== EXACT SAME CALCULATION AS RESULTMODAL ====
-
-    // Get comprehensive calculation results (same as ResultModal)
+    // Get comprehensive calculation results
     const results = calculatorStore.getCalculationResults(
       modelData,
       displayType,
@@ -115,13 +109,9 @@ export const UseExportStore = create((set, get) => ({
       totalWeight,
     } = results;
 
-    // Calculate SQM (same as ResultModal)
     const sqm = (actualScreenSize.width * actualScreenSize.height).toFixed(2);
-
-    // Check if this is Video Wall type (same as ResultModal)
     const isVideoWall = displayType.includes("Video Wall");
 
-    // Get pixel pitch or inch from model data (same as ResultModal)
     const getPixelPitchOrInch = () => {
       if (modelData.pixel_pitch) {
         return modelData.pixel_pitch;
@@ -131,7 +121,6 @@ export const UseExportStore = create((set, get) => ({
       return "N/A";
     };
 
-    // Get unit name based on display type (same as ResultModal)
     const getUnitName = () => {
       if (displayType.includes("Cabinet") || displayType.includes("Outdoor")) {
         return "Cabinets";
@@ -143,7 +132,6 @@ export const UseExportStore = create((set, get) => ({
       return "Units";
     };
 
-    // Get resolution display format (same as ResultModal)
     const getResolutionDisplay = () => {
       const totalResolutionWidth =
         unitCount.horizontal * (resolutionPerUnit.width / totalUnits);
@@ -154,12 +142,10 @@ export const UseExportStore = create((set, get) => ({
       )}`;
     };
 
-    // Get unit configuration (same as ResultModal)
     const getUnitConfiguration = () => {
       return `${unitCount.horizontal}(W) x ${unitCount.vertical}(H) ${totalUnits} Pcs`;
     };
 
-    // Calculate power consumption using exact ResultModal formula
     const calculatePowerConsumption = () => {
       if (!modelData.power_consumption) return { max: 0, average: 0 };
 
@@ -167,15 +153,12 @@ export const UseExportStore = create((set, get) => ({
         modelData.power_consumption
       );
 
-      // For Video Wall: totalUnits x powerConsumption
-      // For other types: screenArea x powerConsumption
       if (isVideoWall) {
         return {
           max: totalUnits * powerData.max,
           average: totalUnits * powerData.average,
         };
       } else {
-        // Calculate screen area in square meters
         const screenArea = actualScreenSize.width * actualScreenSize.height;
 
         return {
@@ -187,7 +170,6 @@ export const UseExportStore = create((set, get) => ({
 
     const powerConsumption = calculatePowerConsumption();
 
-    // Determine component type based on display type
     let specConfigComponent = "IndoorOutdoorConfig";
     let specDefaultComponent = "Indoor";
 
@@ -203,16 +185,16 @@ export const UseExportStore = create((set, get) => ({
       pdfTitle: state.generatePdfTitle(),
       projectName: state.projectName,
       userName: state.userName,
-      phoneNumber: state.phoneNumber,
+      phoneNumber: formatPhoneForStorage(state.phoneNumber), // Format for storage
       email: state.email,
       exportDate: new Date().toLocaleDateString("id-ID"),
       exportTime: new Date().toLocaleTimeString("id-ID"),
 
-      // Model data (same as ResultModal)
+      // Model data
       modelData,
       displayType,
       modelName: navbarStore.selectedModel.model,
-      isVideoWall, // Add this flag for easy access
+      isVideoWall,
 
       // Screen configuration
       screenConfig: {
@@ -227,9 +209,8 @@ export const UseExportStore = create((set, get) => ({
         height: canvasStore.wallHeight.toFixed(1),
       },
 
-      // ==== COMPLETE CALCULATION RESULTS (SAME AS RESULTMODAL) ====
+      // Calculation results
       calculations: {
-        // Raw calculation results
         unitCount,
         totalUnits,
         actualScreenSize,
@@ -240,15 +221,14 @@ export const UseExportStore = create((set, get) => ({
           height: canvasStore.baseHeight,
         },
 
-        // Processed values (same format as ResultModal uses)
         processedValues: {
           pixelPitchOrInch: getPixelPitchOrInch(),
           unitName: getUnitName(),
           resolutionDisplay: getResolutionDisplay(),
           unitConfiguration: getUnitConfiguration(),
-          sqm: isVideoWall ? null : sqm, // Hide SQM for Video Wall
+          sqm: isVideoWall ? null : sqm,
           realSize: isVideoWall
-            ? null // Hide Real Size for Video Wall
+            ? null
             : `${actualScreenSize.width.toFixed(3)} x ${actualScreenSize.height.toFixed(3)} `,
           weight: !isVideoWall && totalWeight > 0 ? `${totalWeight.toFixed(0)} kg` : null,
           powerConsumption: {
@@ -280,7 +260,7 @@ export const UseExportStore = create((set, get) => ({
         specDefault: specDefaultComponent,
       },
 
-      // Additional display info (for other PDF components)
+      // Additional display info
       inch: modelData.inch || "N/A",
       pixelPitch: modelData.pixel_pitch || "N/A",
       brightness: modelData.brightness || "N/A",
@@ -322,19 +302,18 @@ export const UseExportStore = create((set, get) => ({
 
       if (!webAppUrl) {
         console.warn("Google Sheets URL not configured");
-        return { success: true }; // Continue without Google Sheets
+        return { success: true };
       }
 
-      // Only send the fields that your Google Apps Script expects
       const payload = {
         pdfTitle: data.pdfTitle || "",
         projectName: data.projectName || "",
         userName: data.userName || "",
-        phoneNumber: data.phoneNumber || "", // Make sure this is included
+        phoneNumber: data.phoneNumber || "", // Already formatted by formatPhoneForStorage
         email: data.email || "",
       };
 
-      console.log("Sending to Google Sheets:", payload); // Debug log
+      console.log("Sending to Google Sheets:", payload);
 
       const response = await fetch(webAppUrl, {
         method: "POST",
@@ -353,7 +332,7 @@ export const UseExportStore = create((set, get) => ({
       }
 
       const result = await response.json();
-      console.log("Google Sheets response:", result); // Debug log
+      console.log("Google Sheets response:", result);
       return result;
     } catch (error) {
       console.error("Google Sheets error:", error);
@@ -361,7 +340,6 @@ export const UseExportStore = create((set, get) => ({
     }
   },
 
-  // This will be called by react-to-print
   exportToPdf: async () => {
     const state = get();
 
@@ -373,7 +351,6 @@ export const UseExportStore = create((set, get) => ({
     set({ isExporting: true });
 
     try {
-      // Get PDF data
       const pdfData = state.getPdfExportData();
 
       if (!pdfData) {
@@ -384,12 +361,10 @@ export const UseExportStore = create((set, get) => ({
         return;
       }
 
-      // Set PDF data for components to use
       state.setPdfData(pdfData);
 
       console.log("PDF Export Data:", pdfData);
 
-      // Send to Google Sheets (optional)
       try {
         await state.sendToGoogleSheets(pdfData);
       } catch (error) {
@@ -399,7 +374,6 @@ export const UseExportStore = create((set, get) => ({
         );
       }
 
-      // Return success - the actual PDF generation will be handled by react-to-print
       return { success: true, data: pdfData };
     } catch (error) {
       console.error("Export preparation failed:", error);
@@ -409,7 +383,6 @@ export const UseExportStore = create((set, get) => ({
     }
   },
 
-  // Complete export process (called after PDF generation)
   completeExport: () => {
     set({
       isOpen: false,
@@ -423,7 +396,7 @@ export const UseExportStore = create((set, get) => ({
     return {
       projectName: state.projectName,
       userName: state.userName,
-      phoneNumber: state.phoneNumber, // Added phone number to form data
+      phoneNumber: state.phoneNumber,
       email: state.email,
     };
   },
@@ -432,26 +405,24 @@ export const UseExportStore = create((set, get) => ({
     set({
       projectName: data.projectName || "",
       userName: data.userName || "",
-      phoneNumber: data.phoneNumber || "", // Added phone number to form data setter
+      phoneNumber: data.phoneNumber || "",
       email: data.email || "",
     }),
 
   isFormValid: () => {
     const state = get();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[0-9+\-\s()]{8,15}$/; // Simple phone validation
 
     return (
       state.projectName.trim() !== "" &&
       state.userName.trim() !== "" &&
       state.phoneNumber.trim() !== "" &&
-      phoneRegex.test(state.phoneNumber.trim()) &&
+      isValidPhoneNumber(state.phoneNumber) && // Use utility function
       state.email.trim() !== "" &&
       emailRegex.test(state.email)
     );
   },
 
-  // Helper method to check if export is ready
   isExportReady: () => {
     const canvasStore = UseCanvasStore.getState();
     const navbarStore = UseNavbarStore.getState();

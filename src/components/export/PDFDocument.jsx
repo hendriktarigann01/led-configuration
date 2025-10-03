@@ -8,83 +8,56 @@ import { Indoor } from "./spec-default/Indoor";
 import { Outdoor } from "./spec-default/Outdoor";
 import { VideoWall } from "./spec-default/VideoWall";
 import { LastPage } from "./LastPage";
+import { PDF_METADATA } from "../../constants/PDFConfig";
+
+const getSpecConfigComponent = (componentName) => {
+  const mapping = {
+    VideoWallConfig: VideoWallConfig,
+    IndoorOutdoorConfig: IndoorOutdoorConfig,
+  };
+  
+  return mapping[componentName] || IndoorOutdoorConfig;
+};
+
+const getSpecDefaultComponent = (componentName) => {
+  const mapping = {
+    VideoWall: VideoWall,
+    Outdoor: Outdoor,
+    Indoor: Indoor,
+  };
+  
+  return mapping[componentName] || Indoor;
+};
+
+const validateData = (data) => {
+  return data && (data.calculations || data.screenConfig || data.displayType);
+};
 
 export const PDFDocument = ({ data }) => {
-  console.log(">>> PDFDocument rendering with data:", data);
-  console.log(">>> Data keys:", data ? Object.keys(data) : "No data");
-
   if (!data) {
-    console.log(">>> PDFDocument: No data provided");
+    console.warn("PDFDocument: No data provided");
     return null;
   }
 
-  // Log specific data sections for debugging
-  console.log(">>> calculations:", data.calculations);
-  console.log(">>> screenConfig:", data.screenConfig);
-  console.log(">>> wallConfig:", data.wallConfig);
-  console.log(">>> components:", data.components);
-  console.log(">>> displayType:", data.displayType);
-
-  const { components } = data;
-  console.log(">>> PDFDocument components:", components);
-
-  // Dynamic component selection dengan fallback yang lebih robust
-  const SpecConfigComponent = (() => {
-    if (components?.specConfig === "VideoWallConfig") {
-      console.log(">>> Selected VideoWallConfig");
-      return VideoWallConfig;
-    } else {
-      console.log(">>> Selected IndoorOutdoorConfig (default)");
-      return IndoorOutdoorConfig;
-    }
-  })();
-
-  const SpecDefaultComponent = (() => {
-    if (components?.specDefault === "VideoWall") {
-      console.log(">>> Selected VideoWall spec default");
-      return VideoWall;
-    } else if (components?.specDefault === "Outdoor") {
-      console.log(">>> Selected Outdoor spec default");
-      return Outdoor;
-    } else {
-      console.log(">>> Selected Indoor spec default (default)");
-      return Indoor;
-    }
-  })();
-
-  console.log(">>> Final selected components:", {
-    SpecConfigComponent: SpecConfigComponent?.name || "Unknown",
-    SpecDefaultComponent: SpecDefaultComponent?.name || "Unknown",
-  });
-
-  // Validate critical data before rendering
-  const hasValidData =
-    data && (data.calculations || data.screenConfig || data.displayType);
-  if (!hasValidData) {
-    console.warn(">>> PDFDocument: Missing critical data, using defaults");
+  if (!validateData(data)) {
+    console.warn("PDFDocument: Missing critical data, using defaults");
   }
+
+  const SpecConfigComponent = getSpecConfigComponent(data?.components?.specConfig);
+  const SpecDefaultComponent = getSpecDefaultComponent(data?.components?.specDefault);
 
   return (
     <Document
       title={data.pdfTitle || "LED Configuration"}
-      author="MJ Solution Indonesia"
-      subject="LED Display Configuration Report"
-      keywords="LED, Display, Configuration, MJ Solution"
+      author={PDF_METADATA.author}
+      subject={PDF_METADATA.subject}
+      keywords={PDF_METADATA.keywords}
     >
-      {/* Page 1: First Page */}
       <FirstPage data={data} />
-
-      {/* Page 2: Model Page */}
       <ModelPage data={data} />
-
-      {/* Page 3: Spec Config */}
       <SpecConfigComponent data={data} />
-
-      {/* Page 4: Spec Default */}
       <SpecDefaultComponent data={data} />
-
-      {/* Page 5: Last Page */}
-      <LastPage data={data} />
+      <LastPage />
     </Document>
   );
 };

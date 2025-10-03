@@ -5,7 +5,7 @@ import { UseModalStore } from "../store/UseModalStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { ConfigurationModal } from "./ConfigurationModal";
-import { CanvasUtils } from "./utils/CanvasUtils";
+import { CanvasUtils } from "../utils/CanvasUtils";
 
 export const Canvas = () => {
   // Store hooks

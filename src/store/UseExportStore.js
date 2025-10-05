@@ -4,34 +4,56 @@ import { UseCalculatorStore } from "./UseCalculatorStore";
 import { UseNavbarStore } from "./UseNavbarStore";
 import { model as allModels } from "../data/model";
 import { formatPhoneForStorage, isValidPhoneNumber } from "../utils/PhoneUtils";
+import {
+  DISPLAY_TYPE,
+  SUB_TYPE,
+  UNIT_NAME,
+  PDF_COMPONENTS,
+} from "../constants/Display";
+import {
+  calculatePowerConsumption,
+  formatPowerConsumption,
+} from "../utils/PowerCalculator";
 
 export const UseExportStore = create((set, get) => ({
+  // ============================================================================
+  // STATE
+  // ============================================================================
   isOpen: false,
+  isExporting: false,
+  pdfData: null,
 
-  // Form
+  // Form fields
   projectName: "",
   userName: "",
   phoneNumber: "",
   email: "",
 
-  isExporting: false,
+  // ============================================================================
+  // ACTIONS - State mutations
+  // ============================================================================
 
-  // PDF Data for export
-  pdfData: null,
-
+  /**
+   * Open export modal
+   */
   openModal: () => set({ isOpen: true }),
 
-  closeModal: () =>
-    set({
-      isOpen: false,
-    }),
+  /**
+   * Close export modal
+   */
+  closeModal: () => set({ isOpen: false }),
 
-  // Form field setters
+  /**
+   * Set form field values
+   */
   setProjectName: (projectName) => set({ projectName }),
   setUserName: (userName) => set({ userName }),
   setPhoneNumber: (phoneNumber) => set({ phoneNumber }),
   setEmail: (email) => set({ email }),
 
+  /**
+   * Reset form to empty
+   */
   resetForm: () =>
     set({
       projectName: "",
@@ -40,7 +62,129 @@ export const UseExportStore = create((set, get) => ({
       email: "",
     }),
 
-  // Generate automatic PDF title
+  /**
+   * Set form data from object
+   */
+  setFormData: (data) =>
+    set({
+      projectName: data.projectName || "",
+      userName: data.userName || "",
+      phoneNumber: data.phoneNumber || "",
+      email: data.email || "",
+    }),
+
+  /**
+   * Set PDF data for export
+   */
+  setPdfData: (data) => set({ pdfData: data }),
+
+  /**
+   * Export to PDF - prepare data and send to Google Sheets
+   */
+  exportToPdf: async () => {
+    const state = get();
+
+    if (!state.isFormValid()) {
+      alert("Please fill in all required fields correctly");
+      return;
+    }
+
+    set({ isExporting: true });
+
+    try {
+      const pdfData = state.getPdfExportData();
+
+      if (!pdfData) {
+        alert(
+          "No data available for export. Please configure your display first."
+        );
+        set({ isExporting: false });
+        return;
+      }
+
+      state.setPdfData(pdfData);
+
+      // Try to send to Google Sheets (non-blocking)
+      try {
+        await state.sendToGoogleSheets(pdfData);
+      } catch (error) {
+        console.warn(
+          "Google Sheets integration failed, continuing with PDF export:",
+          error
+        );
+      }
+
+      return { success: true, data: pdfData };
+    } catch (error) {
+      console.error("Export preparation failed:", error);
+      alert("Failed to prepare export data. Please try again.");
+      set({ isExporting: false });
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Complete export and cleanup
+   */
+  completeExport: () => {
+    set({
+      isOpen: false,
+      isExporting: false,
+      pdfData: null,
+    });
+  },
+
+  /**
+   * Send data to Google Sheets
+   */
+  sendToGoogleSheets: async (data) => {
+    try {
+      const webAppUrl = import.meta.env.VITE_WEB_APP_URL;
+
+      if (!webAppUrl) {
+        console.warn("Google Sheets URL not configured");
+        return { success: true };
+      }
+
+      const payload = {
+        pdfTitle: data.pdfTitle || "",
+        projectName: data.projectName || "",
+        userName: data.userName || "",
+        phoneNumber: data.phoneNumber || "",
+        email: data.email || "",
+      };
+
+      const response = await fetch(webAppUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Google Sheets response error:", errorText);
+        throw new Error(
+          `Failed to send data to Google Sheets: ${response.status}`
+        );
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Google Sheets error:", error);
+      throw error;
+    }
+  },
+
+  // ============================================================================
+  // SELECTORS - Computed values
+  // ============================================================================
+
+  /**
+   * Generate automatic PDF title
+   */
   generatePdfTitle: () => {
     const navbarStore = UseNavbarStore.getState();
     const state = get();
@@ -60,7 +204,48 @@ export const UseExportStore = create((set, get) => ({
     return `${cleanProjectName}_${pixelPitch}_ByMJSolutionIndonesia`;
   },
 
-  // Get comprehensive data for PDF export
+  /**
+   * Get form data object
+   */
+  getFormData: () => {
+    const state = get();
+    return {
+      projectName: state.projectName,
+      userName: state.userName,
+      phoneNumber: state.phoneNumber,
+      email: state.email,
+    };
+  },
+
+  /**
+   * Validate form fields
+   */
+  isFormValid: () => {
+    const state = get();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    return (
+      state.projectName.trim() !== "" &&
+      state.userName.trim() !== "" &&
+      state.phoneNumber.trim() !== "" &&
+      isValidPhoneNumber(state.phoneNumber) &&
+      state.email.trim() !== "" &&
+      emailRegex.test(state.email)
+    );
+  },
+
+  /**
+   * Check if export is ready (has configured display)
+   */
+  isExportReady: () => {
+    const canvasStore = UseCanvasStore.getState();
+    const navbarStore = UseNavbarStore.getState();
+    return canvasStore.isConfigured() && navbarStore.selectedModel;
+  },
+
+  /**
+   * Get comprehensive data for PDF export
+   */
   getPdfExportData: () => {
     const canvasStore = UseCanvasStore.getState();
     const calculatorStore = UseCalculatorStore.getState();
@@ -73,14 +258,18 @@ export const UseExportStore = create((set, get) => ({
 
     const modelData = navbarStore.selectedModel.modelData;
     const displayType = navbarStore.selectedModel.name;
+    const isVideoWall = displayType.includes("Video Wall");
 
     // Get partner data for indoor displays
     let partnerData = null;
     if (
-      navbarStore.selectedModel?.displayTypeId === 1 &&
+      navbarStore.selectedModel?.displayTypeId === DISPLAY_TYPE.INDOOR_LED &&
       navbarStore.selectedModel?.subTypeId
     ) {
-      const partnerId = navbarStore.selectedModel.subTypeId === 1 ? 2 : 1;
+      const partnerId =
+        navbarStore.selectedModel.subTypeId === SUB_TYPE.CABINET
+          ? DISPLAY_TYPE.MODULE
+          : DISPLAY_TYPE.INDOOR_LED;
       const partnerModel = allModels.find((m) => m.id === partnerId);
       if (partnerModel) {
         partnerData = partnerModel.data.find(
@@ -110,8 +299,8 @@ export const UseExportStore = create((set, get) => ({
     } = results;
 
     const sqm = (actualScreenSize.width * actualScreenSize.height).toFixed(2);
-    const isVideoWall = displayType.includes("Video Wall");
 
+    // Helper functions
     const getPixelPitchOrInch = () => {
       if (modelData.pixel_pitch) {
         return modelData.pixel_pitch;
@@ -123,13 +312,13 @@ export const UseExportStore = create((set, get) => ({
 
     const getUnitName = () => {
       if (displayType.includes("Cabinet") || displayType.includes("Outdoor")) {
-        return "Cabinets";
+        return UNIT_NAME.CABINET;
       } else if (displayType.includes("Module")) {
-        return "Module";
+        return UNIT_NAME.MODULE;
       } else if (displayType.includes("Video Wall")) {
-        return "Units";
+        return UNIT_NAME.VIDEO_WALL;
       }
-      return "Units";
+      return UNIT_NAME.DEFAULT;
     };
 
     const getResolutionDisplay = () => {
@@ -146,38 +335,24 @@ export const UseExportStore = create((set, get) => ({
       return `${unitCount.horizontal}(W) x ${unitCount.vertical}(H) ${totalUnits} Pcs`;
     };
 
-    const calculatePowerConsumption = () => {
-      if (!modelData.power_consumption) return { max: 0, average: 0 };
+    // Calculate power consumption
+    const screenArea = actualScreenSize.width * actualScreenSize.height;
+    const powerConsumption = calculatePowerConsumption(
+      modelData,
+      isVideoWall,
+      totalUnits,
+      screenArea
+    );
 
-      const powerData = calculatorStore.parsePowerConsumption(
-        modelData.power_consumption
-      );
-
-      if (isVideoWall) {
-        return {
-          max: totalUnits * powerData.max,
-          average: totalUnits * powerData.average,
-        };
-      } else {
-        const screenArea = actualScreenSize.width * actualScreenSize.height;
-
-        return {
-          max: screenArea * powerData.max,
-          average: screenArea * powerData.average,
-        };
-      }
-    };
-
-    const powerConsumption = calculatePowerConsumption();
-
-    let specConfigComponent = "IndoorOutdoorConfig";
-    let specDefaultComponent = "Indoor";
+    // Determine component selection for PDF
+    let specConfigComponent = PDF_COMPONENTS.INDOOR_OUTDOOR.CONFIG;
+    let specDefaultComponent = PDF_COMPONENTS.INDOOR_OUTDOOR.DEFAULT;
 
     if (displayType.includes("Video Wall")) {
-      specConfigComponent = "VideoWallConfig";
-      specDefaultComponent = "VideoWall";
+      specConfigComponent = PDF_COMPONENTS.VIDEO_WALL.CONFIG;
+      specDefaultComponent = PDF_COMPONENTS.VIDEO_WALL.DEFAULT;
     } else if (displayType.includes("Outdoor")) {
-      specDefaultComponent = "Outdoor";
+      specDefaultComponent = PDF_COMPONENTS.OUTDOOR.DEFAULT;
     }
 
     return {
@@ -185,7 +360,7 @@ export const UseExportStore = create((set, get) => ({
       pdfTitle: state.generatePdfTitle(),
       projectName: state.projectName,
       userName: state.userName,
-      phoneNumber: formatPhoneForStorage(state.phoneNumber), // Format for storage
+      phoneNumber: formatPhoneForStorage(state.phoneNumber),
       email: state.email,
       exportDate: new Date().toLocaleDateString("id-ID"),
       exportTime: new Date().toLocaleTimeString("id-ID"),
@@ -229,27 +404,24 @@ export const UseExportStore = create((set, get) => ({
           sqm: isVideoWall ? null : sqm,
           realSize: isVideoWall
             ? null
-            : `${actualScreenSize.width.toFixed(3)} x ${actualScreenSize.height.toFixed(3)} `,
-          weight: !isVideoWall && totalWeight > 0 ? `${totalWeight.toFixed(0)} kg` : null,
+            : `${actualScreenSize.width.toFixed(
+                3
+              )} x ${actualScreenSize.height.toFixed(3)} `,
+          weight:
+            !isVideoWall && totalWeight > 0
+              ? `${totalWeight.toFixed(0)} kg`
+              : null,
           powerConsumption: {
             max: powerConsumption.max,
             average: powerConsumption.average,
-            maxFormatted:
-              powerConsumption.max > 0
-                ? isVideoWall
-                  ? `${Math.round(powerConsumption.max).toLocaleString("id-ID")} W`
-                  : `${(
-                      Math.ceil(powerConsumption.max / 500) * 500
-                    ).toLocaleString("id-ID")} W`
-                : null,
-            averageFormatted:
-              powerConsumption.average > 0
-                ? isVideoWall
-                  ? `${Math.round(powerConsumption.average).toLocaleString("id-ID")} W`
-                  : `${(
-                      Math.ceil(powerConsumption.average / 500) * 500
-                    ).toLocaleString("id-ID")} W`
-                : null,
+            maxFormatted: formatPowerConsumption(
+              powerConsumption.max,
+              isVideoWall
+            ),
+            averageFormatted: formatPowerConsumption(
+              powerConsumption.average,
+              isVideoWall
+            ),
           },
         },
       },
@@ -291,141 +463,5 @@ export const UseExportStore = create((set, get) => ({
       resolution: modelData.resolution || "N/A",
       contrastRatio: modelData.contrast_ratio || "N/A",
     };
-  },
-
-  // Set PDF data for export
-  setPdfData: (data) => set({ pdfData: data }),
-
-  sendToGoogleSheets: async (data) => {
-    try {
-      const webAppUrl = import.meta.env.VITE_WEB_APP_URL;
-
-      if (!webAppUrl) {
-        console.warn("Google Sheets URL not configured");
-        return { success: true };
-      }
-
-      const payload = {
-        pdfTitle: data.pdfTitle || "",
-        projectName: data.projectName || "",
-        userName: data.userName || "",
-        phoneNumber: data.phoneNumber || "", // Already formatted by formatPhoneForStorage
-        email: data.email || "",
-      };
-
-      console.log("Sending to Google Sheets:", payload);
-
-      const response = await fetch(webAppUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams(payload),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Google Sheets response error:", errorText);
-        throw new Error(
-          `Failed to send data to Google Sheets: ${response.status}`
-        );
-      }
-
-      const result = await response.json();
-      console.log("Google Sheets response:", result);
-      return result;
-    } catch (error) {
-      console.error("Google Sheets error:", error);
-      throw error;
-    }
-  },
-
-  exportToPdf: async () => {
-    const state = get();
-
-    if (!state.isFormValid()) {
-      alert("Please fill in all required fields correctly");
-      return;
-    }
-
-    set({ isExporting: true });
-
-    try {
-      const pdfData = state.getPdfExportData();
-
-      if (!pdfData) {
-        alert(
-          "No data available for export. Please configure your display first."
-        );
-        set({ isExporting: false });
-        return;
-      }
-
-      state.setPdfData(pdfData);
-
-      console.log("PDF Export Data:", pdfData);
-
-      try {
-        await state.sendToGoogleSheets(pdfData);
-      } catch (error) {
-        console.warn(
-          "Google Sheets integration failed, continuing with PDF export:",
-          error
-        );
-      }
-
-      return { success: true, data: pdfData };
-    } catch (error) {
-      console.error("Export preparation failed:", error);
-      alert("Failed to prepare export data. Please try again.");
-      set({ isExporting: false });
-      return { success: false, error };
-    }
-  },
-
-  completeExport: () => {
-    set({
-      isOpen: false,
-      isExporting: false,
-      pdfData: null,
-    });
-  },
-
-  getFormData: () => {
-    const state = get();
-    return {
-      projectName: state.projectName,
-      userName: state.userName,
-      phoneNumber: state.phoneNumber,
-      email: state.email,
-    };
-  },
-
-  setFormData: (data) =>
-    set({
-      projectName: data.projectName || "",
-      userName: data.userName || "",
-      phoneNumber: data.phoneNumber || "",
-      email: data.email || "",
-    }),
-
-  isFormValid: () => {
-    const state = get();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    return (
-      state.projectName.trim() !== "" &&
-      state.userName.trim() !== "" &&
-      state.phoneNumber.trim() !== "" &&
-      isValidPhoneNumber(state.phoneNumber) && // Use utility function
-      state.email.trim() !== "" &&
-      emailRegex.test(state.email)
-    );
-  },
-
-  isExportReady: () => {
-    const canvasStore = UseCanvasStore.getState();
-    const navbarStore = UseNavbarStore.getState();
-    return canvasStore.isConfigured() && navbarStore.selectedModel;
   },
 }));

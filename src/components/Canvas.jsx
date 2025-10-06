@@ -537,7 +537,7 @@ export const Canvas = () => {
   const renderEmptyCanvas = () => (
     <div className="relative w-full max-w-[400px] h-[250px] md:max-w-[550px] md:h-[320px] lg:max-w-[650px] lg:h-[380px] rounded-lg flex items-center justify-center overflow-hidden">
       <div className="w-[300px] h-[180px] max-h-[300px] md:w-[450px] md:h-[250px] lg:w-[550px] lg:h-[300px] bg-white text-center flex flex-col items-center justify-center px-4">
-        <p className="text-gray-500 text-xs lg:text-base">
+        <p className="text-gray-500 px-auto lg:px-28 text-xs lg:text-base">
           Start your configuration by choosing the model that suits your needs.
         </p>
         <button

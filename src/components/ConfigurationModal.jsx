@@ -91,6 +91,7 @@ export const ConfigurationModal = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [showTooltip, setShowTooltip] = useState(null);
   const scrollContainerRef = useRef(null);
+  const modalContentRef = useRef(null);
 
   const {
     isOpen,
@@ -120,6 +121,18 @@ export const ConfigurationModal = () => {
   const handleSelectDisplayType = (typeId) => {
     selectDisplayType(typeId);
     // Di desktop, tidak perlu nextStep() karena sudah otomatis ke configure di store
+  };
+
+  // Handle click outside tooltip to close it
+  const handleModalContentClick = (e) => {
+    // Cek apakah klik terjadi di luar tombol info dan tooltip
+    if (
+      showTooltip !== null &&
+      !e.target.closest('button[type="button"]') &&
+      !e.target.closest('[role="tooltip"]')
+    ) {
+      setShowTooltip(null);
+    }
   };
 
   // Handle next for mobile display type selection
@@ -343,6 +356,12 @@ export const ConfigurationModal = () => {
                     <button
                       onMouseEnter={() => setShowTooltip(item.id)}
                       onMouseLeave={() => setShowTooltip(null)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowTooltip(
+                          showTooltip === item.id ? null : item.id
+                        );
+                      }}
                       type="button"
                     >
                       <Info size={16} className="text-gray-700" />
@@ -351,7 +370,7 @@ export const ConfigurationModal = () => {
                     {showTooltip === item.id && (
                       <div
                         role="tooltip"
-                        className="absolute z-10 inline-block px-3 py-2 text-xs font-medium text-white transition-opacity duration-300 bg-[#3AAFA9] rounded-sm shadow-sm opacity-100 w-48 -right-2 top-8"
+                        className="absolute w-40 lg:w-48 z-10 inline-block px-3 py-2 text-xs font-medium text-white transition-opacity duration-300 bg-[#3AAFA9] rounded-sm shadow-sm opacity-100 -right-2 top-8"
                       >
                         {getTooltipMessage(item.image)}
                         <div className="absolute w-2 h-2 bg-[#3AAFA9] transform rotate-45 -top-1 right-3"></div>
@@ -637,7 +656,11 @@ export const ConfigurationModal = () => {
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-50 overflow-hidden">
       <div className="bg-white mx-5 rounded-xl shadow-2xl w-[380px] lg:w-full max-w-[820px] h-[90vh] max-h-[600px] overflow-auto">
-        <div className="p-6 h-full">
+        <div
+          ref={modalContentRef}
+          onClick={handleModalContentClick}
+          className="p-6 h-full"
+        >
           {currentStep === "select" && renderSelectStep()}
           {currentStep === "configure" && renderConfigureStep()}
           {currentStep === "subtype" && renderSubtypeStep()}

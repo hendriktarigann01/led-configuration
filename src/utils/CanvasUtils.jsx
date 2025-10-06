@@ -1,5 +1,4 @@
 export const CanvasUtils = {
-  // Helper to detect device type based on window size
   getDeviceType: () => {
     if (typeof window === "undefined") return "desktop";
     const width = window.innerWidth;
@@ -8,21 +7,16 @@ export const CanvasUtils = {
     return "desktop";
   },
 
-  // Get responsive container dimensions based on device
   getResponsiveContainerDimensions: () => {
     const deviceType = CanvasUtils.getDeviceType();
-
-    switch (deviceType) {
-      case "mobile":
-        return { containerWidth: 230, containerHeight: 138 };
-      case "tablet":
-        return { containerWidth: 450, containerHeight: 250 };
-      default: // desktop
-        return { containerWidth: 550, containerHeight: 300 };
-    }
+    const dimensions = {
+      mobile: { containerWidth: 230, containerHeight: 138 },
+      tablet: { containerWidth: 450, containerHeight: 250 },
+      desktop: { containerWidth: 550, containerHeight: 300 },
+    };
+    return dimensions[deviceType] || dimensions.desktop;
   },
 
-  // Calculate canvas dimensions based on wall size with responsive containers
   getCanvasDimensions: (wallWidth, wallHeight) => {
     const { containerWidth, containerHeight } =
       CanvasUtils.getResponsiveContainerDimensions();
@@ -32,13 +26,12 @@ export const CanvasUtils = {
     const wallScaleX = Math.min(1, wallWidth / maxWallWidth);
     const wallScaleY = Math.min(1, wallHeight / maxWallHeight);
 
-    const effectiveCanvasWidth = containerWidth * wallScaleX;
-    const effectiveCanvasHeight = containerHeight * wallScaleY;
-
-    return { effectiveCanvasWidth, effectiveCanvasHeight };
+    return {
+      effectiveCanvasWidth: containerWidth * wallScaleX,
+      effectiveCanvasHeight: containerHeight * wallScaleY,
+    };
   },
 
-  // FIXED: Calculate image dimensions with proper constraints
   getImageDimensions: (
     actualScreenSize,
     wallWidth,
@@ -46,46 +39,36 @@ export const CanvasUtils = {
     effectiveCanvasWidth,
     effectiveCanvasHeight
   ) => {
-    // Calculate screen-to-wall ratios
     const screenToWallRatioX = actualScreenSize.width / wallWidth;
     const screenToWallRatioY = actualScreenSize.height / wallHeight;
 
-    // Calculate ideal image dimensions based on screen-to-wall ratio
     const idealImageWidth = effectiveCanvasWidth * screenToWallRatioX;
     const idealImageHeight = effectiveCanvasHeight * screenToWallRatioY;
 
-    // CRITICAL FIX: Ensure screen never exceeds canvas bounds
-    // Add safety margins to prevent visual overflow
-    const safetyMargin = 0.95; // 5% safety margin
+    const safetyMargin = 0.95;
     const maxAllowedWidth = effectiveCanvasWidth * safetyMargin;
     const maxAllowedHeight = effectiveCanvasHeight * safetyMargin;
 
-    // Constrain to canvas bounds with safety margin
     let imageWidth = Math.min(idealImageWidth, maxAllowedWidth);
     let imageHeight = Math.min(idealImageHeight, maxAllowedHeight);
 
-    // Additional constraint: maintain aspect ratio if one dimension hits the limit
     const screenAspectRatio = actualScreenSize.width / actualScreenSize.height;
 
     if (imageWidth >= maxAllowedWidth) {
-      // Width is constrained, adjust height to maintain aspect ratio
       imageHeight = Math.min(imageWidth / screenAspectRatio, maxAllowedHeight);
     }
 
     if (imageHeight >= maxAllowedHeight) {
-      // Height is constrained, adjust width to maintain aspect ratio
       imageWidth = Math.min(imageHeight * screenAspectRatio, maxAllowedWidth);
     }
 
-    // Final safety check - ensure minimum visible size
-    const minSize = 20; // Minimum 20px for visibility
+    const minSize = 20;
     imageWidth = Math.max(imageWidth, minSize);
     imageHeight = Math.max(imageHeight, minSize);
 
     return { imageWidth, imageHeight };
   },
 
-  // Calculate measurement values for display
   getMeasurementValues: (
     actualScreenSize,
     wallWidth,
@@ -94,137 +77,84 @@ export const CanvasUtils = {
     imageHeight,
     effectiveCanvasWidth,
     effectiveCanvasHeight
-  ) => {
-    const horizontalMeasureLength = Math.min(imageWidth, effectiveCanvasWidth);
-    const verticalMeasureLength = Math.min(imageHeight, effectiveCanvasHeight);
+  ) => ({
+    horizontalMeasureLength: Math.min(imageWidth, effectiveCanvasWidth),
+    verticalMeasureLength: Math.min(imageHeight, effectiveCanvasHeight),
+    remainingWallHeight: (wallHeight - actualScreenSize.height) / 2,
+    remainingWallWidth: (wallWidth - actualScreenSize.width) / 2,
+  }),
 
-    const remainingWallHeight = (wallHeight - actualScreenSize.height) / 2;
-    const remainingWallWidth = (wallWidth - actualScreenSize.width) / 2;
-
-    return {
-      horizontalMeasureLength,
-      verticalMeasureLength,
-      remainingWallHeight,
-      remainingWallWidth,
-    };
-  },
-
-  // Calculate human dimensions for scale reference with responsive sizing
   getHumanDimensions: (wallHeight) => {
     const deviceType = CanvasUtils.getDeviceType();
     const humanRealHeight = 1.7;
     const humanToWallRatio = humanRealHeight / wallHeight;
 
-    // Different base canvas heights for different devices
-    let baseCanvasHeight;
-    switch (deviceType) {
-      case "mobile":
-        baseCanvasHeight = 180;
-        break;
-      case "tablet":
-        baseCanvasHeight = 250;
-        break;
-      default: // desktop
-        baseCanvasHeight = 300;
-    }
+    const config = {
+      mobile: { baseCanvasHeight: 180, minHumanHeight: 6 },
+      tablet: { baseCanvasHeight: 250, minHumanHeight: 7 },
+      desktop: { baseCanvasHeight: 300, minHumanHeight: 8 },
+    };
 
+    const { baseCanvasHeight, minHumanHeight } =
+      config[deviceType] || config.desktop;
     const humanDisplayHeight = baseCanvasHeight * humanToWallRatio;
-
-    // Different minimum heights for different devices
-    let minHumanHeight;
-    switch (deviceType) {
-      case "mobile":
-        minHumanHeight = 6; // minimum 6px for mobile
-        break;
-      case "tablet":
-        minHumanHeight = 7; // minimum 7px for tablet
-        break;
-      default: // desktop
-        minHumanHeight = 8; // minimum 8px for desktop
-    }
-
     const finalHumanHeight = Math.max(minHumanHeight, humanDisplayHeight);
 
     return { finalHumanHeight, humanToWallRatio };
   },
 
-  // Get content source based on selected content
   getContentSource: (selectedContent, customImageUrl) => {
-    switch (selectedContent) {
-      case "Default Image":
-        return "/canvas/canvas-bg.png";
-      case "Default Video":
-        return "/canvas/BumperMJSolution.mp4";
-      case "No Content":
-        return "/canvas/no-content.png";
-      case "Custom":
-        return customImageUrl || "/canvas/canvas-bg.png";
-      default:
-        return "/canvas/canvas-bg.png";
-    }
+    const sources = {
+      "Default Image": "/canvas/canvas-bg.png",
+      "Default Video": "/canvas/BumperMJSolution.mp4",
+      "No Content": "/canvas/no-content.png",
+      Custom: customImageUrl || "/canvas/canvas-bg.png",
+    };
+    return sources[selectedContent] || sources["Default Image"];
   },
 
-  // Render measurement lines component with responsive adjustments
   renderMeasurementLines: (horizontalMeasureLength, verticalMeasureLength) => {
     const deviceType = CanvasUtils.getDeviceType();
 
-    // Adjust measurement line extensions based on device
-    let verticalExtension, horizontalExtension;
-    switch (deviceType) {
-      case "mobile":
-        verticalExtension = 120;
-        horizontalExtension = 150;
-        break;
-      case "tablet":
-        verticalExtension = 150;
-        horizontalExtension = 200;
-        break;
-      default: // desktop
-        verticalExtension = 180;
-        horizontalExtension = 250;
-    }
-
-    const transformValues = {
-      verticalRight: "translateX(80%) translateY(-100%)",
-      verticalLeft: "translateX(-80%) translateY(-100%)",
-      horizontalTop: "translateY(100%) translateX(-100%)",
-      horizontalBottom: "translateY(100%) translateX(-100%)",
+    const extensions = {
+      mobile: { vertical: 120, horizontal: 150 },
+      tablet: { vertical: 150, horizontal: 200 },
+      desktop: { vertical: 180, horizontal: 250 },
     };
+
+    const { vertical: verticalExtension, horizontal: horizontalExtension } =
+      extensions[deviceType] || extensions.desktop;
+
+    const lineStyle =
+      "absolute border-dashed z-50 border-teal-400 pointer-events-none";
 
     return (
       <>
-        {/* Vertical Right Measure */}
         <div
-          className="absolute top-0 right-[1px] border-l border-dashed z-50 border-teal-400 pointer-events-none"
+          className={`${lineStyle} top-0 right-[1px] border-l`}
           style={{
-            transform: transformValues.verticalRight,
+            transform: "translateX(80%) translateY(-100%)",
             height: `${verticalMeasureLength + verticalExtension}px`,
           }}
         />
-
-        {/* Vertical Left Measure */}
         <div
-          className="absolute top-0 left-[0px] border-l border-dashed z-50 border-teal-400 pointer-events-none"
+          className={`${lineStyle} top-0 left-[0px] border-l`}
           style={{
-            transform: transformValues.verticalLeft,
+            transform: "translateX(-80%) translateY(-100%)",
             height: `${verticalMeasureLength + verticalExtension}px`,
           }}
         />
-
-        {/* Horizontal Top Measure */}
         <div
-          className="absolute top-0 left-0 border-t border-dashed z-50 border-teal-400 pointer-events-none"
+          className={`${lineStyle} top-0 left-0 border-t`}
           style={{
-            transform: transformValues.horizontalTop,
+            transform: "translateY(100%) translateX(-100%)",
             width: `${horizontalMeasureLength + horizontalExtension}px`,
           }}
         />
-
-        {/* Horizontal Bottom Measure */}
         <div
-          className="absolute bottom-[1px] left-0 border-t border-dashed z-50 border-teal-400 pointer-events-none"
+          className={`${lineStyle} bottom-[1px] left-0 border-t`}
           style={{
-            transform: transformValues.horizontalBottom,
+            transform: "translateY(100%) translateX(-100%)",
             width: `${horizontalMeasureLength + horizontalExtension}px`,
           }}
         />
@@ -232,33 +162,26 @@ export const CanvasUtils = {
     );
   },
 
-  // Render bezel overlay for multi-cabinet displays
   renderBezelOverlay: (cabinetCount) => {
     if (cabinetCount.horizontal <= 1 && cabinetCount.vertical <= 1) return null;
 
     return (
       <div className="absolute inset-0 z-30 pointer-events-none border-1 border-[#D9D9D9]/40">
-        {/* Vertical bezel lines */}
         {cabinetCount.horizontal > 1 &&
           Array.from({ length: cabinetCount.horizontal - 1 }, (_, i) => (
             <div
               key={`vertical-${i}`}
               className="absolute top-0 bottom-0 border-l-1 border-[#D9D9D9]/40"
-              style={{
-                left: `${((i + 1) / cabinetCount.horizontal) * 100}%`,
-              }}
+              style={{ left: `${((i + 1) / cabinetCount.horizontal) * 100}%` }}
             />
           ))}
 
-        {/* Horizontal bezel lines */}
         {cabinetCount.vertical > 1 &&
           Array.from({ length: cabinetCount.vertical - 1 }, (_, i) => (
             <div
               key={`horizontal-${i}`}
               className="absolute left-0 right-0 border-t-1 border-[#D9D9D9]/40"
-              style={{
-                top: `${((i + 1) / cabinetCount.vertical) * 100}%`,
-              }}
+              style={{ top: `${((i + 1) / cabinetCount.vertical) * 100}%` }}
             />
           ))}
       </div>
@@ -268,77 +191,60 @@ export const CanvasUtils = {
   renderCanvasToWallMeasurements: (
     effectiveCanvasWidth,
     effectiveCanvasHeight
-  ) => {  
+  ) => {
     const deviceType = CanvasUtils.getDeviceType();
 
-    // Extensions tetap sama seperti original
-    let horizontalExtension, verticalExtension;
-    switch (deviceType) {
-      case "mobile":
-        horizontalExtension = 100;
-        verticalExtension = 100;
-        break;
-      case "tablet":
-        horizontalExtension = 80;
-        verticalExtension = 80;
-        break;
-      default: // desktop
-        horizontalExtension = 100;
-        verticalExtension = 100;
-    }
-
-    // KUNCI SOLUSI: Hitung dynamic offset berdasarkan effectiveCanvasWidth
-    const getVerticalOffset = () => {
-      // Hitung selisih antara container width dan effective canvas width
-      const widthDifference = effectiveCanvasWidth;
-
-      // Base offset untuk setiap device
-      const baseOffset =
-        deviceType === "mobile" ? 48 : deviceType === "tablet" ? 50 : 50;
-
-      // Offset dinamis = base offset + adjustment berdasarkan canvas size
-      return baseOffset + widthDifference;
+    const extensions = {
+      mobile: { horizontal: 100, vertical: 100 },
+      tablet: { horizontal: 80, vertical: 80 },
+      desktop: { horizontal: 100, vertical: 100 },
     };
 
-    const dynamicOffset = getVerticalOffset();
+    const { horizontal: horizontalExtension, vertical: verticalExtension } =
+      extensions[deviceType] || extensions.desktop;
+
+    const baseOffset = {
+      mobile: 48,
+      tablet: 50,
+      desktop: 50,
+    };
+
+    const dynamicOffset =
+      (baseOffset[deviceType] || baseOffset.desktop) + effectiveCanvasWidth;
+
+    const lineStyle =
+      "absolute z-10 border-dashed border-teal-400 pointer-events-none";
 
     return (
       <>
-        {/* Horizontal Bottom Measure Screen */}
         <div
-          className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
+          className={`${lineStyle} left-0 border-t`}
           style={{
             bottom: "51px",
             transform: "translateX(-75%) translateY(100%)",
             width: `${effectiveCanvasWidth + horizontalExtension}px`,
           }}
         />
-
-        {/* Horizontal Top Measure Screen */}
         <div
-          className="absolute z-10 left-0 border-t border-dashed border-teal-400 pointer-events-none"
+          className={`${lineStyle} left-0 border-t`}
           style={{
             top: "50px",
             transform: "translateX(-75%) translateY(100%)",
             width: `${effectiveCanvasWidth + horizontalExtension}px`,
           }}
         />
-
-        {/* Vertical Left Measure Screen */}
         <div
-          className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
+          className={`${lineStyle} top-0 border-l`}
           style={{
-            right: `${dynamicOffset}px`, 
+            right: `${dynamicOffset}px`,
             transform: "translateX(100%) translateY(-75%)",
             height: `${effectiveCanvasHeight + verticalExtension}px`,
           }}
         />
-
-        {/* Vertical Right Measure Screen */}
         <div
-          className="absolute z-10 top-0 border-l border-dashed border-teal-400 pointer-events-none"
+          className={`${lineStyle} top-0 border-l`}
           style={{
-            left: `${dynamicOffset}px`, 
+            left: `${dynamicOffset}px`,
             transform: "translateX(-100%) translateY(-75%)",
             height: `${effectiveCanvasHeight + verticalExtension}px`,
           }}
@@ -347,7 +253,6 @@ export const CanvasUtils = {
     );
   },
 
-  // FIXED: Render wall measurements with dynamic positioning based on screen-to-wall ratio
   renderWallMeasurements: (
     remainingWallHeight,
     remainingWallWidth,
@@ -355,140 +260,136 @@ export const CanvasUtils = {
     wallWidth,
     wallHeight
   ) => {
-    // Calculate screen-to-wall ratios
+    const deviceType = CanvasUtils.getDeviceType();
+
+    const margins = {
+      mobile: { horizontal: 22, vertical: 18 },
+      tablet: { horizontal: 17, vertical: 13 },
+      desktop: { horizontal: 15, vertical: 10 },
+    };
+
+    const { horizontal: textMarginHorizontal, vertical: textMarginVertical } =
+      margins[deviceType] || margins.desktop;
+
     const screenToWallRatioX = actualScreenSize.width / wallWidth;
     const screenToWallRatioY = actualScreenSize.height / wallHeight;
 
-    // Calculate remaining space ratio (space on each side)
     const remainingSpaceRatioX = (1 - screenToWallRatioX) / 2;
     const remainingSpaceRatioY = (1 - screenToWallRatioY) / 2;
 
-    // Calculate center position of remaining space (midpoint between outer and inner lines)
-    // Add constraints to keep text within boundaries
     const rawLeftPercentage = (remainingSpaceRatioX / 2) * 115;
-    const rawRightPercentage = (1 - (remainingSpaceRatioX / 2)) * 95;
+    const rawRightPercentage = (1 - remainingSpaceRatioX / 2) * 95;
     const rawTopPercentage = (remainingSpaceRatioY / 2) * 120;
-    const rawBottomPercentage = (1 - (remainingSpaceRatioY / 2)) * 100;
-    
-    // Calculate min and max boundaries based on remaining space
-    // Need extra margin to account for text width/height
-    const textMarginHorizontal = 15; // Extra margin to prevent text from crossing lines
-    const textMarginVertical = 10; // Extra margin to prevent text from crossing lines
+    const rawBottomPercentage = (1 - remainingSpaceRatioY / 2) * 100;
 
-    // Left boundary: between 0% and remainingSpaceRatioX * 100%
-    const minLeftPercentage = textMarginVertical; 
-    const maxLeftPercentage = Math.max(textMarginVertical, remainingSpaceRatioX * 100 - textMarginVertical );
-    
-    // Right boundary: between (100 - remainingSpaceRatioX * 100)% and 100%
-    const minRightPercentage = Math.min(100 - textMarginVertical, (1 - remainingSpaceRatioX) * 100 + textMarginVertical);
-    const maxRightPercentage = 100 - textMarginVertical;
-    
-    // Top boundary: between 0% and remainingSpaceRatioY * 100%
-    const minTopPercentage = textMarginHorizontal;
-    const maxTopPercentage = Math.max(textMarginHorizontal, remainingSpaceRatioY * 100 - textMarginHorizontal);
-    
-    // Bottom boundary: between (100 - remainingSpaceRatioY * 100)% and 100%
-    const minBottomPercentage = Math.min(100 - textMarginHorizontal, (1 - remainingSpaceRatioY) * 100 + textMarginHorizontal);
-    const maxBottomPercentage = 100 - textMarginHorizontal;
-    
-    // Constrain percentages to stay within boundaries
-    const leftPercentage = Math.max(minLeftPercentage, Math.min(rawLeftPercentage, maxLeftPercentage));
-    const rightPercentage = Math.max(minRightPercentage, Math.min(rawRightPercentage, maxRightPercentage));
-    const topPercentage = Math.max(minTopPercentage, Math.min(rawTopPercentage, maxTopPercentage));
-    const bottomPercentage = Math.max(minBottomPercentage, Math.min(rawBottomPercentage, maxBottomPercentage));
+    const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
+
+    const leftPercentage = clamp(
+      rawLeftPercentage,
+      textMarginVertical,
+      Math.max(
+        textMarginVertical,
+        remainingSpaceRatioX * 100 - textMarginVertical
+      )
+    );
+
+    const rightPercentage = clamp(
+      rawRightPercentage,
+      Math.min(
+        100 - textMarginVertical,
+        (1 - remainingSpaceRatioX) * 100 + textMarginVertical
+      ),
+      100 - textMarginVertical
+    );
+
+    const topPercentage = clamp(
+      rawTopPercentage,
+      textMarginHorizontal,
+      Math.max(
+        textMarginHorizontal,
+        remainingSpaceRatioY * 100 - textMarginHorizontal
+      )
+    );
+
+    const bottomPercentage = clamp(
+      rawBottomPercentage,
+      Math.min(
+        100 - textMarginHorizontal,
+        (1 - remainingSpaceRatioY) * 100 + textMarginHorizontal
+      ),
+      100 - textMarginHorizontal
+    );
+
+    const textStyle = "text-[10px] lg:text-xs text-gray-700 text-center";
+    const containerStyle =
+      "absolute flex flex-col items-center justify-center z-50";
 
     return (
       <>
-        {/* Height measurements - Left Top */}
         <div
-          className="absolute left-4 flex flex-col items-center justify-center z-50"
-          style={{
-            top: `${topPercentage}%`,
-            transform: 'translateY(-50%)'
-          }}
+          className={`${containerStyle} left-4`}
+          style={{ top: `${topPercentage}%`, transform: "translateY(-50%)" }}
         >
           <span
-            className="text-[10px] lg:text-xs text-gray-700 text-center"
-            style={{
-              writingMode: "vertical-rl",
-              transform: "rotate(180deg)",
-            }}
+            className={textStyle}
+            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
           >
             {remainingWallHeight.toFixed(2)} m
           </span>
         </div>
 
-        {/* Height measurements - Left Bottom */}
         <div
-          className="absolute left-4 flex flex-col items-center justify-center z-50"
-          style={{
-            top: `${bottomPercentage}%`,
-            transform: 'translateY(-50%)'
-          }}
+          className={`${containerStyle} left-4`}
+          style={{ top: `${bottomPercentage}%`, transform: "translateY(-50%)" }}
         >
           <span
-            className="text-[10px] lg:text-xs text-gray-700 text-center"
-            style={{
-              writingMode: "vertical-rl",
-              transform: "rotate(180deg)",
-            }}
+            className={textStyle}
+            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
           >
             {remainingWallHeight.toFixed(2)} m
           </span>
         </div>
 
-        {/* Width measurements - Top Left */}
         <div
-          className="absolute top-4 flex flex-col items-center justify-center z-50"
-          style={{
-            left: `${leftPercentage}%`,
-            transform: 'translateX(-50%)'
-          }}
+          className={`${containerStyle} top-4`}
+          style={{ left: `${leftPercentage}%`, transform: "translateX(-50%)" }}
         >
-          <span className="text-[10px] lg:text-xs text-gray-700 text-center">
-            {remainingWallWidth.toFixed(2)} m
-          </span>
+          <span className={textStyle}>{remainingWallWidth.toFixed(2)} m</span>
         </div>
 
-        {/* Width measurements - Top Right */}
         <div
-          className="absolute top-4 flex flex-col items-center justify-center z-50"
-          style={{
-            left: `${rightPercentage}%`,
-            transform: 'translateX(-50%)'
-          }}
+          className={`${containerStyle} top-4`}
+          style={{ left: `${rightPercentage}%`, transform: "translateX(-50%)" }}
         >
-          <span className="text-[10px] lg:text-xs text-gray-700 text-center">
-            {remainingWallWidth.toFixed(2)} m
-          </span>
+          <span className={textStyle}>{remainingWallWidth.toFixed(2)} m</span>
         </div>
       </>
     );
   },
 
-  // Render info displays with responsive positioning
   renderInfoDisplays: (resolutionString, humanHeight = "1,70 m") => {
     const deviceType = CanvasUtils.getDeviceType();
 
-    // Adjust positioning and spacing based on device
-    const leftPosition = deviceType === "mobile" ? "left-12" : "left-13";
-    const rightPosition = deviceType === "mobile" ? "right-0" : "right-1";
-    const bottomPosition = deviceType === "mobile" ? "bottom-5" : "bottom-5";
+    const positions = {
+      mobile: { left: "left-12", right: "right-0", bottom: "bottom-5" },
+      tablet: { left: "left-13", right: "right-1", bottom: "bottom-5" },
+      desktop: { left: "left-13", right: "right-1", bottom: "bottom-5" },
+    };
+
+    const { left, right, bottom } = positions[deviceType] || positions.desktop;
 
     return (
       <>
-        {/* Resolution Info Display */}
         <div
-          className={`absolute ${bottomPosition} ${leftPosition} flex flex-col items-start justify-center z-50`}
+          className={`absolute ${bottom} ${left} flex flex-col items-start justify-center z-50`}
         >
           <span className="text-xs text-gray-700">
             Resolution: {resolutionString}
           </span>
         </div>
 
-        {/* Human Info Height */}
         <div
-          className={`absolute ${bottomPosition} ${rightPosition} flex flex-col items-start justify-center z-50`}
+          className={`absolute ${bottom} ${right} flex flex-col items-start justify-center z-50`}
         >
           <span className="text-xs text-gray-700">{humanHeight}</span>
         </div>
@@ -496,37 +397,21 @@ export const CanvasUtils = {
     );
   },
 
-  // Render human silhouette with responsive positioning and sizing
   renderHumanSilhouette: (finalHumanHeight, humanToWallRatio) => {
     const deviceType = CanvasUtils.getDeviceType();
 
-    // Adjust positioning and max width based on device
-    let rightPosition, bottomPosition, maxWidth;
-    switch (deviceType) {
-      case "mobile":
-        rightPosition = "-right-40";
-        bottomPosition = "bottom-12";
-        maxWidth = "50px";
-        break;
-      case "tablet":
-        rightPosition = "-right-37";
-        bottomPosition = "bottom-10";
-        maxWidth = "65px";
-        break;
-      default: // desktop
-        rightPosition = "-right-35";
-        bottomPosition = "bottom-10";
-        maxWidth = "77px";
-    }
+    const config = {
+      mobile: { right: "-right-40", bottom: "bottom-12", maxWidth: "50px" },
+      tablet: { right: "-right-37", bottom: "bottom-10", maxWidth: "65px" },
+      desktop: { right: "-right-35", bottom: "bottom-10", maxWidth: "77px" },
+    };
+
+    const { right, bottom, maxWidth } = config[deviceType] || config.desktop;
 
     return (
       <div
-        className={`absolute ${rightPosition} ${bottomPosition} z-50`}
-        style={{
-          width: "200px",
-          height: "auto",
-          alignItems: "flex-end",
-        }}
+        className={`absolute ${right} ${bottom} z-50`}
+        style={{ width: "200px", height: "auto", alignItems: "flex-end" }}
       >
         <div className="relative flex flex-col">
           <img

@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
       host: true,
       port: 5173,
       cors: true,
-      allowedHosts: ["localhost", "6168be43c122.ngrok-free.app"],
+      allowedHosts: ["localhost", "931e380054fe.ngrok-free.app "],
     },
   };
 });

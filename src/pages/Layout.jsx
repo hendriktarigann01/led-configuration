@@ -53,7 +53,7 @@ const Layout = () => {
         </div>
       </div>
       {/* Mobile: Sidebar at Bottom, Desktop: Sidebar at Left */}
-      <div className="flex-shrink-0 lg:order-1 order-2">
+      <div className="flex-shrink-0 lg:order-1 order-2 ">
         <Navbar />
       </div>
       {/* Modals - renders at root level */}

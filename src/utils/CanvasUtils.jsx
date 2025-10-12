@@ -84,20 +84,23 @@ export const CanvasUtils = {
     remainingWallWidth: (wallWidth - actualScreenSize.width) / 2,
   }),
 
-  getHumanDimensions: (wallHeight) => {
+  getHumanDimensions: (wallHeight, canvasHeight) => {
     const deviceType = CanvasUtils.getDeviceType();
-    const humanRealHeight = 1.7;
+    const humanRealHeight = 1.7; // Selalu 1.7m dalam dunia nyata
     const humanToWallRatio = humanRealHeight / wallHeight;
 
     const config = {
-      mobile: { baseCanvasHeight: 180, minHumanHeight: 6 },
-      tablet: { baseCanvasHeight: 250, minHumanHeight: 7 },
-      desktop: { baseCanvasHeight: 300, minHumanHeight: 8 },
+      mobile: { minHumanHeight: 6 },
+      tablet: { minHumanHeight: 7 },
+      desktop: { minHumanHeight: 8 },
     };
 
-    const { baseCanvasHeight, minHumanHeight } =
-      config[deviceType] || config.desktop;
-    const humanDisplayHeight = baseCanvasHeight * humanToWallRatio;
+    const { minHumanHeight } = config[deviceType] || config.desktop;
+
+    // Hitung tinggi human berdasarkan proporsi ke canvas
+    const humanDisplayHeight = canvasHeight * humanToWallRatio;
+
+    // Pastikan minimal terlihat, tapi tidak ada batas maksimal
     const finalHumanHeight = Math.max(minHumanHeight, humanDisplayHeight);
 
     return { finalHumanHeight, humanToWallRatio };
@@ -265,14 +268,14 @@ export const CanvasUtils = {
     const margins = {
       mobile: { horizontal: 22, vertical: 18 },
       tablet: { horizontal: 17, vertical: 13 },
-      desktop: { horizontal: 15, vertical: 10 },
+      desktop: { horizontal: 16, vertical: 10 },
     };
 
     const { horizontal: textMarginHorizontal, vertical: textMarginVertical } =
       margins[deviceType] || margins.desktop;
 
-    const screenToWallRatioX = actualScreenSize.width / wallWidth;
-    const screenToWallRatioY = actualScreenSize.height / wallHeight;
+    const screenToWallRatioX = (actualScreenSize.width / wallWidth) * 0.7;
+    const screenToWallRatioY = (actualScreenSize.height / wallHeight) * 0.5;
 
     const remainingSpaceRatioX = (1 - screenToWallRatioX) / 2;
     const remainingSpaceRatioY = (1 - screenToWallRatioY) / 2;
@@ -400,33 +403,36 @@ export const CanvasUtils = {
   renderHumanSilhouette: (finalHumanHeight, humanToWallRatio) => {
     const deviceType = CanvasUtils.getDeviceType();
 
+    console.log("human height:", { finalHumanHeight });
+
     const config = {
-      mobile: { right: "-right-40", bottom: "bottom-12", maxWidth: "50px" },
-      tablet: { right: "-right-37", bottom: "bottom-10", maxWidth: "65px" },
-      desktop: { right: "-right-35", bottom: "bottom-10", maxWidth: "77px" },
+      mobile: { right: "-right-40", bottom: "bottom-12", maxWidth: 50 },
+      tablet: { right: "-right-37", bottom: "bottom-10", maxWidth: 65 },
+      desktop: { right: "-right-35", bottom: "bottom-10", maxWidth: 77 },
     };
 
     const { right, bottom, maxWidth } = config[deviceType] || config.desktop;
 
+    const parentWidth = 200;
+    const maxWidthPercent = `${(maxWidth / parentWidth) * 100}%`;
+
     return (
       <div
-        className={`absolute ${right} ${bottom} z-50`}
-        style={{ width: "200px", height: "auto", alignItems: "flex-end" }}
+        className={`absolute ${right} ${bottom} z-10 flex items-end`}
+        style={{ width: `${parentWidth}px` }}
       >
-        <div className="relative flex flex-col">
-          <img
-            src="/human.webp"
-            alt={`Human Scale Reference (1.7m) - ${(
-              humanToWallRatio * 100
-            ).toFixed(1)}% of wall`}
-            className={`${finalHumanHeight > 200 ? "hidden" : "block"} w-full`}
-            style={{
-              height: `${finalHumanHeight}px`,
-              objectFit: "contain",
-              maxWidth: maxWidth,
-            }}
-          />
-        </div>
+        <img
+          src="/human.webp"
+          alt={`Human Scale Reference (1.7m) - ${(
+            humanToWallRatio * 100
+          ).toFixed(1)}% of wall`}
+          className="w-full"
+          style={{
+            height: `${finalHumanHeight}px`,
+            objectFit: finalHumanHeight > 170 ? "fill" : "contain",
+            maxWidth: maxWidthPercent,
+          }}
+        />
       </div>
     );
   },

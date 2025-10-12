@@ -253,7 +253,7 @@ export const Canvas = () => {
   );
 
   const { finalHumanHeight, humanToWallRatio } =
-    CanvasUtils.getHumanDimensions(wallHeight);
+    CanvasUtils.getHumanDimensions(wallHeight, dynamicCanvas.height);
   const contentSource = CanvasUtils.getContentSource(
     selectedContent,
     customImageUrl
@@ -476,7 +476,6 @@ export const Canvas = () => {
   };
 
   const renderCanvasPreview = () => {
-    // Gunakan dynamicCanvas yang sudah ada, hanya adjust container padding/margin
     const screenWidth = window.innerWidth;
     const isVerySmallScreen = screenWidth <= 375; // iPhone SE
     const isSmallScreen = screenWidth <= 410; // Small phones
@@ -489,11 +488,11 @@ export const Canvas = () => {
         className="relative rounded-lg flex items-center justify-center overflow-hidden"
         style={{
           width: `${Math.min(
-            dynamicCanvas.width + containerPadding, // Gunakan dynamicCanvas yang sudah ada
+            dynamicCanvas.width + containerPadding,
             screenWidth - screenMargin
           )}px`,
           height: `${Math.min(
-            dynamicCanvas.height + containerPadding, // Gunakan dynamicCanvas yang sudah ada
+            dynamicCanvas.height + containerPadding,
             window.innerHeight - 50
           )}px`,
           maxWidth: "100vw",

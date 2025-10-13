@@ -1,7 +1,16 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { motion, useDragControls } from "framer-motion";
-import { ArrowRight, Image, Video, Upload, X, CirclePlus } from "lucide-react";
+import {
+  ArrowRight,
+  Image,
+  Video,
+  Upload,
+  X,
+  CirclePlus,
+  Info,
+} from "lucide-react";
 import { DragDropUpload } from "./DragDropUpload";
+import { ProductDetailModal } from "./ProductDetailModal";
 import { UseNavbarStore } from "../store/UseNavbarStore";
 import { UseModalStore } from "../store/UseModalStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
@@ -9,17 +18,16 @@ import { UseCanvasStore } from "../store/UseCanvasStore";
 export const Navbar = () => {
   const [height, setHeight] = useState(80);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isProductDetailOpen, setIsProductDetailOpen] = useState(false);
   const dragControls = useDragControls();
 
   const minHeight = 80;
   const maxHeight =
-    typeof window !== "undefined" ? window.innerHeight * 0.7 : 400; // 70% of screen height max
+    typeof window !== "undefined" ? window.innerHeight * 0.7 : 400;
 
   const {
-    activeTab,
     selectedModel,
     selectedContent,
-    setActiveTab,
     setSelectedModel,
     setSelectedContent,
     setCustomImageUrl,
@@ -28,7 +36,6 @@ export const Navbar = () => {
   } = UseNavbarStore();
 
   const { isConfigured } = UseCanvasStore();
-
   const { openModal, selectDisplayType } = UseModalStore();
 
   const fileInputRef = useRef(null);
@@ -64,29 +71,23 @@ export const Navbar = () => {
   };
 
   const handleChangeModel = (e) => {
-    // Prevent event bubbling if this button is inside a larger clickable area
     e.preventDefault();
     e.stopPropagation();
 
-    // Don't proceed if not configured
     if (!isConfigured()) return;
 
     if (selectedModel && selectedModel.displayTypeId) {
-      // Open modal with pre-selected display type
       selectDisplayType(selectedModel.displayTypeId);
       openModal();
     } else {
-      // Open modal from beginning
       openModal();
     }
   };
 
   const handleContentSelection = (optionId) => {
-    // Don't proceed if not configured
     if (!isConfigured()) return;
 
     if (optionId === "Custom") {
-      // Trigger file input for custom content
       fileInputRef.current?.click();
     } else {
       setSelectedContent(optionId);
@@ -96,9 +97,8 @@ export const Navbar = () => {
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Check file type and size
       const validTypes = ["image/jpeg", "image/png"];
-      const maxSize = 3 * 1024 * 1024; // 3MB
+      const maxSize = 3 * 1024 * 1024;
 
       if (!validTypes.includes(file.type)) {
         alert("Please select a JPG or PNG file only.");
@@ -110,14 +110,10 @@ export const Navbar = () => {
         return;
       }
 
-      // Create object URL for the uploaded file
       const fileUrl = URL.createObjectURL(file);
-
-      // Set custom content and store the file URL in Zustand store
       setSelectedContent("Custom");
       setCustomImageUrl(fileUrl);
     }
-    // Reset input value to allow selecting the same file again
     event.target.value = "";
   };
 
@@ -125,26 +121,17 @@ export const Navbar = () => {
     setRoomImageUrl(fileUrl);
   };
 
-  const handleModalOpen = () => {
-    // Don't proceed if not configured
-    if (!isConfigured()) return;
-    openModal();
-  };
-
-  // Content component that will be reused
   const NavbarContent = () => (
     <>
       {/* Model Section */}
       <div>
         <h3 className="text-sm font-normal text-gray-700 mb-2">Model</h3>
 
-        {/* Model Display */}
         <div
           onClick={!selectedModel ? openModal : handleChangeModel}
-          className="border border-gray-300 hover:border-gray-400 w-full h-36 lg:h-32 rounded-xs mb-4 flex items-center justify-center cursor-pointer"
+          className="border border-gray-300 hover:border-gray-400 w-full h-36 lg:h-28 rounded-xs mb-4 flex items-center justify-center cursor-pointer"
         >
           {!selectedModel ? (
-            /* Empty Model */
             <div className="flex items-center justify-center w-full h-full">
               <div className="space-y-1">
                 <CirclePlus className="w-4 h-4 mx-auto text-gray-500" />
@@ -152,7 +139,6 @@ export const Navbar = () => {
               </div>
             </div>
           ) : (
-            /* Fill Model */
             <div className="flex items-center justify-between w-full m-3">
               <div>
                 <p className="text-xs text-gray-500">{selectedModel.name}</p>
@@ -160,7 +146,7 @@ export const Navbar = () => {
                   {selectedModel.code}
                 </p>
                 <div className="flex items-center mt-4 space-x-2 text-gray-500 group">
-                  <span className="text-xs gxtext-gray-700">Change Model</span>
+                  <span className="text-xs text-gray-700">Change Model</span>
                   <ArrowRight className="w-4 h-4 text-gray-700" />
                 </div>
               </div>
@@ -176,11 +162,18 @@ export const Navbar = () => {
         </div>
       </div>
 
+      <button
+        onClick={() => setIsProductDetailOpen(true)}
+        className="flex w-auto items-center cursor-pointer hover:opacity-70 transition-opacity"
+      >
+        <Info size={14} className="mr-2 text-gray-400" />
+        <div className="text-sm font-normal text-gray-400">Product Detail</div>
+      </button>
+
       {/* Content Section */}
       <div>
         <h3 className="text-sm font-normal text-gray-700 mb-2">Content</h3>
 
-        {/* Content Options Grid */}
         <div className="grid grid-cols-2 gap-2.5">
           {contentOptions.map((option) => {
             const IconComponent = option.icon;
@@ -207,7 +200,6 @@ export const Navbar = () => {
           })}
         </div>
 
-        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -222,7 +214,7 @@ export const Navbar = () => {
         </p>
       </div>
 
-      {/* Room Setup Section - Moved to bottom */}
+      {/* Room Setup Section */}
       <div className="m-0">
         <h3 className="text-sm font-normal text-gray-700 mb-2">Room Setup</h3>
         <p className="text-xs text-[#3AAFA9] mb-3">
@@ -248,20 +240,18 @@ export const Navbar = () => {
 
   return (
     <>
-      {/* Desktop Version - Original Layout */}
+      {/* Desktop Version */}
       <div className="hidden lg:block w-[350px] lg:h-screen bg-white">
-        {/* Header with Logo */}
         <div className="px-6 pt-6">
           <div className="flex items-center justify-center">
             <img
               src="/logo/mjs_logo_text.png"
               alt="logo"
-              className="w-40 h-auto"
+              className="w-32 h-auto"
             />
           </div>
         </div>
 
-        {/* Content */}
         <div className="px-5 py-3 space-y-4 max-h-none overflow-y-auto">
           <NavbarContent />
         </div>
@@ -269,7 +259,6 @@ export const Navbar = () => {
 
       {/* Mobile Bottom Sheet */}
       <div className="lg:hidden">
-        {/* Backdrop overlay when expanded */}
         {isExpanded && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -283,7 +272,6 @@ export const Navbar = () => {
           />
         )}
 
-        {/* Bottom Sheet */}
         <motion.div
           className="fixed bottom-0 left-0 right-0 bg-white rounded-t-2xl z-50"
           style={{ height }}
@@ -300,7 +288,6 @@ export const Navbar = () => {
           onDrag={handleDrag}
           onDragEnd={handleDragEnd}
         >
-          {/* Drag Handle */}
           <div
             className="flex justify-center py-3 cursor-grab active:cursor-grabbing"
             onPointerDown={(e) => dragControls.start(e)}
@@ -308,12 +295,17 @@ export const Navbar = () => {
             <div className="w-10 h-1 bg-gray-200 rounded-full" />
           </div>
 
-          {/* Content - Mobile */}
           <div className="px-5 pt-5 pb-10 z-50 space-y-6 overflow-y-auto h-full">
             <NavbarContent />
           </div>
         </motion.div>
       </div>
+
+      {/* Product Detail Modal */}
+      <ProductDetailModal
+        isOpen={isProductDetailOpen}
+        onClose={() => setIsProductDetailOpen(false)}
+      />
     </>
   );
 };

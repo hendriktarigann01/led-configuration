@@ -230,32 +230,31 @@ export const ResultModal = ({ isOpen, onClose }) => {
                       <div className="text-gray-800">
                         {powerConsumption.max > 0
                           ? isVideoWall
-                            ? `${Math.round(
+                            ? `${Math.floor(
                                 powerConsumption.max
                               ).toLocaleString("id-ID")} W ~ ${Math.round(
                                 powerConsumption.max
                               ).toLocaleString("id-ID")} W`
-                            : `${powerConsumption.max.toLocaleString(
-                                "id-ID"
-                              )} W ~ ${(
+                            : `${Math.floor(
+                                powerConsumption.max
+                              ).toLocaleString("id-ID")} W ~ ${(
                                 Math.ceil(powerConsumption.max / 500) * 500
                               ).toLocaleString("id-ID")} W`
                           : "N/A"}
                       </div>
                     </div>
 
-                    {/* Average Power - SHOW for ALL types including Video Wall */}
                     <div>
                       <div className="text-gray-600 mb-1">Average Power</div>
                       <div className="text-gray-800">
                         {powerConsumption.average > 0
                           ? isVideoWall
-                            ? `${Math.round(
+                            ? `${Math.floor(
                                 powerConsumption.average
                               ).toLocaleString("id-ID")} W`
-                            : `${powerConsumption.average.toLocaleString(
-                                "id-ID"
-                              )} W ~ ${(
+                            : `${Math.floor(
+                                powerConsumption.average
+                              ).toLocaleString("id-ID")} W ~ ${(
                                 Math.ceil(powerConsumption.average / 500) * 500
                               ).toLocaleString("id-ID")} W`
                           : "N/A"}

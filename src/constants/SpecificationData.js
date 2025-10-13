@@ -8,7 +8,7 @@ export const getIndoorSpecifications = (data) => [
       },
       {
         label: "Refresh Rate",
-        value: data?.refreshRate || "1920 Hz / 2400 Hz / 3840 Hz",
+        value: "2400 Hz / 3840 Hz",
       },
       {
         label: "Brightness",
@@ -71,7 +71,7 @@ export const getOutdoorSpecifications = (data) => [
       },
       {
         label: "Refresh Rate",
-        value: data?.refreshRate || "1920Hz / 3840Hz / 7680Hz",
+        value: "3840 Hz / 7680 Hz",
       },
       {
         label: "Brightness",

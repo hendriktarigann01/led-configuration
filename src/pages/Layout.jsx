@@ -9,15 +9,11 @@ import { CropperModal } from "../components/CropperModal"; // New import
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
+import { ProductDetailModal } from "../components/ProductDetailModal";
 
 const Layout = () => {
-  const {
-    screenHeight,
-    screenWidth,
-    wallHeight,
-    wallWidth,
-    syncWithCanvas,
-  } = UseHeaderStore();
+  const { screenHeight, screenWidth, wallHeight, wallWidth, syncWithCanvas } =
+    UseHeaderStore();
 
   const { setScreenSize, setWallSize, updateModelData } = UseCanvasStore();
   const { selectedModel } = UseNavbarStore();
@@ -60,6 +56,7 @@ const Layout = () => {
       <ConfigurationModal />
       <ExportModal />
       <ResultModal />
+      <ProductDetailModal />
       <CropperModal /> {/* New cropper modal */}
     </div>
   );

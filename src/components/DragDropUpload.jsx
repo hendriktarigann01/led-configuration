@@ -87,7 +87,7 @@ export const DragDropUpload = ({
       {/* Upload Area */}
       <div
         onClick={() => fileInputRef.current?.click()}
-        className={`mt-2 border-2 border-dashed w-full h-36 lg:h-32 transition-colors relative cursor-pointer ${
+        className={`mt-2 border-2 border-dashed w-full h-36 lg:h-28 transition-colors relative cursor-pointer ${
           isDragOver
             ? "border-[#3AAFA9] bg-teal-50"
             : "border-gray-500 cursor-not-allowed"

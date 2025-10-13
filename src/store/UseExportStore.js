@@ -23,7 +23,6 @@ export const UseExportStore = create((set, get) => ({
   isExporting: false,
   pdfData: null,
 
-  // Form fields
   projectName: "",
   userName: "",
   phoneNumber: "",
@@ -33,27 +32,15 @@ export const UseExportStore = create((set, get) => ({
   // ACTIONS - State mutations
   // ============================================================================
 
-  /**
-   * Open export modal
-   */
   openModal: () => set({ isOpen: true }),
 
-  /**
-   * Close export modal
-   */
   closeModal: () => set({ isOpen: false }),
 
-  /**
-   * Set form field values
-   */
   setProjectName: (projectName) => set({ projectName }),
   setUserName: (userName) => set({ userName }),
   setPhoneNumber: (phoneNumber) => set({ phoneNumber }),
   setEmail: (email) => set({ email }),
 
-  /**
-   * Reset form to empty
-   */
   resetForm: () =>
     set({
       projectName: "",
@@ -62,9 +49,6 @@ export const UseExportStore = create((set, get) => ({
       email: "",
     }),
 
-  /**
-   * Set form data from object
-   */
   setFormData: (data) =>
     set({
       projectName: data.projectName || "",
@@ -73,14 +57,8 @@ export const UseExportStore = create((set, get) => ({
       email: data.email || "",
     }),
 
-  /**
-   * Set PDF data for export
-   */
   setPdfData: (data) => set({ pdfData: data }),
 
-  /**
-   * Export to PDF - prepare data and send to Google Sheets
-   */
   exportToPdf: async () => {
     const state = get();
 
@@ -104,7 +82,6 @@ export const UseExportStore = create((set, get) => ({
 
       state.setPdfData(pdfData);
 
-      // Try to send to Google Sheets (non-blocking)
       try {
         await state.sendToGoogleSheets(pdfData);
       } catch (error) {
@@ -123,9 +100,6 @@ export const UseExportStore = create((set, get) => ({
     }
   },
 
-  /**
-   * Complete export and cleanup
-   */
   completeExport: () => {
     set({
       isOpen: false,
@@ -134,9 +108,6 @@ export const UseExportStore = create((set, get) => ({
     });
   },
 
-  /**
-   * Send data to Google Sheets
-   */
   sendToGoogleSheets: async (data) => {
     try {
       const webAppUrl = import.meta.env.VITE_WEB_APP_URL;
@@ -152,6 +123,15 @@ export const UseExportStore = create((set, get) => ({
         userName: data.userName || "",
         phoneNumber: data.phoneNumber || "",
         email: data.email || "",
+        productName: data.displayType || data.modelName || "",
+        pixelPitch: data.modelData?.pixel_pitch || "",
+        inch: data.modelData?.inch || "",
+        screenSize: data.screenConfig
+          ? `${data.screenConfig.width}m x ${data.screenConfig.height}m (${data.screenConfig.area} m²)`
+          : "",
+        wallSize: data.wallConfig
+          ? `${data.wallConfig.width}m x ${data.wallConfig.height}m`
+          : "",
       };
 
       const response = await fetch(webAppUrl, {
@@ -171,6 +151,7 @@ export const UseExportStore = create((set, get) => ({
       }
 
       const result = await response.json();
+      console.log("Google Sheets success:", result);
       return result;
     } catch (error) {
       console.error("Google Sheets error:", error);
@@ -182,9 +163,6 @@ export const UseExportStore = create((set, get) => ({
   // SELECTORS - Computed values
   // ============================================================================
 
-  /**
-   * Generate automatic PDF title
-   */
   generatePdfTitle: () => {
     const navbarStore = UseNavbarStore.getState();
     const state = get();
@@ -204,9 +182,6 @@ export const UseExportStore = create((set, get) => ({
     return `${cleanProjectName}_${pixelPitch}_ByMJSolutionIndonesia`;
   },
 
-  /**
-   * Get form data object
-   */
   getFormData: () => {
     const state = get();
     return {
@@ -217,9 +192,6 @@ export const UseExportStore = create((set, get) => ({
     };
   },
 
-  /**
-   * Validate form fields
-   */
   isFormValid: () => {
     const state = get();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -234,18 +206,88 @@ export const UseExportStore = create((set, get) => ({
     );
   },
 
-  /**
-   * Check if export is ready (has configured display)
-   */
   isExportReady: () => {
     const canvasStore = UseCanvasStore.getState();
     const navbarStore = UseNavbarStore.getState();
     return canvasStore.isConfigured() && navbarStore.selectedModel;
   },
 
-  /**
-   * Get comprehensive data for PDF export
-   */
+  // ============================================================================
+  // HELPER FUNCTIONS
+  // ============================================================================
+
+  getPixelPitchOrInch: (modelData) => {
+    if (modelData?.pixel_pitch) {
+      return modelData.pixel_pitch;
+    } else if (modelData?.inch) {
+      return modelData.inch;
+    }
+    return "N/A";
+  },
+
+  getUnitName: (displayType) => {
+    if (displayType.includes("Cabinet") || displayType.includes("Outdoor")) {
+      return UNIT_NAME.CABINET;
+    } else if (displayType.includes("Module")) {
+      return UNIT_NAME.MODULE;
+    } else if (displayType.includes("Video Wall")) {
+      return UNIT_NAME.VIDEO_WALL;
+    }
+    return UNIT_NAME.DEFAULT;
+  },
+
+  getResolutionDisplay: (unitCount, resolutionPerUnit, totalUnits) => {
+    const totalResolutionWidth =
+      unitCount.horizontal * (resolutionPerUnit.width / totalUnits);
+    const totalResolutionHeight =
+      unitCount.vertical * (resolutionPerUnit.height / totalUnits);
+    return `${Math.round(totalResolutionWidth)} x ${Math.round(
+      totalResolutionHeight
+    )}`;
+  },
+
+  getUnitConfiguration: (unitCount, totalUnits) => {
+    return `${unitCount.horizontal}(W) x ${unitCount.vertical}(H) ${totalUnits} Pcs`;
+  },
+
+  getPartnerData: (modelData, displayTypeId, subTypeId) => {
+    if (displayTypeId === DISPLAY_TYPE.INDOOR_LED && subTypeId) {
+      const partnerId =
+        subTypeId === SUB_TYPE.CABINET
+          ? DISPLAY_TYPE.MODULE
+          : DISPLAY_TYPE.INDOOR_LED;
+      const partnerModel = allModels.find((m) => m.id === partnerId);
+      if (partnerModel) {
+        return partnerModel.data.find(
+          (d) => d.pixel_pitch === modelData.pixel_pitch
+        );
+      }
+    }
+    return null;
+  },
+
+  getComponentSelection: (displayType) => {
+    if (displayType.includes("Video Wall")) {
+      return {
+        specConfig: PDF_COMPONENTS.VIDEO_WALL.CONFIG,
+        specDefault: PDF_COMPONENTS.VIDEO_WALL.DEFAULT,
+      };
+    } else if (displayType.includes("Outdoor")) {
+      return {
+        specConfig: PDF_COMPONENTS.INDOOR_OUTDOOR.CONFIG,
+        specDefault: PDF_COMPONENTS.OUTDOOR.DEFAULT,
+      };
+    }
+    return {
+      specConfig: PDF_COMPONENTS.INDOOR_OUTDOOR.CONFIG,
+      specDefault: PDF_COMPONENTS.INDOOR_OUTDOOR.DEFAULT,
+    };
+  },
+
+  // ============================================================================
+  // PDF EXPORT DATA
+  // ============================================================================
+
   getPdfExportData: () => {
     const canvasStore = UseCanvasStore.getState();
     const calculatorStore = UseCalculatorStore.getState();
@@ -260,25 +302,14 @@ export const UseExportStore = create((set, get) => ({
     const displayType = navbarStore.selectedModel.name;
     const isVideoWall = displayType.includes("Video Wall");
 
-    // Get partner data for indoor displays
-    let partnerData = null;
-    if (
-      navbarStore.selectedModel?.displayTypeId === DISPLAY_TYPE.INDOOR_LED &&
-      navbarStore.selectedModel?.subTypeId
-    ) {
-      const partnerId =
-        navbarStore.selectedModel.subTypeId === SUB_TYPE.CABINET
-          ? DISPLAY_TYPE.MODULE
-          : DISPLAY_TYPE.INDOOR_LED;
-      const partnerModel = allModels.find((m) => m.id === partnerId);
-      if (partnerModel) {
-        partnerData = partnerModel.data.find(
-          (d) => d.pixel_pitch === modelData.pixel_pitch
-        );
-      }
-    }
+    // Get partner data
+    const partnerData = state.getPartnerData(
+      modelData,
+      navbarStore.selectedModel.displayTypeId,
+      navbarStore.selectedModel.subTypeId
+    );
 
-    // Get comprehensive calculation results
+    // Get calculation results
     const results = calculatorStore.getCalculationResults(
       modelData,
       displayType,
@@ -300,40 +331,16 @@ export const UseExportStore = create((set, get) => ({
 
     const sqm = (actualScreenSize.width * actualScreenSize.height).toFixed(2);
 
-    // Helper functions
-    const getPixelPitchOrInch = () => {
-      if (modelData.pixel_pitch) {
-        return modelData.pixel_pitch;
-      } else if (modelData.inch) {
-        return modelData.inch;
-      }
-      return "N/A";
-    };
-
-    const getUnitName = () => {
-      if (displayType.includes("Cabinet") || displayType.includes("Outdoor")) {
-        return UNIT_NAME.CABINET;
-      } else if (displayType.includes("Module")) {
-        return UNIT_NAME.MODULE;
-      } else if (displayType.includes("Video Wall")) {
-        return UNIT_NAME.VIDEO_WALL;
-      }
-      return UNIT_NAME.DEFAULT;
-    };
-
-    const getResolutionDisplay = () => {
-      const totalResolutionWidth =
-        unitCount.horizontal * (resolutionPerUnit.width / totalUnits);
-      const totalResolutionHeight =
-        unitCount.vertical * (resolutionPerUnit.height / totalUnits);
-      return `${Math.round(totalResolutionWidth)} x ${Math.round(
-        totalResolutionHeight
-      )}`;
-    };
-
-    const getUnitConfiguration = () => {
-      return `${unitCount.horizontal}(W) x ${unitCount.vertical}(H) ${totalUnits} Pcs`;
-    };
+    // Get helper values
+    const pixelPitchOrInch = state.getPixelPitchOrInch(modelData);
+    const unitName = state.getUnitName(displayType);
+    const resolutionDisplay = state.getResolutionDisplay(
+      unitCount,
+      resolutionPerUnit,
+      totalUnits
+    );
+    const unitConfiguration = state.getUnitConfiguration(unitCount, totalUnits);
+    const componentSelection = state.getComponentSelection(displayType);
 
     // Calculate power consumption
     const screenArea = actualScreenSize.width * actualScreenSize.height;
@@ -343,17 +350,6 @@ export const UseExportStore = create((set, get) => ({
       totalUnits,
       screenArea
     );
-
-    // Determine component selection for PDF
-    let specConfigComponent = PDF_COMPONENTS.INDOOR_OUTDOOR.CONFIG;
-    let specDefaultComponent = PDF_COMPONENTS.INDOOR_OUTDOOR.DEFAULT;
-
-    if (displayType.includes("Video Wall")) {
-      specConfigComponent = PDF_COMPONENTS.VIDEO_WALL.CONFIG;
-      specDefaultComponent = PDF_COMPONENTS.VIDEO_WALL.DEFAULT;
-    } else if (displayType.includes("Outdoor")) {
-      specDefaultComponent = PDF_COMPONENTS.OUTDOOR.DEFAULT;
-    }
 
     return {
       // Form data
@@ -395,18 +391,17 @@ export const UseExportStore = create((set, get) => ({
           width: canvasStore.baseWidth,
           height: canvasStore.baseHeight,
         },
-
         processedValues: {
-          pixelPitchOrInch: getPixelPitchOrInch(),
-          unitName: getUnitName(),
-          resolutionDisplay: getResolutionDisplay(),
-          unitConfiguration: getUnitConfiguration(),
+          pixelPitchOrInch,
+          unitName,
+          resolutionDisplay,
+          unitConfiguration,
           sqm: isVideoWall ? null : sqm,
           realSize: isVideoWall
             ? null
             : `${actualScreenSize.width.toFixed(
                 3
-              )} x ${actualScreenSize.height.toFixed(3)} `,
+              )} x ${actualScreenSize.height.toFixed(3)}`,
           weight:
             !isVideoWall && totalWeight > 0
               ? `${totalWeight.toFixed(0)} kg`
@@ -426,18 +421,15 @@ export const UseExportStore = create((set, get) => ({
         },
       },
 
-      // Component selection for PDF
-      components: {
-        specConfig: specConfigComponent,
-        specDefault: specDefaultComponent,
-      },
+      // Component selection
+      components: componentSelection,
 
-      // Additional display info
+      // Display specs
       inch: modelData.inch || "N/A",
       pixelPitch: modelData.pixel_pitch || "N/A",
       brightness: modelData.brightness || "N/A",
 
-      // Indoor
+      // Indoor specs
       moduleResolution:
         modelData.module_resolution || partnerData?.module_resolution || "N/A",
       modulePixels:
@@ -451,13 +443,13 @@ export const UseExportStore = create((set, get) => ({
       pixelDensity:
         modelData.pixel_density || partnerData?.pixel_density || "N/A",
 
-      // Outdoor
+      // Outdoor specs
       ledLamp: modelData.led_lamp || "N/A",
       pixelResolution: modelData.pixel_resolution || "N/A",
       moduleWeight: modelData.module_weight || "N/A",
       viewingDistance: modelData.best_viewing_distance || "N/A",
 
-      // Video Wall
+      // Video Wall specs
       unitSize: modelData.unit_size_mm || "N/A",
       b2b: modelData.b2b || "N/A",
       resolution: modelData.resolution || "N/A",

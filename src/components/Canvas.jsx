@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { CirclePlus, Plus, Minus, X } from "lucide-react";
+import { CirclePlus, Plus, Minus, X, Move } from "lucide-react";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseModalStore } from "../store/UseModalStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
@@ -252,8 +252,10 @@ export const Canvas = () => {
     dynamicCanvas.height
   );
 
-  const { finalHumanHeight, humanToWallRatio } =
-    CanvasUtils.getHumanDimensions(wallHeight, dynamicCanvas.height);
+  const { finalHumanHeight, humanToWallRatio } = CanvasUtils.getHumanDimensions(
+    wallHeight,
+    dynamicCanvas.height
+  );
   const contentSource = CanvasUtils.getContentSource(
     selectedContent,
     customImageUrl
@@ -325,6 +327,10 @@ export const Canvas = () => {
 
   const renderVideoContent = () => (
     <div className="relative inline-block">
+      {/* Move Screen */}
+      <div className="absolute -top-2 -right-2 text-white bg-black/30 p-1 z-[99]">
+        <Move size={10} />
+      </div>
       <div
         className="relative"
         style={{
@@ -356,6 +362,10 @@ export const Canvas = () => {
 
   const renderImageContent = () => (
     <div className="relative inline-block">
+      {/* Move Screen */}
+      <div className="absolute -top-2 -right-2 text-white bg-black/30 p-1 z-[99]">
+        <Move size={10} />
+      </div>
       <div
         className="relative"
         style={{
@@ -512,7 +522,7 @@ export const Canvas = () => {
         )}
 
         {/* Wall Measurements */}
-       {CanvasUtils.renderWallMeasurements(
+        {CanvasUtils.renderWallMeasurements(
           remainingWallHeight,
           remainingWallWidth,
           actualScreenSize,
@@ -593,7 +603,7 @@ export const Canvas = () => {
                 style={{
                   left: `calc(45% - ${dynamicCanvas.width / 2}px - ${
                     window.innerWidth < 350
-                      ? dynamicCanvas.width * 0.11  
+                      ? dynamicCanvas.width * 0.11
                       : window.innerWidth <= 768
                       ? dynamicCanvas.width * 0.15
                       : dynamicCanvas.width * 0.02

@@ -267,7 +267,7 @@ export const CanvasUtils = {
 
     const margins = {
       mobile: { horizontal: 22, vertical: 18 },
-      tablet: { horizontal: 17, vertical: 13 },
+      tablet: { horizontal: 17, vertical: 11 },
       desktop: { horizontal: 16, vertical: 10 },
     };
 

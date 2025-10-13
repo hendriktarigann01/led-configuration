@@ -1,24 +1,33 @@
 import { create } from "zustand";
+import { DEFAULT_CANVAS, DEFAULT_WALL } from "../constants/Validation";
 import { UseCalculatorStore } from "./UseCalculatorStore";
 
 export const UseCanvasStore = create((set, get) => ({
-  // Basic canvas properties
-  canvasWidth: 800,
-  canvasHeight: 600,
+  // ============================================================================
+  // STATE
+  // ============================================================================
+  canvasWidth: DEFAULT_CANVAS.WIDTH,
+  canvasHeight: DEFAULT_CANVAS.HEIGHT,
 
-  // LED Screen basic properties
-  screenWidth: 0, // meters
-  screenHeight: 0, // meters
+  // LED Screen dimensions (meters)
+  screenWidth: 0,
+  screenHeight: 0,
 
-  // Default wall size (5m width, 3m height)
-  wallWidth: 5,
-  wallHeight: 3,
+  // Wall dimensions (meters)
+  wallWidth: DEFAULT_WALL.WIDTH,
+  wallHeight: DEFAULT_WALL.HEIGHT,
 
-  // Cabinet/Module base size (derived from selected model)
-  baseWidth: 0, // meters - no default, must be set from config
-  baseHeight: 0, // meters - no default, must be set from config
+  // Base unit size derived from selected model (meters)
+  baseWidth: 0,
+  baseHeight: 0,
 
-  // Actions
+  // ============================================================================
+  // ACTIONS - State mutations
+  // ============================================================================
+
+  /**
+   * Set screen size with validation
+   */
   setScreenSize: (width, height) => {
     const { baseWidth, baseHeight } = get();
     const calculator = UseCalculatorStore.getState();
@@ -35,6 +44,9 @@ export const UseCanvasStore = create((set, get) => ({
     });
   },
 
+  /**
+   * Set wall size with validation
+   */
   setWallSize: (width, height) => {
     const calculator = UseCalculatorStore.getState();
     const validated = calculator.validateWallSize(width, height);
@@ -59,55 +71,22 @@ export const UseCanvasStore = create((set, get) => ({
     });
   },
 
-  // Set base cabinet/module size from selected model
-  setBaseSize: (width, height) =>
+  /**
+   * Set base cabinet/module size from selected model
+   */
+  setBaseSize: (width, height) => {
     set({
       baseWidth: width,
       baseHeight: height,
-    }),
-
-  // Calculate number of cabinets needed
-  getCabinetCount: () => {
-    const { screenWidth, screenHeight, baseWidth, baseHeight } = get();
-    const calculator = UseCalculatorStore.getState();
-    return calculator.calculateUnitCount(
-      screenWidth,
-      screenHeight,
-      baseWidth,
-      baseHeight
-    );
-  },
-
-  // Calculate actual screen size based on cabinet count
-  getActualScreenSize: () => {
-    const { screenWidth, screenHeight, baseWidth, baseHeight } = get();
-    const calculator = UseCalculatorStore.getState();
-    return calculator.calculateActualScreenSize(
-      screenWidth,
-      screenHeight,
-      baseWidth,
-      baseHeight
-    );
-  },
-
-  // Complete reset - clears ALL state including model data
-  reset: () => {
-    set({
-      canvasWidth: 800,
-      canvasHeight: 600,
-      screenWidth: 0,
-      screenHeight: 0,
-      wallWidth: 5, // Reset to default 5m width
-      wallHeight: 3, // Reset to default 3m height
-      baseWidth: 0,
-      baseHeight: 0,
     });
   },
 
-  // Update model data and maintain cabinet count (MODIFIED)
-  updateModelData: (modelData, displayType) => {
+  /**
+   * Update model data and maintain cabinet count or initialize first config
+   */
+  updateModelData: (modelData) => {
     const calculator = UseCalculatorStore.getState();
-    const newDimensions = calculator.getBaseDimensions(modelData, displayType);
+    const newDimensions = calculator.getBaseDimensions(modelData);
 
     const currentState = get();
 
@@ -121,8 +100,11 @@ export const UseCanvasStore = create((set, get) => ({
       const newScreenHeight = newDimensions.height;
 
       // Ensure wall is larger than screen (minimum buffer for practical installation)
-      const minWallWidth = Math.max(5, newScreenWidth + 0.5);
-      const minWallHeight = Math.max(3, newScreenHeight + 0.5);
+      const minWallWidth = Math.max(DEFAULT_WALL.WIDTH, newScreenWidth + 0.5);
+      const minWallHeight = Math.max(
+        DEFAULT_WALL.HEIGHT,
+        newScreenHeight + 0.5
+      );
 
       set({
         baseWidth: newDimensions.width,
@@ -154,7 +136,57 @@ export const UseCanvasStore = create((set, get) => ({
     }
   },
 
-  // Check if configuration is ready (has selected model)
+  /**
+   * Complete reset - clears ALL state including model data
+   */
+  reset: () => {
+    set({
+      canvasWidth: DEFAULT_CANVAS.WIDTH,
+      canvasHeight: DEFAULT_CANVAS.HEIGHT,
+      screenWidth: 0,
+      screenHeight: 0,
+      wallWidth: DEFAULT_WALL.WIDTH,
+      wallHeight: DEFAULT_WALL.HEIGHT,
+      baseWidth: 0,
+      baseHeight: 0,
+    });
+  },
+
+  // ============================================================================
+  // SELECTORS - Computed values
+  // ============================================================================
+
+  /**
+   * Calculate number of cabinets needed
+   */
+  getCabinetCount: () => {
+    const { screenWidth, screenHeight, baseWidth, baseHeight } = get();
+    const calculator = UseCalculatorStore.getState();
+    return calculator.calculateUnitCount(
+      screenWidth,
+      screenHeight,
+      baseWidth,
+      baseHeight
+    );
+  },
+
+  /**
+   * Calculate actual screen size based on cabinet count
+   */
+  getActualScreenSize: () => {
+    const { screenWidth, screenHeight, baseWidth, baseHeight } = get();
+    const calculator = UseCalculatorStore.getState();
+    return calculator.calculateActualScreenSize(
+      screenWidth,
+      screenHeight,
+      baseWidth,
+      baseHeight
+    );
+  },
+
+  /**
+   * Check if configuration is ready (has selected model)
+   */
   isConfigured: () => {
     const { baseWidth, baseHeight } = get();
     return baseWidth > 0 && baseHeight > 0;

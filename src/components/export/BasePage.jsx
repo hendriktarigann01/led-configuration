@@ -1,5 +1,6 @@
 import React from "react";
 import { Page, View, Image, StyleSheet } from "@react-pdf/renderer";
+import { DECORATION_PATHS } from "../../constants/PDFConfig";
 
 const styles = StyleSheet.create({
   page: {
@@ -15,21 +16,19 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
-  topDecoration: {
+  decoration: {
     position: "absolute",
-    top: 0,
-    left: 0,
     width: 150,
     height: "auto",
     zIndex: 6,
   },
+  topDecoration: {
+    top: 0,
+    left: 0,
+  },
   bottomDecoration: {
-    position: "absolute",
     bottom: 0,
     right: 0,
-    width: 150,
-    height: "auto",
-    zIndex: 6,
   },
   content: {
     flex: 1,
@@ -41,14 +40,18 @@ const styles = StyleSheet.create({
 export const BasePage = ({ children, showDecorations = true }) => (
   <Page size="A4" style={styles.page}>
     <View style={styles.container}>
-      {/* Decorative elements */}
       {showDecorations && (
         <>
-          <Image style={styles.topDecoration} src="/top_pdf.png" />
-          <Image style={styles.bottomDecoration} src="/bottom_pdf.png" />
+          <Image 
+            style={[styles.decoration, styles.topDecoration]} 
+            src={DECORATION_PATHS.top} 
+          />
+          <Image 
+            style={[styles.decoration, styles.bottomDecoration]} 
+            src={DECORATION_PATHS.bottom} 
+          />
         </>
       )}
-
       <View style={styles.content}>{children}</View>
     </View>
   </Page>

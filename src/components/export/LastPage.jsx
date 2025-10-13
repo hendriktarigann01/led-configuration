@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { BasePage } from "./BasePage";
+import { LOGO_PATHS, COMPANY_INFO, ICON_PATHS } from "../../constants/PDFConfig";
 
 const styles = StyleSheet.create({
   header: {
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
   },
   companyLogo: {
     width: "auto",
-    height: 64,
+    height: 40,
     marginBottom: 30,
   },
   companyName: {
@@ -76,38 +77,32 @@ const styles = StyleSheet.create({
   },
 });
 
-export const LastPage = ({ data }) => (
+export const LastPage = () => (
   <BasePage>
-    <View style={styles.header}>
-      <Image style={styles.logo} src="/logo/mjs_logo_text.png" />
-    </View>
-
     <View style={styles.centerContent}>
       <View style={{ alignItems: "center" }}>
-        <Image style={styles.companyLogo} src="/logo/mjs_logo.png" />
-        <Text style={styles.companyName}>MJ Solution Indonesia</Text>
+        <Image style={styles.companyLogo} src={LOGO_PATHS.text} />
+        <Text style={styles.companyName}>{COMPANY_INFO.name}</Text>
 
         <View style={styles.tagline}>
-          <Text style={styles.taglineText}>EXPLORE</Text>
-          <View style={styles.taglineDot} />
-          <Text style={styles.taglineText}>CREATE</Text>
-          <View style={styles.taglineDot} />
-          <Text style={styles.taglineText}>INSPIRE</Text>
+          {COMPANY_INFO.tagline.map((text, index) => (
+            <React.Fragment key={text}>
+              {index > 0 && <View style={styles.taglineDot} />}
+              <Text style={styles.taglineText}>{text}</Text>
+            </React.Fragment>
+          ))}
         </View>
       </View>
     </View>
 
     <View style={styles.footer}>
-      <Text style={styles.footerTitle}>MJ Solution Indonesia</Text>
-      <Text style={styles.footerText}>
-        The Mansion Bougenville Kemayoran Tower Fontana Zona I Lantai 50
-        Kemayoran Jakarta Utara
-      </Text>
+      <Text style={styles.footerTitle}>{COMPANY_INFO.name}</Text>
+      <Text style={styles.footerText}>{COMPANY_INFO.address}</Text>
       <View style={styles.footerContact}>
-        <Image src="/icons/icon-web.png" style={styles.icon} />
-        <Text style={styles.iconTeks}>mjsolution.co.id</Text>
-        <Image src="/icons/icon-call.png" style={styles.icon} />
-        <Text style={styles.iconTeks}>(+62) 811-1122-492</Text>
+        <Image src={ICON_PATHS.web} style={styles.icon} />
+        <Text style={styles.iconTeks}>{COMPANY_INFO.website}</Text>
+        <Image src={ICON_PATHS.call} style={styles.icon} />
+        <Text style={styles.iconTeks}>{COMPANY_INFO.phone}</Text>
       </View>
     </View>
   </BasePage>

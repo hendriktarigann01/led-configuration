@@ -1,24 +1,24 @@
 export const model = [
   {
     id: 1,
-    name: "Indoor LED Fixed", // Indoor LED Fixed (Cabinet)
+    name: "Indoor LED Fixed", // Cabinet
     description: "Suitable for indoor use with a modular and flexible design.",
     data: [
       {
-        pixel_pitch: "P 1.2",
-        cabinet_size: "640*480mm", // calculate
-        cabinet_weight: "7.8kg/pcs", // calculate
+        pixel_pitch: "P 1.25",
+        cabinet_size: "640*480mm",
+        cabinet_weight: "7.8kg/pcs",
         brightness: "500 - 1.000 Nits",
         refresh_rate: "2400 Hz / 3840 Hz",
-        cabinet_resolution: "512 X 384 dots", // calculate
+        cabinet_resolution: "512 X 384 dots",
         cabinet_pixels: "196608 dots",
         pixel_density: "640000 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 500W/m², Average; 700W/m²", // calculate (max and average values only)
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
       },
       {
-        pixel_pitch: "P 1.5",
+        pixel_pitch: "P 1.53",
         cabinet_size: "640*480mm",
         cabinet_weight: "7.8kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -27,11 +27,11 @@ export const model = [
         cabinet_pixels: "129792 dots",
         pixel_density: "422500 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 500W/m², Average: 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
       },
       {
-        pixel_pitch: "P 1.8",
+        pixel_pitch: "P 1.86",
         cabinet_size: "640*480mm",
         cabinet_weight: "7.8kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -40,7 +40,7 @@ export const model = [
         cabinet_pixels: "88752 dots",
         pixel_density: "288906 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
       },
       {
@@ -53,7 +53,7 @@ export const model = [
         cabinet_pixels: "49152 dots",
         pixel_density: "160000 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
       },
       {
@@ -66,7 +66,7 @@ export const model = [
         cabinet_pixels: "32448 dots",
         pixel_density: "105625 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
       },
       {
@@ -79,31 +79,31 @@ export const model = [
         cabinet_pixels: "32448 dots",
         pixel_density: "105625 dots/m²",
         cabinet_material: "Die-casting aluminum",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
       },
     ],
   },
   {
     id: 2,
-    name: "Indoor LED Fixed", // Indoor LED Fixed (Module)
+    name: "Indoor LED Fixed", // Module
     description: "Suitable for indoor use with a modular and flexible design.",
     data: [
       {
-        pixel_pitch: "P 1.2",
-        module_size: "320*160mm", // calculate
-        module_weight: "0.48kg/pcs", // calculate
+        pixel_pitch: "P 1.25",
+        module_size: "320*160mm",
+        module_weight: "0.48kg/pcs",
         brightness: "500 - 1.000 Nits",
         refresh_rate: "2400 Hz / 3840 Hz",
-        module_resolution: "256 x 128 dots", // calculate
+        module_resolution: "256 x 128 dots",
         module_pixels: "32768 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
       },
       {
-        pixel_pitch: "P 1.5",
+        pixel_pitch: "P 1.53",
         module_size: "320*160mm",
         module_weight: "0.48kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -112,11 +112,11 @@ export const model = [
         module_pixels: "31632 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
       },
       {
-        pixel_pitch: "P 1.8",
+        pixel_pitch: "P 1.86",
         module_size: "320*160mm",
         module_weight: "0.48kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -125,7 +125,7 @@ export const model = [
         module_pixels: "14792 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
       },
       {
@@ -135,10 +135,10 @@ export const model = [
         brightness: "500 - 1.000 Nits",
         refresh_rate: "2400 Hz / 3840 Hz",
         module_resolution: "128x64 dots",
-        module_pixels: "8192 dots", // total pixel
+        module_pixels: "8192 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
       },
       {
@@ -151,7 +151,7 @@ export const model = [
         module_pixels: "5408 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
       },
       {
@@ -164,7 +164,7 @@ export const model = [
         module_pixels: "5408 dots",
         ic: "ICN2153",
         led_configuration: "3 in 1",
-        power_consumption: "Max: 500W/m², Average; 700W/m²",
+        power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
       },
     ],
@@ -176,7 +176,7 @@ export const model = [
     data: [
       {
         pixel_pitch: "P 3.0",
-        cabinet_size: "960*960 mm", // calculate
+        cabinet_size: "960*960 mm",
         module_weight: "0.45kg/pcs",
         brightness: "5500 - 6000 Nits",
         refresh_rate: "3840 Hz / 7680 Hz",
@@ -186,12 +186,12 @@ export const model = [
         module_thickness: "17MM",
         drive_type: "Constant drive",
         application: "Outdoor Fixed Installation",
-        cabinet_resolution: "312 X 312 dots", // calculate
+        cabinet_resolution: "312 X 312 dots",
         pixel_density: "105625 dots/m²",
-        power_consumption: "Max: 1000W/m², Average: 700W/m²", // calculate (max and average values only)
+        power_consumption: "Max: 1000W/m², Average: 700W/m²",
         cabinet_material: "Die-casting Magnesium Cabinet",
         life_span: "≥100,000 Hours",
-        cabinet_weight: "25kg/pcs", // calculate
+        cabinet_weight: "25kg/pcs",
         working_voltage: "AC220v+-10%",
         humidity: "10%-75%",
         best_viewing_distance: "3-10M",
@@ -294,8 +294,8 @@ export const model = [
       {
         inch: '46"',
         b2b: "1.8 mm",
-        unit_size_mm: "1,075 (W) x 606 (H) x 54 (D)", // calculate
-        brightness: "500 cd/m", // calculate
+        unit_size_mm: "1,075 (W) x 606 (H) x 54 (D)",
+        brightness: "500 cd/m",
         resolution: "FHD 1920 x 1080",
         contrast_ratio: "4000:1",
         aspect_ratio: "16:9",

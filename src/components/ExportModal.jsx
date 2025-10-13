@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { X, Download, CircleAlert } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 import { UseExportStore } from "../store/UseExportStore";
 import { PDFDocument } from "./export/PDFDocument";
+import { formatPhoneForDisplay } from "../utils/PhoneUtils";
 
 export const ExportModal = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -25,6 +28,11 @@ export const ExportModal = () => {
     isExportReady,
     generatePdfTitle,
   } = UseExportStore();
+
+  const handlePhoneChange = (phone, meta) => {
+    const formatted = formatPhoneForDisplay(phone, meta.country);
+    setPhoneNumber(formatted);
+  };
 
   const waitForDataReady = (timeoutMs = 10000) => {
     return Promise.race([
@@ -86,7 +94,7 @@ export const ExportModal = () => {
       let finalData;
       try {
         finalData = await waitForDataReady();
-      } catch (waitError) {
+      } catch {
         finalData = getFallbackData();
         if (!finalData) {
           throw new Error(
@@ -187,13 +195,53 @@ export const ExportModal = () => {
               <label className="block font-xs lg:text-sm font-normal lg:font-medium text-gray-700 mb-2">
                 Phone Number<span className="text-red-500">*</span>
               </label>
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="ex. 62815xxxxxxxx"
+             <PhoneInput
+                defaultCountry="id"
+                value={phoneNumber || "+62"} // Fallback ke +62 jika kosong
+                onChange={handlePhoneChange}
                 disabled={isProcessing}
-                className="w-full px-3 py-3 border border-gray-300 text-sm font-light lg:font-light rounded-md focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] focus:border-transparent placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                forceDialCode={true}
+                style={{
+                  '--react-international-phone-height': '48px',
+                  '--react-international-phone-border-radius': '6px',
+                  '--react-international-phone-border-color': '#d1d5db',
+                  '--react-international-phone-background-color': isProcessing ? '#f3f4f6' : '#ffffff',
+                  '--react-international-phone-dropdown-item-height': '40px',
+                }}
+                countrySelectorStyleProps={{
+                  buttonStyle: {
+                    height: '48px',
+                    border: '1px solid #d1d5db',
+                    borderRight: 'none',
+                    borderRadius: '6px 0 0 6px',
+                    padding: '0 12px',
+                    backgroundColor: isProcessing ? '#f3f4f6' : '#ffffff',
+                    cursor: isProcessing ? 'not-allowed' : 'pointer',
+                  },
+                  dropdownStyleProps: {
+                    style: {
+                      maxHeight: '180px',
+                      overflowY: 'auto',
+                    }
+                  }
+                }}
+                inputStyle={{
+                  height: '48px',
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #d1d5db',
+                  borderLeft: 'none',
+                  borderRadius: '0 6px 6px 0',
+                  fontSize: '14px',
+                  fontWeight: '300',
+                  backgroundColor: isProcessing ? '#f3f4f6' : '#ffffff',
+                  cursor: isProcessing ? 'not-allowed' : 'text',
+                  color: phoneNumber === "+62" || !phoneNumber ? '#9ca3af' : '#000', // Warna placeholder
+                }}
+                inputProps={{
+                  placeholder: "812-3456-7890",
+                  disabled: isProcessing,
+                }}
               />
             </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { X, ChevronDown, ChevronUp } from "lucide-react";
+import { X, ChevronDown, ChevronUp, Info } from "lucide-react";
 import { UseModalStore } from "../store/UseModalStore";
 
 // Helper untuk mendapatkan icon display type
@@ -89,7 +89,9 @@ const getTableRowData = (config, selectedDisplayType, selectedSubTypeId) => {
 
 export const ConfigurationModal = () => {
   const [expandedRow, setExpandedRow] = useState(null);
+  const [showTooltip, setShowTooltip] = useState(null);
   const scrollContainerRef = useRef(null);
+  const modalContentRef = useRef(null);
 
   const {
     isOpen,
@@ -121,6 +123,18 @@ export const ConfigurationModal = () => {
     // Di desktop, tidak perlu nextStep() karena sudah otomatis ke configure di store
   };
 
+  // Handle click outside tooltip to close it
+  const handleModalContentClick = (e) => {
+    // Cek apakah klik terjadi di luar tombol info dan tooltip
+    if (
+      showTooltip !== null &&
+      !e.target.closest('button[type="button"]') &&
+      !e.target.closest('[role="tooltip"]')
+    ) {
+      setShowTooltip(null);
+    }
+  };
+
   // Handle next for mobile display type selection
   const handleMobileDisplayNext = () => {
     // Semua display type langsung ke configuration
@@ -136,10 +150,10 @@ export const ConfigurationModal = () => {
   const handleSelectModel = (config) => {
     // Store current scroll position
     const currentScrollTop = scrollContainerRef.current?.scrollTop || 0;
-    
+
     // Select the model
     selectModel(config);
-    
+
     // Restore scroll position after state update
     setTimeout(() => {
       if (scrollContainerRef.current) {
@@ -191,6 +205,15 @@ export const ConfigurationModal = () => {
       { label: "Brightness", value: config.brightness },
       { label: "Refresh Rate", value: config.refresh_rate },
     ];
+  };
+
+  const getTooltipMessage = (imageSrc) => {
+    if (imageSrc.includes("cabinet")) {
+      return "Cabinet is a series of LED modules arranged in a single panel unit.";
+    } else if (imageSrc.includes("modul")) {
+      return "Module is a small LED unit that can be assembled as needed for flexible sizing and easy maintenance.";
+    }
+    return "";
   };
 
   // Modal Header Component
@@ -323,8 +346,37 @@ export const ConfigurationModal = () => {
               className="p-4 rounded-lg bg-white cursor-pointer"
             >
               <div className="flex flex-col items-center text-center">
-                <div className="w-32 lg:w-40 h-auto mb-3 flex items-center justify-center">
-                  <img src={item.image} alt={`${item.name}-Image`} />
+                <div className="w-32 lg:w-40 h-auto mb-3 relative">
+                  <img
+                    src={item.image}
+                    alt={`${item.name}-Image`}
+                    className="w-full h-auto"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <button
+                      onMouseEnter={() => setShowTooltip(item.id)}
+                      onMouseLeave={() => setShowTooltip(null)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowTooltip(
+                          showTooltip === item.id ? null : item.id
+                        );
+                      }}
+                      type="button"
+                    >
+                      <Info size={16} className="text-gray-700" />
+                    </button>
+
+                    {showTooltip === item.id && (
+                      <div
+                        role="tooltip"
+                        className="absolute w-40 lg:w-48 z-10 inline-block px-3 py-2 text-xs font-medium text-white transition-opacity duration-300 bg-[#3AAFA9] rounded-sm shadow-sm opacity-100 -right-2 top-8"
+                      >
+                        {getTooltipMessage(item.image)}
+                        <div className="absolute w-2 h-2 bg-[#3AAFA9] transform rotate-45 -top-1 right-3"></div>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div
@@ -396,7 +448,9 @@ export const ConfigurationModal = () => {
                   (header, index) => (
                     <th
                       key={index}
-                      className="p-3 w-32 text-left text-xs font-medium text-gray-700"
+                      className={`p-3 text-left text-xs font-medium text-gray-700 ${
+                        index === 0 ? "w-20 lg:w-24" : "w-36"
+                      }`}
                     >
                       {header}
                     </th>
@@ -424,7 +478,9 @@ export const ConfigurationModal = () => {
                     ).map((data, dataIndex) => (
                       <td
                         key={dataIndex}
-                        className="py-0 px-3 lg:p-3 w-32 text-[10px] lg:text-xs text-gray-700 whitespace-pre-line"
+                        className={`py-0 px-3 lg:p-3 text-[10px] lg:text-xs text-gray-700 whitespace-pre-line ${
+                          dataIndex === 0 ? "w-20 lg:w-24" : "w-36"
+                        }`}
                       >
                         {data}
                       </td>
@@ -600,7 +656,11 @@ export const ConfigurationModal = () => {
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-50 overflow-hidden">
       <div className="bg-white mx-5 rounded-xl shadow-2xl w-[380px] lg:w-full max-w-[820px] h-[90vh] max-h-[600px] overflow-auto">
-        <div className="p-6 h-full">
+        <div
+          ref={modalContentRef}
+          onClick={handleModalContentClick}
+          className="p-6 h-full"
+        >
           {currentStep === "select" && renderSelectStep()}
           {currentStep === "configure" && renderConfigureStep()}
           {currentStep === "subtype" && renderSubtypeStep()}

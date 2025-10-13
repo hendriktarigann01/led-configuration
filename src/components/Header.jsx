@@ -204,7 +204,7 @@ export const Header = () => {
                       [&::-webkit-outer-spin-button]:appearance-none
                       ${
                         disabled || readOnly || (isInteger && !isCustomMode)
-                          ? "text-gray-400 cursor-not-allowed"
+                          ? "text-gray-600"
                           : "text-gray-600"
                       }`}
         />

@@ -5,7 +5,7 @@ import { UseModalStore } from "../store/UseModalStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { ConfigurationModal } from "./ConfigurationModal";
-import { CanvasUtils } from "./utils/CanvasUtils";
+import { CanvasUtils } from "../utils/CanvasUtils";
 
 export const Canvas = () => {
   // Store hooks
@@ -253,7 +253,7 @@ export const Canvas = () => {
   );
 
   const { finalHumanHeight, humanToWallRatio } =
-    CanvasUtils.getHumanDimensions(wallHeight);
+    CanvasUtils.getHumanDimensions(wallHeight, dynamicCanvas.height);
   const contentSource = CanvasUtils.getContentSource(
     selectedContent,
     customImageUrl
@@ -476,7 +476,6 @@ export const Canvas = () => {
   };
 
   const renderCanvasPreview = () => {
-    // Gunakan dynamicCanvas yang sudah ada, hanya adjust container padding/margin
     const screenWidth = window.innerWidth;
     const isVerySmallScreen = screenWidth <= 375; // iPhone SE
     const isSmallScreen = screenWidth <= 410; // Small phones
@@ -489,11 +488,11 @@ export const Canvas = () => {
         className="relative rounded-lg flex items-center justify-center overflow-hidden"
         style={{
           width: `${Math.min(
-            dynamicCanvas.width + containerPadding, // Gunakan dynamicCanvas yang sudah ada
+            dynamicCanvas.width + containerPadding,
             screenWidth - screenMargin
           )}px`,
           height: `${Math.min(
-            dynamicCanvas.height + containerPadding, // Gunakan dynamicCanvas yang sudah ada
+            dynamicCanvas.height + containerPadding,
             window.innerHeight - 50
           )}px`,
           maxWidth: "100vw",
@@ -537,7 +536,7 @@ export const Canvas = () => {
   const renderEmptyCanvas = () => (
     <div className="relative w-full max-w-[400px] h-[250px] md:max-w-[550px] md:h-[320px] lg:max-w-[650px] lg:h-[380px] rounded-lg flex items-center justify-center overflow-hidden">
       <div className="w-[300px] h-[180px] max-h-[300px] md:w-[450px] md:h-[250px] lg:w-[550px] lg:h-[300px] bg-white text-center flex flex-col items-center justify-center px-4">
-        <p className="text-gray-500 text-xs lg:text-base">
+        <p className="text-gray-500 px-auto lg:px-28 text-xs lg:text-base">
           Start your configuration by choosing the model that suits your needs.
         </p>
         <button

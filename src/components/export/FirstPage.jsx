@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { BasePage } from "./BasePage";
+import { LOGO_PATHS, COMPANY_INFO } from "../../constants/PDFConfig";
 
 const styles = StyleSheet.create({
   centerContent: {
@@ -66,15 +67,16 @@ export const FirstPage = ({ data }) => (
   <BasePage>
     <View style={styles.centerContent}>
       <View style={{ alignItems: "center" }}>
-        <Image style={styles.companyLogo} src="/logo/mjs_logo_text.png" />
-        <Text style={styles.companyName}>MJ Solution Indonesia</Text>
+        <Image style={styles.companyLogo} src={LOGO_PATHS.text} />
+        <Text style={styles.companyName}>{COMPANY_INFO.name}</Text>
 
         <View style={styles.tagline}>
-          <Text style={styles.taglineText}>EXPLORE</Text>
-          <View style={styles.taglineDot} />
-          <Text style={styles.taglineText}>CREATE</Text>
-          <View style={styles.taglineDot} />
-          <Text style={styles.taglineText}>INSPIRE</Text>
+          {COMPANY_INFO.tagline.map((text, index) => (
+            <React.Fragment key={text}>
+              {index > 0 && <View style={styles.taglineDot} />}
+              <Text style={styles.taglineText}>{text}</Text>
+            </React.Fragment>
+          ))}
         </View>
       </View>
 

@@ -17,6 +17,8 @@ jobs:
         run: npm ci
 
       - name: Build React app
+        env:
+          VITE_WEB_APP_URL: ${{ secrets.VITE_WEB_APP_URL }}
         run: npm run build
 
       - name: Deploy to Hostinger via FTP

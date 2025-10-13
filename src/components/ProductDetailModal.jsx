@@ -1,142 +1,128 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useMemo } from "react";
 import { X } from "lucide-react";
-import {
-  getIndoorSpecifications,
-  getOutdoorSpecifications,
-  getVideoWallSpecifications,
-} from "../constants/SpecificationData";
 import { UseNavbarStore } from "../store/UseNavbarStore";
+import { getDetailSpec } from "../utils/ProductDetailSpec";
 
 export const ProductDetailModal = ({ isOpen, onClose }) => {
   const { selectedModel } = UseNavbarStore();
-  const [activeTab, setActiveTab] = useState("Basic Specifications");
 
-  if (!selectedModel || !isOpen) return null;
+  const specifications = useMemo(() => {
+    if (!selectedModel) return [];
+    return getDetailSpec(selectedModel.modelData, selectedModel.name);
+  }, [selectedModel]);
 
-  // Determine which specifications to display based on model type
-  const getSpecifications = () => {
-    switch (selectedModel.displayTypeId) {
-      case "indoor":
-        return getIndoorSpecifications(selectedModel.specs);
-      case "outdoor":
-        return getOutdoorSpecifications(selectedModel.specs);
-      case "videowall":
-        return getVideoWallSpecifications(selectedModel.specs);
-      default:
-        return getIndoorSpecifications(selectedModel.specs);
-    }
-  };
+  if (!selectedModel || !isOpen || specifications.length === 0) return null;
 
-  const specifications = getSpecifications();
-  const categories = specifications.map((spec) => spec.category);
-  const activeCategory = specifications.find(
-    (spec) => spec.category === activeTab
+  // Get Basic Specifications (always first)
+  const basicSpecs = specifications[0];
+
+  // Get Module and Cabinet specs
+  const moduleSpecs = specifications.find((spec) => spec.category === "Module");
+  const cabinetSpecs = specifications.find(
+    (spec) => spec.category === "Cabinet"
   );
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={onClose}
-            className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-50 overflow-hidden"
-          />
+    <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-50 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-2xl w-[380px] lg:w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div className="p-2 h-full">
+          {/* Header */}
+          <div className="flex justify-end">
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              <X size={24} />
+            </button>
+          </div>
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.3 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl bg-white rounded-lg z-50 max-h-[90vh] overflow-hidden flex flex-col"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Product Detail
-              </h2>
-              <button
-                onClick={onClose}
-                className="p-1 hover:bg-gray-100 rounded-md transition-colors"
-              >
-                <X size={24} className="text-gray-600" />
-              </button>
+          <div className="flex mb- justify-center">
+            <h2 className="text-lg:text-xl font-normal lg:font-medium text-gray-800">
+              Export Calculator Simulation
+            </h2>
+          </div>
+
+          {/* Basic Specifications at Top */}
+          <div className="px-12 py-2 bg-white">
+            <div className="grid grid-cols-1 gap-2">
+              {basicSpecs?.items.map((item, idx) => (
+                <div key={idx} className="space-y-1">
+                  <p className="text-xs text-gray-600">{item.label}</p>
+                  <p className="text-xs font-medium text-gray-900">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
             </div>
+          </div>
 
-            {/* Content */}
-            <div className="overflow-y-auto flex-1">
-              {/* Basic Info */}
-              <div className="px-8 py-6 border-b border-gray-100">
-                <div className="grid grid-cols-3 gap-8">
-                  {activeCategory?.items.slice(0, 3).map((item, idx) => (
-                    <div key={idx}>
-                      <p className="text-sm font-medium text-gray-500 mb-2">
-                        {item.label}
-                      </p>
-                      <p className="text-base font-semibold text-gray-900">
-                        {item.value}
-                      </p>
+          {/* Divider */}
+          <div className="h-px bg-gray-200 mx-12" />
+
+          {/* Module and Cabinet Section */}
+          <div className="px-12 py-2">
+            <div className="grid grid-cols-2 gap-16">
+              {/* Module Section */}
+              {moduleSpecs && (
+                <div>
+                  <h3 className="text-lg:text-xl font-normal lg:font-medium text-gray-800 mb-1 text-center">
+                    Module
+                  </h3>
+
+                  {/* Module Image Placeholder */}
+                  <div className="bg-gray-50 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-24 h-24 bg-gray-200 rounded mx-auto mb-1"></div>
+                     
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Tabs */}
-              <div className="px-8 pt-6 pb-0">
-                <div className="flex gap-1 border-b border-gray-200">
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => setActiveTab(category)}
-                      className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
-                        activeTab === category
-                          ? "text-gray-900 border-[#3AAFA9]"
-                          : "text-gray-600 border-transparent hover:text-gray-900"
-                      }`}
-                    >
-                      {category}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tab Content */}
-              <div className="px-8 py-6">
-                {activeCategory && (
-                  <div className="grid grid-cols-2 gap-8">
-                    {activeCategory.items.map((item, idx) => (
-                      <div key={idx} className="space-y-1">
-                        <p className="text-sm font-medium text-gray-500">
-                          {item.label}
-                        </p>
-                        <p className="text-base font-semibold text-gray-900">
+                  {/* Module Specs */}
+                  <div className="space-y-1">
+                    {moduleSpecs.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between py-1">
+                        <p className="text-xs text-gray-600">{item.label}</p>
+                        <p className="text-xs font-medium text-gray-900 text-right">
                           {item.value}
                         </p>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+              )}
 
-            {/* Footer */}
-            <div className="px-8 py-4 border-t border-gray-200 flex justify-end bg-gray-50">
-              <button
-                onClick={onClose}
-                className="px-6 py-2 bg-gray-900 text-white rounded-md font-medium hover:bg-gray-800 transition-colors"
-              >
-                Close
-              </button>
+              {/* Cabinet Section */}
+              {cabinetSpecs && (
+                <div>
+                  <h3 className="text-lg:text-xl font-normal lg:font-medium text-gray-800 mb-1 text-center">
+                    Cabinet
+                  </h3>
+
+                  {/* Cabinet Image Placeholder */}
+                  <div className="bg-gray-50 rounded-lg flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-24 h-24 bg-gray-200 rounded mx-auto mb-1"></div>
+                      
+                    </div>
+                  </div>
+
+                  {/* Cabinet Specs */}
+                  <div className="space-y-1">
+                    {cabinetSpecs.items.map((item, idx) => (
+                      <div key={idx} className="flex justify-between py-1">
+                        <p className="text-xs text-gray-600">{item.label}</p>
+                        <p className="text-xs font-medium text-gray-900 text-right">
+                          {item.value}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };

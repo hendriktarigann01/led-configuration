@@ -370,7 +370,11 @@ export const CanvasUtils = {
     );
   },
 
-  renderInfoDisplays: (resolutionString, humanHeight = "1,70 m") => {
+  renderInfoDisplays: (
+    resolutionString,
+    aspectRatio = "N/A",
+    humanHeight = "1,70 m"
+  ) => {
     const deviceType = CanvasUtils.getDeviceType();
 
     const positions = {
@@ -390,7 +394,9 @@ export const CanvasUtils = {
           <span className="text-xs text-gray-700">
             Resolution: {resolutionString}
           </span>
-          <span className="text-xs text-gray-700">Aspect Ratio 4:3</span>
+          <span className="text-xs text-gray-700">
+            Aspect Ratio: {aspectRatio}
+          </span>
         </div>
 
         {/* Human Height (kanan) */}

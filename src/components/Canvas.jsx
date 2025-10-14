@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { CirclePlus, Plus, Minus, X, Move, RotateCcw } from "lucide-react";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseModalStore } from "../store/UseModalStore";
@@ -6,6 +6,7 @@ import { UseNavbarStore } from "../store/UseNavbarStore";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { ConfigurationModal } from "./ConfigurationModal";
 import { CanvasUtils } from "../utils/CanvasUtils";
+import { calculateAspectRatio } from "../utils/ResolutionCalculator";
 
 export const Canvas = () => {
   // Store hooks
@@ -45,10 +46,8 @@ export const Canvas = () => {
     isConfigured,
     screenPosition,
     setScreenPosition,
-    resetScreenPosition,
     isMoveMode,
     toggleMoveMode,
-    setMoveMode,
   } = canvasStore;
 
   const {
@@ -238,22 +237,33 @@ export const Canvas = () => {
     });
   };
 
-  const handleMouseMove = (e) => {
-    if (!isDragging || !isMoveMode) return;
+  // Use useCallback to fix missing dependency warning
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (!isMoveMode) return;
 
-    const newX = e.clientX - dragStart.x;
-    const newY = e.clientY - dragStart.y;
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
 
-    // Calculate boundaries based on canvas and image size
-    const maxX = (dynamicCanvas.width - imageWidth) / 2;
-    const maxY = (dynamicCanvas.height - imageHeight) / 2;
+      // Calculate boundaries based on canvas and image size
+      const maxX = (dynamicCanvas.width - imageWidth) / 2;
+      const maxY = (dynamicCanvas.height - imageHeight) / 2;
 
-    // Clamp position within boundaries
-    const clampedX = Math.max(-maxX, Math.min(maxX, newX));
-    const clampedY = Math.max(-maxY, Math.min(maxY, newY));
+      // Clamp position within boundaries
+      const clampedX = Math.max(-maxX, Math.min(maxX, newX));
+      const clampedY = Math.max(-maxY, Math.min(maxY, newY));
 
-    setScreenPosition(clampedX, clampedY);
-  };
+      setScreenPosition(clampedX, clampedY);
+    },
+    [
+      isMoveMode,
+      dragStart.x,
+      dragStart.y,
+      dynamicCanvas.width,
+      dynamicCanvas.height,
+      setScreenPosition,
+    ]
+  );
 
   const handleMouseUp = () => {
     setIsDragging(false);
@@ -270,16 +280,7 @@ export const Canvas = () => {
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [isDragging, dragStart, screenPosition, isMoveMode]);
-
-  // FIXED: Improved calculations using CanvasUtils
-  const { effectiveCanvasWidth, effectiveCanvasHeight } =
-    CanvasUtils.getCanvasDimensions(
-      wallWidth,
-      wallHeight,
-      dynamicCanvas.width,
-      dynamicCanvas.height
-    );
+  }, [isDragging, handleMouseMove]);
 
   // CRITICAL FIX: Calculate screen size based on actual canvas dimensions
   const screenToWallRatioX = actualScreenSize.width / wallWidth;
@@ -327,6 +328,12 @@ export const Canvas = () => {
     if (!resolutionInfo) return "No Resolution Data";
     const { actual } = resolutionInfo;
     return `${actual.width} × ${actual.height} px`;
+  };
+
+  const getAspectRatio = () => {
+    if (!resolutionInfo) return "N/A";
+    const { actual } = resolutionInfo;
+    return calculateAspectRatio(actual);
   };
 
   // Component render helpers
@@ -647,7 +654,10 @@ export const Canvas = () => {
         )}
 
         {/* Info Displays */}
-        {CanvasUtils.renderInfoDisplays(getResolutionDisplayString())}
+        {CanvasUtils.renderInfoDisplays(
+          getResolutionDisplayString(),
+          getAspectRatio()
+        )}
 
         {/* Screen Controls */}
         {renderWidthControls()}
@@ -675,18 +685,6 @@ export const Canvas = () => {
       </div>
     </div>
   );
-
-  console.log("Canvas values:", {
-    actualScreenWidth: actualScreenSize.width,
-    wallWidth: wallWidth,
-    calculated: (wallWidth - actualScreenSize.width) / 2,
-  });
-
-  console.log("Header values:", {
-    screenWidth: headerStore.screenWidth,
-    wallWidth: headerStore.wallWidth,
-    calculated: (headerStore.wallWidth - headerStore.screenWidth) / 2,
-  });
 
   return (
     <>

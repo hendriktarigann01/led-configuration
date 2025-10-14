@@ -12,7 +12,9 @@ export const parseResolution = (resolutionString) => {
   const cleanResolution = resolutionString.toLowerCase();
 
   // Extract numbers from string
-  const numberMatch = cleanResolution.match(/(\d+)\s*[xÃƒÆ'Ã¢â‚¬"]\s*(\d+)/);
+  const numberMatch = cleanResolution.match(
+    /(\d+)\s*[xÃƒÆ'Ã†'ÃƒÂ¢Ã¢â€šÂ¬"]\s*(\d+)/
+  );
 
   if (numberMatch) {
     return {
@@ -178,4 +180,33 @@ export const calculateResolutionPerUnit = (modelData, totalUnits) => {
     width: unitResolution.width * totalUnits,
     height: unitResolution.height * totalUnits,
   };
+};
+
+/**
+ * Calculate GCD (Greatest Common Divisor) using Euclidean algorithm
+ * @param {number} a - First number
+ * @param {number} b - Second number
+ * @returns {number} GCD of a and b
+ */
+const gcd = (a, b) => {
+  return b === 0 ? a : gcd(b, a % b);
+};
+
+/**
+ * Calculate aspect ratio from resolution
+ * @param {{width: number, height: number}} resolution - Resolution object
+ * @returns {string} Aspect ratio in "W:H" format (e.g., "16:9", "4:3")
+ */
+export const calculateAspectRatio = (resolution) => {
+  if (!resolution || resolution.width === 0 || resolution.height === 0) {
+    return "N/A";
+  }
+
+  const { width, height } = resolution;
+  const divisor = gcd(width, height);
+
+  const ratioWidth = width / divisor;
+  const ratioHeight = height / divisor;
+
+  return `${ratioWidth}:${ratioHeight}`;
 };

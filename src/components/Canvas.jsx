@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { CirclePlus, Plus, Minus, X, Move } from "lucide-react";
+import { CirclePlus, Plus, Minus, X, Move, RotateCcw } from "lucide-react";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseModalStore } from "../store/UseModalStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
@@ -24,6 +24,11 @@ export const Canvas = () => {
   const [showSizeWarning, setShowSizeWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState("");
 
+  // Drag state
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const dragRef = useRef(null);
+
   // Refs
   const canvasRef = useRef(null);
 
@@ -38,6 +43,12 @@ export const Canvas = () => {
     getActualScreenSize,
     updateModelData,
     isConfigured,
+    screenPosition,
+    setScreenPosition,
+    resetScreenPosition,
+    isMoveMode,
+    toggleMoveMode,
+    setMoveMode,
   } = canvasStore;
 
   const {
@@ -186,6 +197,11 @@ export const Canvas = () => {
     setShowSizeWarning(false);
   };
 
+  // Toggle move mode
+  const handleToggleMoveMode = () => {
+    toggleMoveMode();
+  };
+
   // Screen control handlers
   const handleWidthIncrement = () => {
     if (!configured || !canIncreaseScreenWidth || resolution !== "Custom")
@@ -210,6 +226,51 @@ export const Canvas = () => {
       return;
     decrementScreenHeight();
   };
+
+  // Drag handlers
+  const handleMouseDown = (e) => {
+    if (!isMoveMode) return;
+
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - screenPosition.x,
+      y: e.clientY - screenPosition.y,
+    });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging || !isMoveMode) return;
+
+    const newX = e.clientX - dragStart.x;
+    const newY = e.clientY - dragStart.y;
+
+    // Calculate boundaries based on canvas and image size
+    const maxX = (dynamicCanvas.width - imageWidth) / 2;
+    const maxY = (dynamicCanvas.height - imageHeight) / 2;
+
+    // Clamp position within boundaries
+    const clampedX = Math.max(-maxX, Math.min(maxX, newX));
+    const clampedY = Math.max(-maxY, Math.min(maxY, newY));
+
+    setScreenPosition(clampedX, clampedY);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add global mouse event listeners for drag
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+
+      return () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+    }
+  }, [isDragging, dragStart, screenPosition, isMoveMode]);
 
   // FIXED: Improved calculations using CanvasUtils
   const { effectiveCanvasWidth, effectiveCanvasHeight } =
@@ -269,12 +330,12 @@ export const Canvas = () => {
   };
 
   // Component render helpers
-  const renderResetButton = () => (
-    <div className="absolute top-4 right-4 z-10">
+  const renderTopButton = () => (
+    <div className="absolute space-y-2 top-4 right-4 z-10">
       <button
         disabled={!isConfigured()}
         onClick={handleCompleteReset}
-        className={`w-20 lg:w-[144px] flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+        className={`w-20 lg:w-[144px] max-w-40 flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
           isConfigured()
             ? "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
             : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
@@ -282,6 +343,37 @@ export const Canvas = () => {
       >
         Reset
       </button>
+      <div className="flex gap-2">
+        {/* Active Move */}
+        <button
+          disabled={!isConfigured()}
+          onClick={handleToggleMoveMode}
+          className={`w-full flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+            isConfigured()
+              ? isMoveMode
+                ? "cursor-pointer bg-white border border-[#3AAFA9] text-[#3AAFA9]"
+                : "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+              : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
+          }`}
+        >
+          <Move size={16} />
+        </button>
+
+        {/* Reset Move */}
+        <button
+          disabled={!isConfigured()}
+          onClick={handleToggleMoveMode}
+          className={`w-full flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+            isConfigured()
+              ? isMoveMode
+                ? "cursor-pointer bg-white border border-[#3AAFA9] text-[#3AAFA9]"
+                : "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+              : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
+          }`}
+        >
+          <RotateCcw size={16} />
+        </button>
+      </div>
     </div>
   );
 
@@ -326,11 +418,22 @@ export const Canvas = () => {
   };
 
   const renderVideoContent = () => (
-    <div className="relative inline-block">
-      {/* Move Screen */}
-      <div className="absolute -top-2 -right-2 text-white bg-black/30 p-1 z-[99]">
-        <Move size={10} />
-      </div>
+    <div
+      className="relative inline-block"
+      style={{
+        transform: `translate(${screenPosition.x}px, ${screenPosition.y}px)`,
+        transition: isDragging ? "none" : "transform 0.2s ease-out",
+        cursor: isMoveMode ? "move" : "default",
+      }}
+      onMouseDown={handleMouseDown}
+      ref={dragRef}
+    >
+      {/* Move Screen Icon - Only visible when move mode is active */}
+      {isMoveMode && (
+        <div className="absolute -top-3 -right-3 bg-[#3AAFA9] text-white p-1 rounded-full z-[99] shadow-lg">
+          <Move size={16} />
+        </div>
+      )}
       <div
         className="relative"
         style={{
@@ -348,6 +451,7 @@ export const Canvas = () => {
             height: `${imageHeight}px`,
             maxWidth: "100%",
             maxHeight: "100%",
+            pointerEvents: "none",
           }}
           className="object-cover z-20"
         />
@@ -361,11 +465,22 @@ export const Canvas = () => {
   );
 
   const renderImageContent = () => (
-    <div className="relative inline-block">
-      {/* Move Screen */}
-      <div className="absolute -top-2 -right-2 text-white bg-black/30 p-1 z-[99]">
-        <Move size={10} />
-      </div>
+    <div
+      className="relative inline-block"
+      style={{
+        transform: `translate(${screenPosition.x}px, ${screenPosition.y}px)`,
+        transition: isDragging ? "none" : "transform 0.2s ease-out",
+        cursor: isMoveMode ? "move" : "default",
+      }}
+      onMouseDown={handleMouseDown}
+      ref={dragRef}
+    >
+      {/* Move Screen Icon - Only visible when move mode is active */}
+      {isMoveMode && (
+        <div className="absolute -top-3 -right-3 bg-[#3AAFA9] text-white p-1 rounded-full z-[99] shadow-lg">
+          <Move size={16} />
+        </div>
+      )}
       <div
         className="relative"
         style={{
@@ -377,6 +492,7 @@ export const Canvas = () => {
           src={contentSource}
           alt="Canvas Preview"
           className="object-cover w-full h-full z-20"
+          style={{ pointerEvents: "none" }}
         />
         {CanvasUtils.renderBezelOverlay(cabinetCount)}
       </div>
@@ -478,7 +594,7 @@ export const Canvas = () => {
         }}
       >
         {/* LED Screen Content */}
-        <div className="relative z-20 pointer-events-none mt-1.5">
+        <div className="relative z-20">
           {isVideo ? renderVideoContent() : renderImageContent()}
         </div>
       </div>
@@ -575,7 +691,7 @@ export const Canvas = () => {
   return (
     <>
       <div className="flex-1 bg-gray-100 w-full h-80 lg:h-full px-2 mt-12 mb-28 lg:my-0 lg:p-4 flex items-center justify-center">
-        {renderResetButton()}
+        {renderTopButton()}
 
         {/* Canvas Container */}
         <div className="relative m-auto flex justify-center items-center w-full">

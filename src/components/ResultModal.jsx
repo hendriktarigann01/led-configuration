@@ -136,7 +136,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
         <div className="p-6">
           {/* Header with close button */}
           <div className="flex justify-between items-start mb-6">
-            <h2 className="text-lg font-semibold text-gray-800 pr-4">
+            <h2 className="text-lg  text-gray-800 pr-4">
               {getModalTitle()}
             </h2>
             <button

@@ -8,21 +8,24 @@ export const getDetailSpec = (modelData, displayType) => {
   const isVideoWall = displayType?.includes("Video Wall");
 
   if (isIndoor) {
-    // Find module and cabinet data based on the same pixel pitch
     const currentPixelPitch = modelData?.pixel_pitch;
     const allIndoorData = model.filter((m) => m.name?.includes("Indoor"));
 
     let moduleData = null;
     let cabinetData = null;
+    let moduleImagePath = null;
+    let cabinetImagePath = null;
 
     allIndoorData.forEach((item) => {
       item.data.forEach((d) => {
         if (d.pixel_pitch === currentPixelPitch) {
           if (d.module_size) {
             moduleData = d;
+            moduleImagePath = d.image_path;
           }
           if (d.cabinet_size) {
             cabinetData = d;
+            cabinetImagePath = d.image_path;
           }
         }
       });
@@ -57,6 +60,7 @@ export const getDetailSpec = (modelData, displayType) => {
             value: moduleData?.application || "N/A",
           },
         ],
+        imagePath: moduleImagePath,
       },
       {
         category: "Cabinet",
@@ -88,6 +92,7 @@ export const getDetailSpec = (modelData, displayType) => {
           },
           { label: "Life span", value: cabinetData?.life_span || "N/A" },
         ],
+        imagePath: cabinetImagePath,
       },
     ];
   }
@@ -122,6 +127,7 @@ export const getDetailSpec = (modelData, displayType) => {
             value: modelData?.application || "N/A",
           },
         ],
+        imagePath: modelData?.image_path_module,
       },
       {
         category: "Cabinet",
@@ -158,6 +164,7 @@ export const getDetailSpec = (modelData, displayType) => {
             value: modelData?.best_viewing_distance || "N/A",
           },
         ],
+        imagePath: modelData?.image_path_cabinet,
       },
     ];
   }
@@ -199,7 +206,7 @@ export const getDetailSpec = (modelData, displayType) => {
       {
         category: "Connectivity",
         items: [
-          { label: "Audio in/Out", value: modelData?.audio_in_out || "N/A" },
+          { label: "Audio In/Out", value: modelData?.audio_in_out || "N/A" },
           { label: "Video In", value: modelData?.video_in || "N/A" },
         ],
       },

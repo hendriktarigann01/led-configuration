@@ -57,7 +57,7 @@ const Layout = () => {
       <ExportModal />
       <ResultModal />
       <ProductDetailModal />
-      <CropperModal /> {/* New cropper modal */}
+      <CropperModal /> 
     </div>
   );
 };

@@ -16,6 +16,7 @@ export const model = [
         cabinet_material: "Die-casting aluminum",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
+        image_path: "product/indoor/Cabinet-P1.25.png",
       },
       {
         pixel_pitch: "P 1.53",
@@ -29,6 +30,7 @@ export const model = [
         cabinet_material: "Die-casting aluminum",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
+        image_path: "product/indoor/Cabinet-P1.53.png",
       },
       {
         pixel_pitch: "P 1.86",
@@ -42,6 +44,7 @@ export const model = [
         cabinet_material: "Die-casting aluminum",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
+        image_path: "product/indoor/Cabinet-P1.86.png",
       },
       {
         pixel_pitch: "P 2.5",
@@ -55,6 +58,7 @@ export const model = [
         cabinet_material: "Die-casting aluminum",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
+        image_path: "product/indoor/Cabinet-P2.5.png",
       },
       {
         pixel_pitch: "P 3.0",
@@ -68,6 +72,7 @@ export const model = [
         cabinet_material: "Die-casting aluminum",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
+        image_path: "product/indoor/Cabinet-P3.0.png",
       },
       {
         pixel_pitch: "P 4.0",
@@ -81,6 +86,7 @@ export const model = [
         cabinet_material: "Die-casting aluminum",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         life_span: ">10,000 hours",
+        image_path: "product/indoor/Cabinet-P4.0.png",
       },
     ],
   },
@@ -101,6 +107,7 @@ export const model = [
         led_configuration: "3 in 1",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
+        image_path: "product/indoor/Module-P1.25.png",
       },
       {
         pixel_pitch: "P 1.53",
@@ -114,6 +121,7 @@ export const model = [
         led_configuration: "3 in 1",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
+        image_path: "product/indoor/Module-P1.53.png",
       },
       {
         pixel_pitch: "P 1.86",
@@ -127,6 +135,7 @@ export const model = [
         led_configuration: "3 in 1",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
+        image_path: "product/indoor/Module-P1.86.png",
       },
       {
         pixel_pitch: "P 2.5",
@@ -140,6 +149,7 @@ export const model = [
         led_configuration: "3 in 1",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
+        image_path: "product/indoor/Module-P2.5.png",
       },
       {
         pixel_pitch: "P 3.0",
@@ -153,6 +163,7 @@ export const model = [
         led_configuration: "3 in 1",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
+        image_path: "product/indoor/Module-P3.0.png",
       },
       {
         pixel_pitch: "P 4.0",
@@ -166,6 +177,7 @@ export const model = [
         led_configuration: "3 in 1",
         power_consumption: "Max: 700W/m², Average: 500W/m²",
         application: "Indoor Fixed Installation",
+        image_path: "product/indoor/Module-P4.0.png",
       },
     ],
   },
@@ -195,6 +207,8 @@ export const model = [
         working_voltage: "AC220v+-10%",
         humidity: "10%-75%",
         best_viewing_distance: "3-10M",
+        image_path_cabinet: "product/outdoor/Cabinet-P3.0.png",
+        image_path_module: "product/outdoor/Module-P3.0.png",
       },
       {
         pixel_pitch: "P 4.0",
@@ -217,6 +231,8 @@ export const model = [
         working_voltage: "AC220v+-10%",
         humidity: "10%-75%",
         best_viewing_distance: "4-12M",
+        image_path_cabinet: "product/outdoor/Cabinet-P4.0.png",
+        image_path_module: "product/outdoor/Module-P4.0.png",
       },
       {
         pixel_pitch: "P 5.0",
@@ -239,6 +255,8 @@ export const model = [
         working_voltage: "AC220v+-10%",
         humidity: "10%-75%",
         best_viewing_distance: "5-15M",
+        image_path_cabinet: "product/outdoor/Cabinet-P5.0.png",
+        image_path_module: "product/outdoor/Module-P5.0.png",
       },
       {
         pixel_pitch: "P 8.0",
@@ -261,6 +279,8 @@ export const model = [
         working_voltage: "AC220v+-10%",
         humidity: "10%-75%",
         best_viewing_distance: "8-24M",
+        image_path_cabinet: "product/outdoor/Cabinet-P8.0.png",
+        image_path_module: "product/outdoor/Module-P8.0.png",
       },
       {
         pixel_pitch: "P 10",
@@ -283,6 +303,8 @@ export const model = [
         working_voltage: "AC220v+-10%",
         humidity: "10%-75%",
         best_viewing_distance: "8-24M",
+        image_path_cabinet: "product/outdoor/Cabinet-P10.png",
+        image_path_module: "product/outdoor/Module-P10.png",
       },
     ],
   },
@@ -313,6 +335,7 @@ export const model = [
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",
         operation: "24/7",
+        image_path: "product/video-wall/video-wall.png"
       },
       {
         inch: '46"',
@@ -336,6 +359,7 @@ export const model = [
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",
         operation: "24/7",
+        image_path: "product/video-wall/video-wall.png"
       },
       {
         inch: '46"',
@@ -359,6 +383,7 @@ export const model = [
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",
         operation: "24/7",
+        image_path: "product/video-wall/video-wall.png"
       },
       {
         inch: '46"',
@@ -382,6 +407,7 @@ export const model = [
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",
         operation: "24/7",
+        image_path: "product/video-wall/video-wall.png"
       },
       {
         inch: '55"',
@@ -405,6 +431,7 @@ export const model = [
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",
         operation: "24/7",
+        image_path: "product/video-wall/video-wall.png"
       },
       {
         inch: '55"',
@@ -428,6 +455,7 @@ export const model = [
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",
         operation: "24/7",
+        image_path: "product/video-wall/video-wall.png"
       },
       {
         inch: '55"',
@@ -451,6 +479,7 @@ export const model = [
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",
         operation: "24/7",
+        image_path: "product/video-wall/video-wall.png"
       },
       {
         inch: '55"',
@@ -474,6 +503,7 @@ export const model = [
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",
         operation: "24/7",
+        image_path: "product/video-wall/video-wall.png"
       },
       {
         inch: '65"',
@@ -497,8 +527,8 @@ export const model = [
         operation_temperature: "0 ~ 50 ℃",
         storage_temperature: "-20 ~ 65 ℃",
         operation: "24/7",
+        image_path: "product/video-wall/video-wall.png"
       },
     ],
   },
 ];
-               

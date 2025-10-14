@@ -374,25 +374,28 @@ export const CanvasUtils = {
     const deviceType = CanvasUtils.getDeviceType();
 
     const positions = {
-      mobile: { left: "left-12", right: "right-0", bottom: "bottom-5" },
-      tablet: { left: "left-13", right: "right-1", bottom: "bottom-5" },
-      desktop: { left: "left-13", right: "right-1", bottom: "bottom-5" },
+      mobile: { left: "left-12", right: "right-0", bottom: "bottom-2" },
+      tablet: { left: "left-13", right: "right-1", bottom: "bottom-2" },
+      desktop: { left: "left-13", right: "right-1", bottom: "bottom-2" },
     };
 
     const { left, right, bottom } = positions[deviceType] || positions.desktop;
 
     return (
       <>
+        {/* Resolution + Ratio (kiri) */}
         <div
-          className={`absolute ${bottom} ${left} flex flex-col items-start justify-center z-50`}
+          className={`absolute ${bottom} ${left} flex flex-col h-5 justify-center z-50`}
         >
           <span className="text-xs text-gray-700">
             Resolution: {resolutionString}
           </span>
+          <span className="text-xs text-gray-700">Aspect Ratio 4:3</span>
         </div>
 
+        {/* Human Height (kanan) */}
         <div
-          className={`absolute ${bottom} ${right} flex flex-col items-start justify-center z-50`}
+          className={`absolute bottom-3 ${right} flex flex-col h-5 items-start justify-start z-50`}
         >
           <span className="text-xs text-gray-700">{humanHeight}</span>
         </div>

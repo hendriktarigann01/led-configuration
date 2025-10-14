@@ -21,6 +21,12 @@ export const UseCanvasStore = create((set, get) => ({
   baseWidth: 0,
   baseHeight: 0,
 
+  // Screen position (offset in pixels from center)
+  screenPosition: { x: 0, y: 0 },
+
+  // Move mode state
+  isMoveMode: false,
+
   // ============================================================================
   // ACTIONS - State mutations
   // ============================================================================
@@ -137,6 +143,40 @@ export const UseCanvasStore = create((set, get) => ({
   },
 
   /**
+   * Toggle move mode on/off
+   */
+  toggleMoveMode: () => {
+    set((state) => ({
+      isMoveMode: !state.isMoveMode,
+    }));
+  },
+
+  /**
+   * Set move mode state
+   */
+  setMoveMode: (enabled) => {
+    set({ isMoveMode: enabled });
+  },
+
+  /**
+   * Update screen position
+   */
+  setScreenPosition: (x, y) => {
+    set({
+      screenPosition: { x, y },
+    });
+  },
+
+  /**
+   * Reset screen position to center
+   */
+  resetScreenPosition: () => {
+    set({
+      screenPosition: { x: 0, y: 0 },
+    });
+  },
+
+  /**
    * Complete reset - clears ALL state including model data
    */
   reset: () => {
@@ -149,6 +189,8 @@ export const UseCanvasStore = create((set, get) => ({
       wallHeight: DEFAULT_WALL.HEIGHT,
       baseWidth: 0,
       baseHeight: 0,
+      screenPosition: { x: 0, y: 0 },
+      isMoveMode: false,
     });
   },
 

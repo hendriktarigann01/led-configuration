@@ -427,7 +427,7 @@ export const Header = () => {
             <button
               onClick={openModal}
               disabled={!isConfigured()}
-              className={`flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+              className={`flex items-center justify-center space-x-2 h-8 lg:w-[144px] max-w-40 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
                 isConfigured()
                   ? "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
                   : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
@@ -440,7 +440,7 @@ export const Header = () => {
             <button
               onClick={() => setIsResultModalOpen(true)}
               disabled={!isConfigured()}
-              className={`flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+              className={`flex items-center justify-center space-x-2 h-8 lg:w-[144px] max-w-40 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
                 isConfigured()
                   ? "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
                   : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"

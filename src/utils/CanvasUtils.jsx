@@ -257,11 +257,12 @@ export const CanvasUtils = {
   },
 
   renderWallMeasurements: (
-    remainingWallHeight,
-    remainingWallWidth,
+    dynamicRemainingWall,
     actualScreenSize,
     wallWidth,
-    wallHeight
+    wallHeight,
+    screenPosition,
+    dynamicCanvas
   ) => {
     const deviceType = CanvasUtils.getDeviceType();
 
@@ -274,97 +275,121 @@ export const CanvasUtils = {
     const { horizontal: textMarginHorizontal, vertical: textMarginVertical } =
       margins[deviceType] || margins.desktop;
 
-    const screenToWallRatioX = (actualScreenSize.width / wallWidth) * 0.7;
-    const screenToWallRatioY = (actualScreenSize.height / wallHeight) * 0.5;
+    // Calculate screen position in percentage of canvas
+    const screenOffsetXPercent = (screenPosition.x / dynamicCanvas.width) * 100;
+    const screenOffsetYPercent =
+      (screenPosition.y / dynamicCanvas.height) * 100;
 
-    const remainingSpaceRatioX = (1 - screenToWallRatioX) / 2;
-    const remainingSpaceRatioY = (1 - screenToWallRatioY) / 2;
+    // Calculate screen size as percentage of canvas
+    const pixelToMeterRatioX = dynamicCanvas.width / wallWidth;
+    const pixelToMeterRatioY = dynamicCanvas.height / wallHeight;
 
-    const rawLeftPercentage = (remainingSpaceRatioX / 2) * 115;
-    const rawRightPercentage = (1 - remainingSpaceRatioX / 2) * 95;
-    const rawTopPercentage = (remainingSpaceRatioY / 2) * 120;
-    const rawBottomPercentage = (1 - remainingSpaceRatioY / 2) * 100;
+    const screenWidthPercent =
+      ((actualScreenSize.width * pixelToMeterRatioX) / dynamicCanvas.width) *
+      100;
+    const screenHeightPercent =
+      ((actualScreenSize.height * pixelToMeterRatioY) / dynamicCanvas.height) *
+      100;
 
+    // Calculate base positions (centered screen)
+    const baseLeftSpace = (100 - screenWidthPercent) / 2;
+    const baseTopSpace = (100 - screenHeightPercent) / 2;
+
+    // ===== INI YANG PENTING! =====
+    // Calculate text positions - midpoint between screen edge and wall edge
+
+    // LEFT: Between left wall (0%) and left screen edge
+    const leftScreenEdge = 50 - screenWidthPercent / 2 + screenOffsetXPercent;
+    const leftTextPosition = leftScreenEdge / 2; // Midpoint between 0% and leftScreenEdge
+
+    // RIGHT: Between right screen edge and right wall (100%)
+    const rightScreenEdge = 50 + screenWidthPercent / 2 + screenOffsetXPercent;
+    const rightTextPosition = (rightScreenEdge + 100) / 2; // Midpoint between rightScreenEdge and 100%
+
+    // TOP: Between top wall (0%) and top screen edge
+    const topScreenEdge = 50 - screenHeightPercent / 2 + screenOffsetYPercent;
+    const topTextPosition = topScreenEdge / 2; // Midpoint between 0% and topScreenEdge
+
+    // BOTTOM: Between bottom screen edge and bottom wall (100%)
+    const bottomScreenEdge =
+      50 + screenHeightPercent / 2 + screenOffsetYPercent;
+    const bottomTextPosition = (bottomScreenEdge + 100) / 2; // Midpoint between bottomScreenEdge and 100%
+    // ===== END =====
+
+    // Clamp positions to stay within canvas boundaries
     const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
 
-    const leftPercentage = clamp(
-      rawLeftPercentage,
+    const leftPos = clamp(
+      leftTextPosition,
       textMarginVertical,
-      Math.max(
-        textMarginVertical,
-        remainingSpaceRatioX * 100 - textMarginVertical
-      )
-    );
-
-    const rightPercentage = clamp(
-      rawRightPercentage,
-      Math.min(
-        100 - textMarginVertical,
-        (1 - remainingSpaceRatioX) * 100 + textMarginVertical
-      ),
       100 - textMarginVertical
     );
-
-    const topPercentage = clamp(
-      rawTopPercentage,
-      textMarginHorizontal,
-      Math.max(
-        textMarginHorizontal,
-        remainingSpaceRatioY * 100 - textMarginHorizontal
-      )
+    const rightPos = clamp(
+      rightTextPosition,
+      textMarginVertical,
+      100 - textMarginVertical
     );
-
-    const bottomPercentage = clamp(
-      rawBottomPercentage,
-      Math.min(
-        100 - textMarginHorizontal,
-        (1 - remainingSpaceRatioY) * 100 + textMarginHorizontal
-      ),
+    const topPos = clamp(
+      topTextPosition,
+      textMarginHorizontal,
+      100 - textMarginHorizontal
+    );
+    const bottomPos = clamp(
+      bottomTextPosition,
+      textMarginHorizontal,
       100 - textMarginHorizontal
     );
 
     const textStyle = "text-[10px] lg:text-xs text-gray-700 text-center";
     const containerStyle =
-      "absolute flex flex-col items-center justify-center z-50";
+      "absolute flex flex-col items-center justify-center z-30";
 
     return (
       <>
+        {/* Top-Left measurement (vertical - left side) */}
         <div
           className={`${containerStyle} left-4`}
-          style={{ top: `${topPercentage}%`, transform: "translateY(-50%)" }}
+          style={{ top: `${topPos}%`, transform: "translateY(-50%)" }}
         >
           <span
             className={textStyle}
             style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
           >
-            {remainingWallHeight.toFixed(2)} m
+            {dynamicRemainingWall.left.toFixed(2)} m
           </span>
         </div>
 
+        {/* Bottom-Left measurement (vertical - left side) */}
         <div
           className={`${containerStyle} left-4`}
-          style={{ top: `${bottomPercentage}%`, transform: "translateY(-50%)" }}
+          style={{ top: `${bottomPos}%`, transform: "translateY(-50%)" }}
         >
           <span
             className={textStyle}
             style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
           >
-            {remainingWallHeight.toFixed(2)} m
+            {dynamicRemainingWall.right.toFixed(2)} m
           </span>
         </div>
 
+        {/* Top-Left measurement (horizontal - top side) */}
         <div
           className={`${containerStyle} top-4`}
-          style={{ left: `${leftPercentage}%`, transform: "translateX(-50%)" }}
+          style={{ left: `${leftPos}%`, transform: "translateX(-50%)" }}
         >
-          <span className={textStyle}>{remainingWallWidth.toFixed(2)} m</span>
+          <span className={textStyle}>
+            {dynamicRemainingWall.top.toFixed(2)} m
+          </span>
         </div>
 
+        {/* Top-Right measurement (horizontal - top side) */}
         <div
           className={`${containerStyle} top-4`}
-          style={{ left: `${rightPercentage}%`, transform: "translateX(-50%)" }}
+          style={{ left: `${rightPos}%`, transform: "translateX(-50%)" }}
         >
-          <span className={textStyle}>{remainingWallWidth.toFixed(2)} m</span>
+          <span className={textStyle}>
+            {dynamicRemainingWall.bottom.toFixed(2)} m
+          </span>
         </div>
       </>
     );

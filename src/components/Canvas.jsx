@@ -48,6 +48,7 @@ export const Canvas = () => {
     setScreenPosition,
     isMoveMode,
     toggleMoveMode,
+    resetScreenPosition,
   } = canvasStore;
 
   const {
@@ -201,30 +202,77 @@ export const Canvas = () => {
     toggleMoveMode();
   };
 
+  const handleResetMove = () => {
+    resetScreenPosition();
+    toggleMoveMode(); // Turn off move mode after reset
+  };
+
   // Screen control handlers
   const handleWidthIncrement = () => {
-    if (!configured || !canIncreaseScreenWidth || resolution !== "Custom")
+    if (
+      !configured ||
+      !canIncreaseScreenWidth ||
+      resolution !== "Custom" ||
+      isMoveMode
+    )
       return;
     handleScreenWidthIncrement();
   };
 
   const handleWidthDecrement = () => {
-    if (!configured || !canDecreaseScreenWidth || resolution !== "Custom")
+    if (
+      !configured ||
+      !canDecreaseScreenWidth ||
+      resolution !== "Custom" ||
+      isMoveMode
+    )
       return;
     decrementScreenWidth();
   };
 
   const handleHeightIncrement = () => {
-    if (!configured || !canIncreaseScreenHeight || resolution !== "Custom")
+    if (
+      !configured ||
+      !canIncreaseScreenHeight ||
+      resolution !== "Custom" ||
+      isMoveMode
+    )
       return;
     handleScreenHeightIncrement();
   };
 
   const handleHeightDecrement = () => {
-    if (!configured || !canDecreaseScreenHeight || resolution !== "Custom")
+    if (
+      !configured ||
+      !canDecreaseScreenHeight ||
+      resolution !== "Custom" ||
+      isMoveMode
+    )
       return;
     decrementScreenHeight();
   };
+
+  const calculateDynamicRemainingWall = () => {
+    // Convert screen position (pixels) to meters based on canvas scale
+    const pixelToMeterRatioX = wallWidth / dynamicCanvas.width;
+    const pixelToMeterRatioY = wallHeight / dynamicCanvas.height;
+
+    const offsetX = screenPosition.x * pixelToMeterRatioX;
+    const offsetY = screenPosition.y * pixelToMeterRatioY;
+
+    // Base remaining space (when centered)
+    const baseRemainingWidth = (wallWidth - actualScreenSize.width) / 2;
+    const baseRemainingHeight = (wallHeight - actualScreenSize.height) / 2;
+
+    return {
+      left: baseRemainingWidth - offsetX,
+      right: baseRemainingWidth + offsetX,
+      top: baseRemainingHeight - offsetY,
+      bottom: baseRemainingHeight + offsetY,
+    };
+  };
+
+  const dynamicRemainingWall = calculateDynamicRemainingWall();
 
   // Drag handlers
   const handleMouseDown = (e) => {
@@ -351,7 +399,7 @@ export const Canvas = () => {
         Reset
       </button>
       <div className="flex gap-2">
-        {/* Active Move */}
+        {/* Toggle Move Mode */}
         <button
           disabled={!isConfigured()}
           onClick={handleToggleMoveMode}
@@ -366,15 +414,13 @@ export const Canvas = () => {
           <Move size={16} />
         </button>
 
-        {/* Reset Move */}
+        {/* Reset Move Position */}
         <button
-          disabled={!isConfigured()}
-          onClick={handleToggleMoveMode}
+          disabled={!isConfigured() || !isMoveMode}
+          onClick={handleResetMove}
           className={`w-full flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
-            isConfigured()
-              ? isMoveMode
-                ? "cursor-pointer bg-white border border-[#3AAFA9] text-[#3AAFA9]"
-                : "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
+            isConfigured() && isMoveMode
+              ? "cursor-pointer bg-white border border-[#3AAFA9] text-[#3AAFA9] hover:bg-teal-50"
               : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
           }`}
         >
@@ -537,7 +583,7 @@ export const Canvas = () => {
   };
 
   const renderWidthControls = () => (
-    <div className="absolute top-3 left-1/2 -translate-x-1/2 hidden lg:flex items-center space-x-2 z-50">
+    <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-red-200 px-2 hidden lg:flex items-center space-x-2 z-50">
       {renderControlButton(
         handleWidthDecrement,
         !configured || !canDecreaseScreenWidth || resolution !== "Custom",
@@ -555,7 +601,7 @@ export const Canvas = () => {
   );
 
   const renderHeightControls = () => (
-    <div className="absolute left-3 top-1/2 -translate-y-1/2 hidden lg:flex flex-col items-center justify-center space-y-2 z-50">
+    <div className="absolute left-3 top-1/2 -translate-y-1/2 bg-red-200 py-2 hidden lg:flex flex-col items-center justify-center space-y-2 z-50">
       {renderControlButton(
         handleHeightIncrement,
         !configured || !canIncreaseScreenHeight || resolution !== "Custom",
@@ -646,11 +692,12 @@ export const Canvas = () => {
 
         {/* Wall Measurements */}
         {CanvasUtils.renderWallMeasurements(
-          remainingWallHeight,
-          remainingWallWidth,
+          dynamicRemainingWall,
           actualScreenSize,
           wallWidth,
-          wallHeight
+          wallHeight,
+          screenPosition,
+          dynamicCanvas
         )}
 
         {/* Info Displays */}
@@ -700,7 +747,7 @@ export const Canvas = () => {
             <>
               {/* Total Wall Width */}
               <div
-                className="absolute -top-3 lg:-top-3 left-[50%] border-t z-50 border-teal-400 pointer-events-none"
+                className="absolute -top-3 lg:-top-3 left-[50%] border-t z-30 border-teal-400 pointer-events-none"
                 style={{
                   transform: "translateX(-50%)",
                   width: `${dynamicCanvas.width}px`,
@@ -713,7 +760,7 @@ export const Canvas = () => {
               </div>
               {/* Total Wall Height */}
               <div
-                className="absolute border-l z-50 border-teal-400 pointer-events-none"
+                className="absolute border-l z-30 border-teal-400 pointer-events-none"
                 style={{
                   left: `calc(45% - ${dynamicCanvas.width / 2}px - ${
                     window.innerWidth < 350

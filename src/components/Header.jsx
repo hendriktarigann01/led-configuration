@@ -13,7 +13,6 @@ export const Header = () => {
   const [isProcessorDropdownOpen, setIsProcessorDropdownOpen] = useState(false);
   const [selectedProcessor, setSelectedProcessor] = useState(processor[0]);
 
-  
   const {
     screenSize,
     resolution,
@@ -51,6 +50,7 @@ export const Header = () => {
     getActualScreenSize,
     isConfigured,
     getCabinetCount,
+    isMoveMode,
   } = UseCanvasStore();
   const { openModal } = UseExportStore();
 
@@ -209,13 +209,13 @@ export const Header = () => {
           disabled={disabled}
           readOnly={readOnly || (isInteger && !isCustomMode)}
           className={`w-full text-center border-none outline-none text-xs
-                      [&::-webkit-inner-spin-button]:appearance-none
-                      [&::-webkit-outer-spin-button]:appearance-none
-                      ${
-                        disabled || readOnly || (isInteger && !isCustomMode)
-                          ? "text-gray-600"
-                          : "text-gray-600"
-                      }`}
+                    [&::-webkit-inner-spin-button]:appearance-none
+                    [&::-webkit-outer-spin-button]:appearance-none
+                    ${
+                      disabled || readOnly || (isInteger && !isCustomMode)
+                        ? "text-gray-600"
+                        : "text-gray-600"
+                    }`}
         />
         <button
           onClick={onIncrement}
@@ -307,21 +307,30 @@ export const Header = () => {
                     onIncrement={handleCabinetWidthIncrement}
                     onDecrement={decrementCabinetWidth}
                     onChange={handleCabinetWidthChange}
-                    disabled={controlsDisabled}
-                    canIncrease={canIncreaseCabinetWidth && isCustomMode}
-                    canDecrease={canDecreaseCabinetWidth && isCustomMode}
+                    disabled={controlsDisabled || isMoveMode}
+                    canIncrease={
+                      canIncreaseCabinetWidth && isCustomMode && !isMoveMode
+                    }
+                    canDecrease={
+                      canDecreaseCabinetWidth && isCustomMode && !isMoveMode
+                    }
                     isInteger={true}
                     readOnly={false}
                   />
+
                   <NumberInput
                     label="Row Count"
                     value={cabinetCount.vertical}
                     onIncrement={handleCabinetHeightIncrement}
                     onDecrement={decrementCabinetHeight}
                     onChange={handleCabinetHeightChange}
-                    disabled={controlsDisabled}
-                    canIncrease={canIncreaseCabinetHeight && isCustomMode}
-                    canDecrease={canDecreaseCabinetHeight && isCustomMode}
+                    disabled={controlsDisabled || isMoveMode}
+                    canIncrease={
+                      canIncreaseCabinetHeight && isCustomMode && !isMoveMode
+                    }
+                    canDecrease={
+                      canDecreaseCabinetHeight && isCustomMode && !isMoveMode
+                    }
                     isInteger={true}
                     readOnly={false}
                   />
@@ -334,21 +343,30 @@ export const Header = () => {
                     value={screenWidth}
                     onIncrement={handleScreenWidthIncrement}
                     onDecrement={decrementScreenWidth}
-                    onChange={() => {}} // no-op
-                    disabled={controlsDisabled}
-                    canIncrease={canIncreaseScreenWidth && isCustomMode}
-                    canDecrease={canDecreaseScreenWidth && isCustomMode}
+                    onChange={() => {}}
+                    disabled={controlsDisabled || isMoveMode}
+                    canIncrease={
+                      canIncreaseScreenWidth && isCustomMode && !isMoveMode
+                    }
+                    canDecrease={
+                      canDecreaseScreenWidth && isCustomMode && !isMoveMode
+                    }
                     readOnly={true}
                   />
+
                   <NumberInput
                     label="Screen Height(m)"
                     value={screenHeight}
                     onIncrement={handleScreenHeightIncrement}
                     onDecrement={decrementScreenHeight}
-                    onChange={() => {}} // no-op
-                    disabled={controlsDisabled}
-                    canIncrease={canIncreaseScreenHeight && isCustomMode}
-                    canDecrease={canDecreaseScreenHeight && isCustomMode}
+                    onChange={() => {}}
+                    disabled={controlsDisabled || isMoveMode}
+                    canIncrease={
+                      canIncreaseScreenHeight && isCustomMode && !isMoveMode
+                    }
+                    canDecrease={
+                      canDecreaseScreenHeight && isCustomMode && !isMoveMode
+                    }
                     readOnly={true}
                   />
                 </>
@@ -381,7 +399,7 @@ export const Header = () => {
                     onDecrement={decrementWallWidth}
                     onChange={handleWallWidthChange}
                     step={0.1}
-                    disabled={!wallControlsEnabled}
+                    disabled={!wallControlsEnabled || isMoveMode}
                     canIncrease={canIncreaseWallWidth}
                     canDecrease={canDecreaseWallWidth}
                     readOnly={false}
@@ -393,7 +411,7 @@ export const Header = () => {
                     onDecrement={decrementWallHeight}
                     onChange={handleWallHeightChange}
                     step={0.1}
-                    disabled={!wallControlsEnabled}
+                    disabled={!wallControlsEnabled || isMoveMode}
                     canIncrease={canIncreaseWallHeight}
                     canDecrease={canDecreaseWallHeight}
                     readOnly={false}
@@ -456,7 +474,7 @@ export const Header = () => {
                   </div>
 
                   {/* Dropdown */}
-                  <div className="relative z-[99]">
+                  <div className="relative z-40">
                     {/* Dropdown Button */}
                     <button
                       onClick={() =>

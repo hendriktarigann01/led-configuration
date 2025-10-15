@@ -6,7 +6,7 @@ import { UseNavbarStore } from "../store/UseNavbarStore";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { ConfigurationModal } from "./ConfigurationModal";
 import { CanvasUtils } from "../utils/CanvasUtils";
-import { calculateAspectRatio } from "../utils/ResolutionCalculator";
+import { CalculateAspectRatio } from "../utils/ResolutionCalculator";
 
 export const Canvas = () => {
   // Store hooks
@@ -333,7 +333,7 @@ export const Canvas = () => {
   const getAspectRatio = () => {
     if (!resolutionInfo) return "N/A";
     const { actual } = resolutionInfo;
-    return calculateAspectRatio(actual);
+    return CalculateAspectRatio(actual);
   };
 
   // Component render helpers
@@ -601,7 +601,7 @@ export const Canvas = () => {
         }}
       >
         {/* LED Screen Content */}
-        <div className="relative z-20">
+        <div className="relative z-20 mt-1.5">
           {isVideo ? renderVideoContent() : renderImageContent()}
         </div>
       </div>

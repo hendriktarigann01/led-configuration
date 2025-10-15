@@ -137,28 +137,28 @@ export const CanvasUtils = {
           className={`${lineStyle} top-0 right-[1px] border-l`}
           style={{
             transform: "translateX(80%) translateY(-100%)",
-            height: `${verticalMeasureLength + verticalExtension}px`,
+            height: `${(verticalMeasureLength + verticalExtension) * 2}px`,
           }}
         />
         <div
           className={`${lineStyle} top-0 left-[0px] border-l`}
           style={{
             transform: "translateX(-80%) translateY(-100%)",
-            height: `${verticalMeasureLength + verticalExtension}px`,
+            height: `${(verticalMeasureLength + verticalExtension) * 2}px`,
           }}
         />
         <div
           className={`${lineStyle} top-0 left-0 border-t`}
           style={{
             transform: "translateY(100%) translateX(-100%)",
-            width: `${horizontalMeasureLength + horizontalExtension}px`,
+            width: `${(horizontalMeasureLength + horizontalExtension) * 2}px`,
           }}
         />
         <div
           className={`${lineStyle} bottom-[1px] left-0 border-t`}
           style={{
             transform: "translateY(100%) translateX(-100%)",
-            width: `${horizontalMeasureLength + horizontalExtension}px`,
+            width: `${(horizontalMeasureLength + horizontalExtension) * 2}px`,
           }}
         />
       </>
@@ -395,7 +395,7 @@ export const CanvasUtils = {
             Resolution: {resolutionString}
           </span>
           <span className="text-xs text-gray-700">
-            Aspect Ratio: {aspectRatio}
+            Aspect Ratio {aspectRatio}
           </span>
         </div>
 

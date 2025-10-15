@@ -197,7 +197,7 @@ const gcd = (a, b) => {
  * @param {{width: number, height: number}} resolution - Resolution object
  * @returns {string} Aspect ratio in "W:H" format (e.g., "16:9", "4:3")
  */
-export const calculateAspectRatio = (resolution) => {
+export const CalculateAspectRatio = (resolution) => {
   if (!resolution || resolution.width === 0 || resolution.height === 0) {
     return "N/A";
   }
@@ -208,5 +208,5 @@ export const calculateAspectRatio = (resolution) => {
   const ratioWidth = width / divisor;
   const ratioHeight = height / divisor;
 
-  return `${ratioWidth}:${ratioHeight}`;
+  return `${ratioWidth} : ${ratioHeight}`;
 };

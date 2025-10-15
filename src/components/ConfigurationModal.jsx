@@ -117,15 +117,11 @@ export const ConfigurationModal = () => {
   const configurations = getSelectedTypeConfigurations();
   const selectedDisplayType = getSelectedDisplayType();
 
-  // Enhanced selectDisplayType for mobile flow
   const handleSelectDisplayType = (typeId) => {
     selectDisplayType(typeId);
-    // Di desktop, tidak perlu nextStep() karena sudah otomatis ke configure di store
   };
 
-  // Handle click outside tooltip to close it
   const handleModalContentClick = (e) => {
-    // Cek apakah klik terjadi di luar tombol info dan tooltip
     if (
       showTooltip !== null &&
       !e.target.closest('button[type="button"]') &&
@@ -135,9 +131,7 @@ export const ConfigurationModal = () => {
     }
   };
 
-  // Handle next for mobile display type selection
   const handleMobileDisplayNext = () => {
-    // Semua display type langsung ke configuration
     nextStep();
   };
 

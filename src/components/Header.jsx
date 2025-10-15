@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { FileDown, Eye } from "lucide-react";
+import { FileDown, Eye, Info, ChevronDown, Check } from "lucide-react";
 import { UseHeaderStore } from "../store/UseHeaderStore";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseExportStore } from "../store/UseExportStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
 import { ExportModal } from "./ExportModal";
 import { ResultModal } from "./ResultModal";
+import { processor } from "./canvas/ProcessorDropdown";
 
 export const Header = () => {
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+  const [isProcessorDropdownOpen, setIsProcessorDropdownOpen] = useState(false);
+  const [selectedProcessor, setSelectedProcessor] = useState(processor[0]);
 
+  
   const {
     screenSize,
     resolution,
@@ -156,6 +160,11 @@ export const Header = () => {
   const handleCabinetHeightIncrement = () => {
     if (!canIncreaseCabinetHeight) return;
     incrementCabinetHeight();
+  };
+
+  const handleProcessorSelect = (proc) => {
+    setSelectedProcessor(proc);
+    setIsProcessorDropdownOpen(false);
   };
 
   const NumberInput = ({
@@ -418,6 +427,86 @@ export const Header = () => {
                   canDecrease={canDecreaseWallHeight}
                   readOnly={false}
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Processor Section */}
+          <div className="flex flex-col space-y-2">
+            <h3 className="text-base font-medium text-gray-800">
+              Control System
+            </h3>
+
+            <div className="flex flex-col lg:space-y-2 w-44">
+              <div className="flex space-x-4 lg:space-x-0 space-y-4 lg:space-y-0">
+                <div className="flex flex-col space-y-1">
+                  <label className="text-xs text-gray-600">Processor</label>
+
+                  {/* Processor Image & Info */}
+                  <div className="flex w-14 h-14">
+                    <img
+                      src="/processor-1.png"
+                      alt="Processor"
+                      className="w-full h-full"
+                    />
+                    <div className="flex items-center space-x-1 ml-2 mt-1">
+                      <Info size={12} className="text-gray-400" />
+                      <p className="text-xs text-gray-400">Details</p>
+                    </div>
+                  </div>
+
+                  {/* Dropdown */}
+                  <div className="relative z-[99]">
+                    {/* Dropdown Button */}
+                    <button
+                      onClick={() =>
+                        setIsProcessorDropdownOpen(!isProcessorDropdownOpen)
+                      }
+                      className={`w-40 h-8 bg-teal-500 text-white px-3 py-2 flex items-center justify-between text-xs font-light ${
+                        isProcessorDropdownOpen ? "rounded-t" : "rounded"
+                      }`}
+                    >
+                      <span>{selectedProcessor.name}</span>
+                      <ChevronDown
+                        size={18}
+                        className={`transition-transform duration-200 ${
+                          isProcessorDropdownOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isProcessorDropdownOpen && (
+                      <div
+                        className="absolute z-10 w-40 bg-teal-500 rounded-b shadow-lg max-h-64 overflow-y-auto"
+                        style={{
+                          scrollbarWidth: "none", // Firefox
+                          msOverflowStyle: "none", // IE/Edge
+                        }}
+                      >
+                        <style>{`
+                          div::-webkit-scrollbar { display: none; }
+                        `}</style>
+                        {processor.map((proc) => (
+                          <div
+                            key={proc.id}
+                            onClick={() => handleProcessorSelect(proc)}
+                            className={`px-3 py-2 text-xs font-light cursor-pointer transition-colors ${
+                              selectedProcessor.id === proc.id
+                                ? "bg-gray-200 text-teal-500 flex items-center gap-2 mx-2 my-1"
+                                : "text-white hover:border border-gray-200 mx-2 my-1"
+                            }`}
+                          >
+                            {selectedProcessor.id === proc.id && (
+                              <Check size={16} />
+                            )}
+                            <span>{proc.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

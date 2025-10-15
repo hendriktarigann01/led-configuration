@@ -69,6 +69,10 @@ export const UseExportStore = create((set, get) => ({
 
     set({ isExporting: true });
 
+    // Get room image directly without compression
+    const navbarStore = UseNavbarStore.getState();
+    const roomImageUrl = navbarStore.roomImageUrl || null;
+
     try {
       const pdfData = state.getPdfExportData();
 
@@ -80,7 +84,12 @@ export const UseExportStore = create((set, get) => ({
         return;
       }
 
+      pdfData.roomImageUrl = roomImageUrl;
       state.setPdfData(pdfData);
+      console.log(
+        "PDF Data roomImageUrl:",
+        pdfData.roomImageUrl?.substring(0, 50)
+      );
 
       try {
         await state.sendToGoogleSheets(pdfData);
@@ -454,6 +463,8 @@ export const UseExportStore = create((set, get) => ({
       b2b: modelData.b2b || "N/A",
       resolution: modelData.resolution || "N/A",
       contrastRatio: modelData.contrast_ratio || "N/A",
+
+      roomImageUrl: null,
     };
   },
 }));

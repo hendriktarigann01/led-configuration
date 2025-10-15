@@ -30,14 +30,15 @@ export const calculateCanvasData = (data) => {
   const defaults = {
     wallWidth: CANVAS_DEFAULTS.wallWidth,
     wallHeight: CANVAS_DEFAULTS.wallHeight,
-    actualScreenSize: { 
-      width: CANVAS_DEFAULTS.screenWidth, 
-      height: CANVAS_DEFAULTS.screenHeight 
+    actualScreenSize: {
+      width: CANVAS_DEFAULTS.screenWidth,
+      height: CANVAS_DEFAULTS.screenHeight,
     },
     cabinetCount: { horizontal: 1, vertical: 1 },
     contentSource: "/canvas/canvas-bg-compress.png",
     screenWidth: CANVAS_DEFAULTS.screenWidth,
     screenHeight: CANVAS_DEFAULTS.screenHeight,
+    roomImageUrl: null,
   };
 
   if (!data?.calculations?.unitCount) return defaults;
@@ -59,6 +60,7 @@ export const calculateCanvasData = (data) => {
     contentSource,
     screenWidth,
     screenHeight,
+    roomImageUrl: data.roomImageUrl || null,
   };
 };
 
@@ -98,33 +100,32 @@ export const calculateDynamicContainerSize = (canvasData) => {
   };
 };
 
-export const calculateImageSize = (canvasData, containerWidth, containerHeight) => {
-  // Hitung rasio aspek screen dari ukuran asli
-  const screenAspectRatio =
-    canvasData.actualScreenSize.width / canvasData.actualScreenSize.height;
+export const calculateImageSize = (
+  canvasData,
+  containerWidth,
+  containerHeight
+) => {
+  const { actualScreenSize, wallWidth, wallHeight } = canvasData;
 
-  let imageWidth = containerWidth * 0.8;
-  let imageHeight = imageWidth / screenAspectRatio;
+  const screenToWallRatioX = actualScreenSize.width / wallWidth;
+  const screenToWallRatioY = actualScreenSize.height / wallHeight;
 
-  if (imageHeight > containerHeight * 0.8) {
-    imageHeight = containerHeight * 0.8;
-    imageWidth = imageHeight * screenAspectRatio;
-  }
+  const maxScreenWidth = containerWidth * 0.9;
+  const maxScreenHeight = containerHeight * 0.9;
 
-  imageWidth = Math.max(imageWidth, 50);
-  imageHeight = Math.max(imageHeight, 50);
+  const idealScreenWidth = containerWidth * screenToWallRatioX;
+  const idealScreenHeight = containerHeight * screenToWallRatioY;
 
-  const screenToWallRatioX = canvasData.actualScreenSize.width / canvasData.wallWidth;
-  const screenToWallRatioY = canvasData.actualScreenSize.height / canvasData.wallHeight;
+  const imageWidth = Math.min(idealScreenWidth, maxScreenWidth);
+  const imageHeight = Math.min(idealScreenHeight, maxScreenHeight);
 
   return {
-    width: imageWidth,
-    height: imageHeight,
+    width: Math.round(imageWidth),
+    height: Math.round(imageHeight),
     screenToWallRatioX,
     screenToWallRatioY,
   };
 };
-
 
 export const calculateHumanHeight = (canvasData, containerHeight) => {
   if (canvasData.wallHeight < 3) return 0;

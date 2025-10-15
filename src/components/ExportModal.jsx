@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { X, Download, CircleAlert } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
-import { PhoneInput } from 'react-international-phone';
-import 'react-international-phone/style.css';
+import { PhoneInput } from "react-international-phone";
+import "react-international-phone/style.css";
 import { UseExportStore } from "../store/UseExportStore";
 import { PDFDocument } from "./export/PDFDocument";
 import { formatPhoneForDisplay } from "../utils/PhoneUtils";
@@ -103,7 +103,16 @@ export const ExportModal = () => {
         }
       }
 
+      const exportState = UseExportStore.getState();
+      if (exportState.pdfData?.roomImageUrl) {
+        finalData.roomImageUrl = exportState.pdfData.roomImageUrl;
+      }
+
       const pdfResult = await generatePDF(finalData);
+      console.log(
+        "Final Data to PDF:",
+        finalData.roomImageUrl?.substring(0, 50)
+      );
 
       if (pdfResult.success) {
         alert(`PDF successfully generated: ${pdfResult.filename}`);
@@ -195,48 +204,51 @@ export const ExportModal = () => {
               <label className="block font-xs lg:text-sm font-normal lg:font-medium text-gray-700 mb-2">
                 Phone Number<span className="text-red-500">*</span>
               </label>
-             <PhoneInput
+              <PhoneInput
                 defaultCountry="id"
                 value={phoneNumber || "+62"} // Fallback ke +62 jika kosong
                 onChange={handlePhoneChange}
                 disabled={isProcessing}
                 forceDialCode={true}
                 style={{
-                  '--react-international-phone-height': '48px',
-                  '--react-international-phone-border-radius': '6px',
-                  '--react-international-phone-border-color': '#d1d5db',
-                  '--react-international-phone-background-color': isProcessing ? '#f3f4f6' : '#ffffff',
-                  '--react-international-phone-dropdown-item-height': '40px',
+                  "--react-international-phone-height": "48px",
+                  "--react-international-phone-border-radius": "6px",
+                  "--react-international-phone-border-color": "#d1d5db",
+                  "--react-international-phone-background-color": isProcessing
+                    ? "#f3f4f6"
+                    : "#ffffff",
+                  "--react-international-phone-dropdown-item-height": "40px",
                 }}
                 countrySelectorStyleProps={{
                   buttonStyle: {
-                    height: '48px',
-                    border: '1px solid #d1d5db',
-                    borderRight: 'none',
-                    borderRadius: '6px 0 0 6px',
-                    padding: '0 12px',
-                    backgroundColor: isProcessing ? '#f3f4f6' : '#ffffff',
-                    cursor: isProcessing ? 'not-allowed' : 'pointer',
+                    height: "48px",
+                    border: "1px solid #d1d5db",
+                    borderRight: "none",
+                    borderRadius: "6px 0 0 6px",
+                    padding: "0 12px",
+                    backgroundColor: isProcessing ? "#f3f4f6" : "#ffffff",
+                    cursor: isProcessing ? "not-allowed" : "pointer",
                   },
                   dropdownStyleProps: {
                     style: {
-                      maxHeight: '180px',
-                      overflowY: 'auto',
-                    }
-                  }
+                      maxHeight: "180px",
+                      overflowY: "auto",
+                    },
+                  },
                 }}
                 inputStyle={{
-                  height: '48px',
-                  width: '100%',
-                  padding: '12px',
-                  border: '1px solid #d1d5db',
-                  borderLeft: 'none',
-                  borderRadius: '0 6px 6px 0',
-                  fontSize: '14px',
-                  fontWeight: '300',
-                  backgroundColor: isProcessing ? '#f3f4f6' : '#ffffff',
-                  cursor: isProcessing ? 'not-allowed' : 'text',
-                  color: phoneNumber === "+62" || !phoneNumber ? '#9ca3af' : '#000', // Warna placeholder
+                  height: "48px",
+                  width: "100%",
+                  padding: "12px",
+                  border: "1px solid #d1d5db",
+                  borderLeft: "none",
+                  borderRadius: "0 6px 6px 0",
+                  fontSize: "14px",
+                  fontWeight: "300",
+                  backgroundColor: isProcessing ? "#f3f4f6" : "#ffffff",
+                  cursor: isProcessing ? "not-allowed" : "text",
+                  color:
+                    phoneNumber === "+62" || !phoneNumber ? "#9ca3af" : "#000", // Warna placeholder
                 }}
                 inputProps={{
                   placeholder: "812-3456-7890",

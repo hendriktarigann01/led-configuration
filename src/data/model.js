@@ -5,7 +5,7 @@ export const model = [
     description: "Suitable for indoor use with a modular and flexible design.",
     data: [
       {
-        pixel_pitch: "P 1.25",
+        pixel_pitch: "P1.25",
         cabinet_size: "640*480mm",
         cabinet_weight: "7.8kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -19,7 +19,7 @@ export const model = [
         image_path: "product/indoor/Cabinet-P1.25.png",
       },
       {
-        pixel_pitch: "P 1.53",
+        pixel_pitch: "P1.53",
         cabinet_size: "640*480mm",
         cabinet_weight: "7.8kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -33,7 +33,7 @@ export const model = [
         image_path: "product/indoor/Cabinet-P1.53.png",
       },
       {
-        pixel_pitch: "P 1.86",
+        pixel_pitch: "P1.86",
         cabinet_size: "640*480mm",
         cabinet_weight: "7.8kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -47,7 +47,7 @@ export const model = [
         image_path: "product/indoor/Cabinet-P1.86.png",
       },
       {
-        pixel_pitch: "P 2.5",
+        pixel_pitch: "P2.5",
         cabinet_size: "640*480mm",
         cabinet_weight: "7.8kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -61,7 +61,7 @@ export const model = [
         image_path: "product/indoor/Cabinet-P2.5.png",
       },
       {
-        pixel_pitch: "P 3.0",
+        pixel_pitch: "P3.0",
         cabinet_size: "640*480mm",
         cabinet_weight: "7.8kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -75,7 +75,7 @@ export const model = [
         image_path: "product/indoor/Cabinet-P3.0.png",
       },
       {
-        pixel_pitch: "P 4.0",
+        pixel_pitch: "P4.0",
         cabinet_size: "640*480mm",
         cabinet_weight: "7.8kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -96,7 +96,7 @@ export const model = [
     description: "Suitable for indoor use with a modular and flexible design.",
     data: [
       {
-        pixel_pitch: "P 1.25",
+        pixel_pitch: "P1.25",
         module_size: "320*160mm",
         module_weight: "0.48kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -110,7 +110,7 @@ export const model = [
         image_path: "product/indoor/Module-P1.25.png",
       },
       {
-        pixel_pitch: "P 1.53",
+        pixel_pitch: "P1.53",
         module_size: "320*160mm",
         module_weight: "0.48kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -124,7 +124,7 @@ export const model = [
         image_path: "product/indoor/Module-P1.53.png",
       },
       {
-        pixel_pitch: "P 1.86",
+        pixel_pitch: "P1.86",
         module_size: "320*160mm",
         module_weight: "0.48kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -138,7 +138,7 @@ export const model = [
         image_path: "product/indoor/Module-P1.86.png",
       },
       {
-        pixel_pitch: "P 2.5",
+        pixel_pitch: "P2.5",
         module_size: "320*160mm",
         module_weight: "0.48kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -152,7 +152,7 @@ export const model = [
         image_path: "product/indoor/Module-P2.5.png",
       },
       {
-        pixel_pitch: "P 3.0",
+        pixel_pitch: "P3.0",
         module_size: "320*160mm",
         module_weight: "0.48kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -166,7 +166,7 @@ export const model = [
         image_path: "product/indoor/Module-P3.0.png",
       },
       {
-        pixel_pitch: "P 4.0",
+        pixel_pitch: "P4.0",
         module_size: "320*160mm",
         module_weight: "0.48kg/pcs",
         brightness: "500 - 1.000 Nits",
@@ -187,7 +187,7 @@ export const model = [
     description: "Ideal for outdoor use in all weather conditions.",
     data: [
       {
-        pixel_pitch: "P 3.0",
+        pixel_pitch: "P3.0",
         cabinet_size: "960*960 mm",
         module_weight: "0.45kg/pcs",
         brightness: "5500 - 6000 Nits",
@@ -211,7 +211,7 @@ export const model = [
         image_path_module: "product/outdoor/Module-P3.0.png",
       },
       {
-        pixel_pitch: "P 4.0",
+        pixel_pitch: "P4.0",
         cabinet_size: "960*960 mm",
         module_weight: "0.45kg/pcs",
         brightness: "5500 - 6000 Nits",
@@ -235,7 +235,7 @@ export const model = [
         image_path_module: "product/outdoor/Module-P4.0.png",
       },
       {
-        pixel_pitch: "P 5.0",
+        pixel_pitch: "P5.0",
         cabinet_size: "960*960 mm",
         module_weight: "0.45kg/pcs",
         brightness: "5500 - 6000 Nits",
@@ -259,7 +259,7 @@ export const model = [
         image_path_module: "product/outdoor/Module-P5.0.png",
       },
       {
-        pixel_pitch: "P 8.0",
+        pixel_pitch: "P8.0",
         cabinet_size: "960*960 mm",
         module_weight: "0.44kg/pcs",
         brightness: "5500 - 6000 Nits",
@@ -283,7 +283,7 @@ export const model = [
         image_path_module: "product/outdoor/Module-P8.0.png",
       },
       {
-        pixel_pitch: "P 10",
+        pixel_pitch: "P10",
         cabinet_size: "960*960 mm",
         module_weight: "0.44kg/pcs",
         brightness: "5500 - 6000 Nits",

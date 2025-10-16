@@ -390,7 +390,7 @@ export const Canvas = () => {
       <button
         disabled={!isConfigured()}
         onClick={handleCompleteReset}
-        className={`w-20 lg:w-[144px] max-w-40 flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+        className={`w-20 lg:w-[144px] max-w-40 flex items-center justify-center space-x-2 h-6 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
           isConfigured()
             ? "cursor-pointer bg-white border border-gray-300 text-gray-600 hover:bg-gray-50"
             : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
@@ -398,12 +398,12 @@ export const Canvas = () => {
       >
         Reset
       </button>
-      <div className="flex gap-2">
+      <div className="w-auto flex gap-2">
         {/* Toggle Move Mode */}
         <button
           disabled={!isConfigured()}
           onClick={handleToggleMoveMode}
-          className={`w-full flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+          className={`w-full flex items-center justify-center space-x-2 h-6 lg:h-auto px-2 py-1 lg:px-4 lg:py-2 rounded text-xs transition-colors ${
             isConfigured()
               ? isMoveMode
                 ? "cursor-pointer bg-white border border-[#3AAFA9] text-[#3AAFA9]"
@@ -411,20 +411,20 @@ export const Canvas = () => {
               : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
           }`}
         >
-          <Move size={16} />
+          <Move className="w-2.5 h-2.5 lg:w-4 lg:h-4" />
         </button>
 
         {/* Reset Move Position */}
         <button
           disabled={!isConfigured() || !isMoveMode}
           onClick={handleResetMove}
-          className={`w-full flex items-center justify-center space-x-2 h-8 lg:h-auto px-4 py-2 rounded text-xs transition-colors ${
+          className={`w-full flex items-center justify-center space-x-2 h-6 lg:h-auto px-2 py-1 lg:px-4 lg:py-2 rounded text-xs transition-colors ${
             isConfigured() && isMoveMode
               ? "cursor-pointer bg-white border border-[#3AAFA9] text-[#3AAFA9] hover:bg-teal-50"
               : "cursor-not-allowed bg-gray-100 border border-gray-200 text-gray-400"
           }`}
         >
-          <RotateCcw size={16} />
+          <RotateCcw className="w-2.5 h-2.5 lg:w-4 lg:h-4" />
         </button>
       </div>
     </div>
@@ -583,7 +583,7 @@ export const Canvas = () => {
   };
 
   const renderWidthControls = () => (
-    <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-red-200 px-2 hidden lg:flex items-center space-x-2 z-50">
+    <div className="absolute top-3 left-1/2 -translate-x-1/2  hidden lg:flex items-center space-x-2 z-50">
       {renderControlButton(
         handleWidthDecrement,
         !configured || !canDecreaseScreenWidth || resolution !== "Custom",
@@ -601,7 +601,7 @@ export const Canvas = () => {
   );
 
   const renderHeightControls = () => (
-    <div className="absolute left-3 top-1/2 -translate-y-1/2 bg-red-200 py-2 hidden lg:flex flex-col items-center justify-center space-y-2 z-50">
+    <div className="absolute left-3 top-1/2 -translate-y-1/2  hidden lg:flex flex-col items-center justify-center space-y-2 z-50">
       {renderControlButton(
         handleHeightIncrement,
         !configured || !canIncreaseScreenHeight || resolution !== "Custom",

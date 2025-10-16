@@ -269,7 +269,7 @@ export const CanvasUtils = {
     const margins = {
       mobile: { horizontal: 22, vertical: 18 },
       tablet: { horizontal: 17, vertical: 11 },
-      desktop: { horizontal: 16, vertical: 10 },
+      desktop: { horizontal: 16, vertical: 12 },
     };
 
     const { horizontal: textMarginHorizontal, vertical: textMarginVertical } =
@@ -291,32 +291,55 @@ export const CanvasUtils = {
       ((actualScreenSize.height * pixelToMeterRatioY) / dynamicCanvas.height) *
       100;
 
-    // Calculate base positions (centered screen)
-    const baseLeftSpace = (100 - screenWidthPercent) / 2;
-    const baseTopSpace = (100 - screenHeightPercent) / 2;
+    // ===== CALCULATE BASE POSITIONS (WHEN CENTERED) =====
 
-    // ===== INI YANG PENTING! =====
-    // Calculate text positions - midpoint between screen edge and wall edge
+    // LEFT: Base position when centered
+    const leftScreenEdgeBase = 60 - screenWidthPercent / 2;
+    const leftTextPositionBase = leftScreenEdgeBase / 2;
 
-    // LEFT: Between left wall (0%) and left screen edge
-    const leftScreenEdge = 50 - screenWidthPercent / 2 + screenOffsetXPercent;
-    const leftTextPosition = leftScreenEdge / 2; // Midpoint between 0% and leftScreenEdge
+    // RIGHT: Base position when centered
+    const rightScreenEdgeBase = 40 + screenWidthPercent / 2;
+    const rightTextPositionBase = (rightScreenEdgeBase + 100) / 2;
 
-    // RIGHT: Between right screen edge and right wall (100%)
-    const rightScreenEdge = 50 + screenWidthPercent / 2 + screenOffsetXPercent;
-    const rightTextPosition = (rightScreenEdge + 100) / 2; // Midpoint between rightScreenEdge and 100%
+    // TOP: Base position when centered
+    const topScreenEdgeBase = 68 - screenHeightPercent / 2;
+    const topTextPositionBase = topScreenEdgeBase / 2;
 
-    // TOP: Between top wall (0%) and top screen edge
-    const topScreenEdge = 50 - screenHeightPercent / 2 + screenOffsetYPercent;
-    const topTextPosition = topScreenEdge / 2; // Midpoint between 0% and topScreenEdge
+    // BOTTOM: Base position when centered
+    const bottomScreenEdgeBase = 35 + screenHeightPercent / 2;
+    const bottomTextPositionBase = (bottomScreenEdgeBase + 100) / 2;
 
-    // BOTTOM: Between bottom screen edge and bottom wall (100%)
-    const bottomScreenEdge =
-      50 + screenHeightPercent / 2 + screenOffsetYPercent;
-    const bottomTextPosition = (bottomScreenEdge + 100) / 2; // Midpoint between bottomScreenEdge and 100%
-    // ===== END =====
+    // ===== CONDITIONAL MOVEMENT LOGIC =====
+    // Text only moves if screen moves in that direction
 
-    // Clamp positions to stay within canvas boundaries
+    let leftTextPosition = leftTextPositionBase;
+    let rightTextPosition = rightTextPositionBase;
+    let topTextPosition = topTextPositionBase;
+    let bottomTextPosition = bottomTextPositionBase;
+
+    // HORIZONTAL MOVEMENT
+    if (screenOffsetXPercent < 0) {
+      // Screen bergeser ke KIRI → hanya teks KIRI yang bergerak
+      const leftScreenEdge = leftScreenEdgeBase + screenOffsetXPercent;
+      leftTextPosition = leftScreenEdge / 2;
+    } else if (screenOffsetXPercent > 0) {
+      // Screen bergeser ke KANAN → hanya teks KANAN yang bergerak
+      const rightScreenEdge = rightScreenEdgeBase + screenOffsetXPercent;
+      rightTextPosition = (rightScreenEdge + 100) / 2;
+    }
+
+    // VERTICAL MOVEMENT
+    if (screenOffsetYPercent < 0) {
+      // Screen bergeser ke ATAS → hanya teks ATAS yang bergerak
+      const topScreenEdge = topScreenEdgeBase + screenOffsetYPercent;
+      topTextPosition = topScreenEdge / 2;
+    } else if (screenOffsetYPercent > 0) {
+      // Screen bergeser ke BAWAH → hanya teks BAWAH yang bergerak
+      const bottomScreenEdge = bottomScreenEdgeBase + screenOffsetYPercent;
+      bottomTextPosition = (bottomScreenEdge + 100) / 2;
+    }
+
+    // ===== CLAMP TO BOUNDARIES =====
     const clamp = (value, min, max) => Math.max(min, Math.min(value, max));
 
     const leftPos = clamp(
@@ -346,7 +369,7 @@ export const CanvasUtils = {
 
     return (
       <>
-        {/* Top-Left measurement (vertical - left side) */}
+        {/* LEFT measurement (vertical - left side) - TOP POSITION */}
         <div
           className={`${containerStyle} left-4`}
           style={{ top: `${topPos}%`, transform: "translateY(-50%)" }}
@@ -355,11 +378,11 @@ export const CanvasUtils = {
             className={textStyle}
             style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
           >
-            {dynamicRemainingWall.left.toFixed(2)} m
+            {dynamicRemainingWall.bottom.toFixed(2)} m
           </span>
         </div>
 
-        {/* Bottom-Left measurement (vertical - left side) */}
+        {/* LEFT measurement (vertical - left side) - BOTTOM POSITION */}
         <div
           className={`${containerStyle} left-4`}
           style={{ top: `${bottomPos}%`, transform: "translateY(-50%)" }}
@@ -368,27 +391,27 @@ export const CanvasUtils = {
             className={textStyle}
             style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
           >
-            {dynamicRemainingWall.right.toFixed(2)} m
+            {dynamicRemainingWall.top.toFixed(2)} m
           </span>
         </div>
 
-        {/* Top-Left measurement (horizontal - top side) */}
+        {/* TOP measurement (horizontal - top side) - LEFT POSITION */}
         <div
           className={`${containerStyle} top-4`}
           style={{ left: `${leftPos}%`, transform: "translateX(-50%)" }}
         >
           <span className={textStyle}>
-            {dynamicRemainingWall.top.toFixed(2)} m
+            {dynamicRemainingWall.right.toFixed(2)} m
           </span>
         </div>
 
-        {/* Top-Right measurement (horizontal - top side) */}
+        {/* TOP measurement (horizontal - top side) - RIGHT POSITION */}
         <div
           className={`${containerStyle} top-4`}
           style={{ left: `${rightPos}%`, transform: "translateX(-50%)" }}
         >
           <span className={textStyle}>
-            {dynamicRemainingWall.bottom.toFixed(2)} m
+            {dynamicRemainingWall.left.toFixed(2)} m
           </span>
         </div>
       </>

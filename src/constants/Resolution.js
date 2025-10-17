@@ -20,5 +20,4 @@ export const SCREEN_SIZE_MODE = {
 // Unit Types
 export const UNIT_TYPE = {
   METER: "Meter",
-  FEET: "Feet",
 };

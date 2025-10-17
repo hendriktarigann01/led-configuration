@@ -5,13 +5,8 @@ import { UseCalculatorStore } from "../store/UseCalculatorStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
 
 export const ResultModal = ({ isOpen, onClose }) => {
-  const {
-    baseWidth,
-    baseHeight,
-    isConfigured,
-    screenWidth,
-    screenHeight,
-  } = UseCanvasStore();
+  const { baseWidth, baseHeight, isConfigured, screenWidth, screenHeight } =
+    UseCanvasStore();
 
   const calculator = UseCalculatorStore();
   const { selectedModel } = UseNavbarStore();
@@ -124,21 +119,18 @@ export const ResultModal = ({ isOpen, onClose }) => {
   };
 
   const powerConsumption = calculatePowerConsumption();
-  console.log(">>> powerConsumption:", powerConsumption);
 
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
       <div
         className={`bg-white rounded-xl shadow-2xl w-[380px] lg:w-full ${
           isVideoWall ? "max-w-xl" : "max-w-2xl"
-        } max-h-[90vh] overflow-hidden`}
+        }  overflow-hidden`}
       >
         <div className="p-6">
           {/* Header with close button */}
           <div className="flex justify-between items-start mb-6">
-            <h2 className="text-lg  text-gray-800 pr-4">
-              {getModalTitle()}
-            </h2>
+            <h2 className="text-lg  text-gray-800 pr-4">{getModalTitle()}</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer flex-shrink-0"
@@ -159,21 +151,21 @@ export const ResultModal = ({ isOpen, onClose }) => {
               {/* Product Data - Vertical Layout */}
               <div className="col-span-6 py-3">
                 <div className="space-y-4">
-                  <div>
+                  <div className="mb-2">
                     <div className="text-gray-600 mb-1">
                       {isVideoWall ? "Inch" : "Pixel Pitch"}
                     </div>
                     <div className="text-gray-800">{getPixelPitchOrInch()}</div>
                   </div>
 
-                  <div>
+                  <div className="mb-2">
                     <div className="text-gray-600 mb-1">Resolution</div>
                     <div className="text-gray-800">
                       {getResolutionDisplay()}
                     </div>
                   </div>
 
-                  <div>
+                  <div className="mb-2">
                     <div className="text-gray-600 mb-1">{`Number of ${getUnitName()}`}</div>
                     <div className="text-gray-800">
                       {getUnitConfiguration()}
@@ -182,7 +174,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
 
                   {/* SQM - HIDDEN for Video Wall */}
                   {!isVideoWall && (
-                    <div>
+                    <div className="mb-2">
                       <div className="text-gray-600 mb-1">SQM</div>
                       <div className="text-gray-800">{sqm} m2</div>
                     </div>
@@ -190,7 +182,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
 
                   {/* Real Size - HIDDEN for Video Wall */}
                   {!isVideoWall && (
-                    <div>
+                    <div className="mb-2">
                       <div className="text-gray-600 mb-1">Real Size</div>
                       <div className="text-gray-800">
                         {actualScreenSize.width.toFixed(3)} (
@@ -203,7 +195,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
 
                   {/* Weight - only for non-Video Wall types */}
                   {!isVideoWall && totalWeight > 0 && (
-                    <div>
+                    <div className="mb-2">
                       <div className="text-gray-600 mb-1">{`Weight ${getUnitName()}`}</div>
                       <div className="text-gray-800">
                         {totalWeight.toFixed(0)} kg
@@ -216,7 +208,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
 
             {/* Power Consumption - SHOW for ALL types including Video Wall */}
             {modelData.power_consumption && (
-              <div className="grid grid-cols-12 gap-x-4 text-sm border-t border-gray-100 mt-4">
+              <div className="grid grid-cols-12 gap-x-4 text-sm border-t border-gray-100">
                 {/* Power Label with Rowspan Effect */}
                 <div className="col-span-6 text-gray-700 font-medium py-3 flex items-start">
                   Power Consumption
@@ -225,7 +217,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
                 {/* Power Data - Vertical Layout */}
                 <div className="col-span-6 py-3">
                   <div className="space-y-4">
-                    <div>
+                    <div className="mb-2">
                       <div className="text-gray-600 mb-1">Max Power</div>
                       <div className="text-gray-800">
                         {powerConsumption.max > 0
@@ -244,7 +236,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
                       </div>
                     </div>
 
-                    <div>
+                    <div className="mb-2">
                       <div className="text-gray-600 mb-1">Average Power</div>
                       <div className="text-gray-800">
                         {powerConsumption.average > 0
@@ -264,6 +256,23 @@ export const ResultModal = ({ isOpen, onClose }) => {
                 </div>
               </div>
             )}
+
+            {/* Material */}
+            <div className="grid grid-cols-12 gap-x-4 text-sm border-t border-gray-100">
+              <div className="col-span-6 text-gray-700 font-medium py-3 flex items-start">
+                Material
+              </div>
+
+              {/* Power Data - Vertical Layout */}
+              <div className="col-span-6 py-3">
+                <div className="space-y-4">
+                  <div className="mb-2">
+                    <div className="text-gray-600 mb-1">Processor</div>
+                    <div className="text-gray-800">VX400</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

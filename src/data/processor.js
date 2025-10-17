@@ -5,7 +5,7 @@ export const processor = [
     name: "VX400",
     series: "VX",
     maxResolution: {
-      default: 2600000,
+      lan: 2600000,
     },
   },
   {
@@ -13,7 +13,7 @@ export const processor = [
     name: "VX600",
     series: "VX",
     maxResolution: {
-      default: 3900000,
+      lan: 3900000,
     },
   },
   {
@@ -21,7 +21,7 @@ export const processor = [
     name: "VX1000",
     series: "VX",
     maxResolution: {
-      default: 6500000,
+      lan: 6500000,
     },
   },
 
@@ -61,7 +61,7 @@ export const processor = [
     name: "TB30",
     series: "TB",
     maxResolution: {
-      default: 650000,
+      lan: 650000,
     },
   },
   {
@@ -69,7 +69,7 @@ export const processor = [
     name: "TB60",
     series: "TB",
     maxResolution: {
-      default: 2300000,
+      lan: 2300000,
     },
   },
 ];

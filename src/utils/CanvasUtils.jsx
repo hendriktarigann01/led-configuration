@@ -425,6 +425,7 @@ export const CanvasUtils = {
   ) => {
     const deviceType = CanvasUtils.getDeviceType();
 
+    console.log("resolution canvas:", resolutionString);
     const positions = {
       mobile: { left: "left-12", right: "right-0", bottom: "bottom-2" },
       tablet: { left: "left-13", right: "right-1", bottom: "bottom-2" },

@@ -90,11 +90,13 @@ export const UseHeaderStore = create((set, get) => ({
 
   /**
    * Set resolution mode and update screen size accordingly
+   * FIXED: Properly handle Custom mode transition
    */
   setResolution: (resolution) => {
     set({ resolution });
 
     if (resolution !== RESOLUTION_MODE.CUSTOM) {
+      // FHD/UHD mode - calculate and set screen size
       const screenSize = get().calculateScreenSizeFromResolution(resolution);
       const canvasStore = UseCanvasStore.getState();
 
@@ -128,20 +130,20 @@ export const UseHeaderStore = create((set, get) => ({
         canvasStore.setWallSize(newWallWidth, newWallHeight);
       }
     } else {
-      // Custom mode - sync with canvas
+      // Custom mode - sync with canvas and ensure canvas is updated
       const canvasStore = UseCanvasStore.getState();
       const actualScreenSize = canvasStore.getActualScreenSize();
-      const currentState = get();
 
-      if (
-        currentState.screenWidth !== actualScreenSize.width ||
-        currentState.screenHeight !== actualScreenSize.height
-      ) {
-        set({
-          screenWidth: actualScreenSize.width,
-          screenHeight: actualScreenSize.height,
-        });
-      }
+      set({
+        screenWidth: actualScreenSize.width,
+        screenHeight: actualScreenSize.height,
+      });
+
+      // FIXED: Ensure canvas store is properly synced when switching to Custom mode
+      canvasStore.setScreenSize(
+        actualScreenSize.width,
+        actualScreenSize.height
+      );
     }
   },
 

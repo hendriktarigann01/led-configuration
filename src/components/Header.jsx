@@ -58,13 +58,11 @@ export const Header = () => {
   const { updateResolution } = UseProcessorStore();
   const { selectedModel } = UseNavbarStore();
 
-  // Initialize defaults and sync on component mount
   useEffect(() => {
     initializeDefaults();
     syncWithCanvas();
   }, [initializeDefaults, syncWithCanvas]);
 
-  // Update processor resolution when screen size or model changes
   useEffect(() => {
     if (isConfigured() && selectedModel?.modelData) {
       updateResolution(
@@ -85,35 +83,39 @@ export const Header = () => {
     updateResolution,
   ]);
 
-  // Get actual screen size and cabinet count for validation
   const actualScreenSize = getActualScreenSize();
   const cabinetCount = getCabinetCount();
   const configured = isConfigured();
 
-  // Validation rules - Wall must be >= Screen (exact match allowed)
-  const canIncreaseScreenWidth = actualScreenSize.width + baseWidth <= wallWidth;
+  const canIncreaseScreenWidth =
+    actualScreenSize.width + baseWidth <= wallWidth;
   const canDecreaseScreenWidth = actualScreenSize.width > baseWidth;
-  const canIncreaseScreenHeight = actualScreenSize.height + baseHeight <= wallHeight;
+  const canIncreaseScreenHeight =
+    actualScreenSize.height + baseHeight <= wallHeight;
   const canDecreaseScreenHeight = actualScreenSize.height > baseHeight;
 
-  // Cabinet validation (same logic but different display)
   const canIncreaseCabinetWidth = canIncreaseScreenWidth;
-  const canDecreaseCabinetWidth = canDecreaseScreenWidth && cabinetCount.horizontal > 1;
+  const canDecreaseCabinetWidth =
+    canDecreaseScreenWidth && cabinetCount.horizontal > 1;
   const canIncreaseCabinetHeight = canIncreaseScreenHeight;
-  const canDecreaseCabinetHeight = canDecreaseScreenHeight && cabinetCount.vertical > 1;
+  const canDecreaseCabinetHeight =
+    canDecreaseScreenHeight && cabinetCount.vertical > 1;
 
-  // Wall validation - wall can be reduced to match screen size but minimum 1m
   const canIncreaseWallWidth = true;
   const canDecreaseWallWidth = wallWidth > Math.max(1, actualScreenSize.width);
   const canIncreaseWallHeight = true;
-  const canDecreaseWallHeight = wallHeight > Math.max(1, actualScreenSize.height);
+  const canDecreaseWallHeight =
+    wallHeight > Math.max(1, actualScreenSize.height);
 
   const screenControlsEnabled = isScreenControlsEnabled();
   const wallControlsEnabled = isWallControlsEnabled();
   const isCustomMode = resolution === "Custom";
-  const controlsDisabled = !screenControlsEnabled || !isCustomMode;
 
-  // Enhanced manual input handlers for cabinet count
+  const toggleButtonsDisabled = !screenControlsEnabled;
+
+  const numberInputsDisabled =
+    !screenControlsEnabled || !isCustomMode || isMoveMode;
+
   const handleCabinetWidthChange = (value) => {
     if (!isCustomMode || isMoveMode) return;
 
@@ -136,7 +138,6 @@ export const Header = () => {
     setScreenHeight(newScreenHeight);
   };
 
-  // Wall dimension handlers
   const handleWallWidthChange = (value) => {
     if (isMoveMode) return;
     const parsedValue = parseFloat(value);
@@ -153,7 +154,6 @@ export const Header = () => {
     }
   };
 
-  // Enhanced increment handlers
   const handleScreenWidthIncrement = () => {
     if (!canIncreaseScreenWidth || isMoveMode) return;
     incrementScreenWidth();
@@ -214,7 +214,8 @@ export const Header = () => {
             canDecreaseCabinetWidth={canDecreaseCabinetWidth}
             canIncreaseCabinetHeight={canIncreaseCabinetHeight}
             canDecreaseCabinetHeight={canDecreaseCabinetHeight}
-            // controlsDisabled={controlsDisabled}
+            toggleButtonsDisabled={toggleButtonsDisabled}
+            numberInputsDisabled={numberInputsDisabled}
             isMoveMode={isMoveMode}
           />
 
@@ -236,7 +237,6 @@ export const Header = () => {
             isMoveMode={isMoveMode}
           />
 
-          {/* Processor Section */}
           <ProcessorSection configured={configured} />
 
           {/* Action Buttons */}

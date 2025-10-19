@@ -26,20 +26,24 @@ export const UseCalculatorStore = create((set, get) => ({
 
   /**
    * Calculate number of units needed to fill screen dimensions
+   * This ensures accurate cabinet count calculation without floating point errors
    */
   calculateUnitCount: (screenWidth, screenHeight, baseWidth, baseHeight) => {
     if (baseWidth === 0 || baseHeight === 0) {
       return { horizontal: 1, vertical: 1 };
     }
 
-    const horizontal = Math.max(1, Math.ceil(screenWidth / baseWidth));
-    const vertical = Math.max(1, Math.ceil(screenHeight / baseHeight));
+    // Use Math.round() to handle floating point precision issues
+    // This prevents skipping values like 7, 14, etc.
+    const horizontal = Math.max(1, Math.round(screenWidth / baseWidth));
+    const vertical = Math.max(1, Math.round(screenHeight / baseHeight));
 
     return { horizontal, vertical };
   },
 
   /**
    * Calculate actual screen size based on unit count
+   * This ensures the screen size is always a perfect multiple of base dimensions
    */
   calculateActualScreenSize: (
     screenWidth,
@@ -53,9 +57,11 @@ export const UseCalculatorStore = create((set, get) => ({
       baseWidth,
       baseHeight
     );
+
+    // Round to 3 decimal places to avoid floating point errors
     return {
-      width: unitCount.horizontal * baseWidth,
-      height: unitCount.vertical * baseHeight,
+      width: Number((unitCount.horizontal * baseWidth).toFixed(3)),
+      height: Number((unitCount.vertical * baseHeight).toFixed(3)),
     };
   },
 

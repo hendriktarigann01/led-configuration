@@ -26,7 +26,9 @@ export const DisplayControls = ({
   canDecreaseCabinetWidth,
   canIncreaseCabinetHeight,
   canDecreaseCabinetHeight,
-  controlsDisabled,
+  // FIXED: Separate disabled states for toggle buttons vs number inputs
+  toggleButtonsDisabled,
+  numberInputsDisabled,
   isMoveMode,
 }) => {
   const Tooltip = ({ children, text, show }) => {
@@ -153,11 +155,12 @@ export const DisplayControls = ({
       <div className="flex justify-between lg:flex-row lg:items-end space-y-4 lg:space-y-0 gap-2 lg:space-x-6">
         <div className="flex flex-col space-y-1">
           <label className="text-xs text-gray-600">Screen Size</label>
+          {/* FIXED: Toggle buttons use toggleButtonsDisabled instead of controlsDisabled */}
           <ToggleButton
             options={["Area", "Column/Row"]}
             selected={screenSize}
             onChange={setScreenSize}
-            disabled={controlsDisabled || isMoveMode}
+            disabled={toggleButtonsDisabled || isMoveMode}
             showTooltip={isMoveMode}
             tooltipText="Disabled during Move Screen mode"
           />
@@ -167,11 +170,12 @@ export const DisplayControls = ({
           <div className="flex items-center space-x-2">
             <label className="text-xs text-gray-600">Resolution</label>
           </div>
+          {/* FIXED: Toggle buttons use toggleButtonsDisabled instead of controlsDisabled */}
           <ToggleButton
             options={["Custom", "FHD", "UHD"]}
             selected={resolution}
             onChange={setResolution}
-            disabled={controlsDisabled || isMoveMode}
+            disabled={toggleButtonsDisabled || isMoveMode}
             showTooltip={isMoveMode}
             tooltipText="Disabled during Move Screen mode"
           />
@@ -181,13 +185,14 @@ export const DisplayControls = ({
       <div className="flex gap-5 lg:gap-0 lg:flex-row lg:items-end space-y-4 lg:space-y-0 space-x-3 lg:space-x-6">
         {isCabinetMode ? (
           <>
+            {/* FIXED: Number inputs use numberInputsDisabled */}
             <NumberInput
               label="Column Count"
               value={cabinetCount.horizontal}
               onIncrement={onCabinetWidthIncrement}
               onDecrement={onCabinetWidthDecrement}
               onChange={onCabinetWidthChange}
-              disabled={controlsDisabled || isMoveMode}
+              disabled={numberInputsDisabled}
               canIncrease={
                 canIncreaseCabinetWidth &&
                 resolution === "Custom" &&
@@ -210,7 +215,7 @@ export const DisplayControls = ({
               onIncrement={onCabinetHeightIncrement}
               onDecrement={onCabinetHeightDecrement}
               onChange={onCabinetHeightChange}
-              disabled={controlsDisabled || isMoveMode}
+              disabled={numberInputsDisabled}
               canIncrease={
                 canIncreaseCabinetHeight &&
                 resolution === "Custom" &&
@@ -229,13 +234,14 @@ export const DisplayControls = ({
           </>
         ) : (
           <>
+            {/* FIXED: Number inputs use numberInputsDisabled */}
             <NumberInput
               label="Screen Width(m)"
               value={screenWidth}
               onIncrement={onScreenWidthIncrement}
               onDecrement={onScreenWidthDecrement}
               onChange={() => {}}
-              disabled={controlsDisabled || isMoveMode}
+              disabled={numberInputsDisabled}
               canIncrease={
                 canIncreaseScreenWidth && resolution === "Custom" && !isMoveMode
               }
@@ -253,7 +259,7 @@ export const DisplayControls = ({
               onIncrement={onScreenHeightIncrement}
               onDecrement={onScreenHeightDecrement}
               onChange={() => {}}
-              disabled={controlsDisabled || isMoveMode}
+              disabled={numberInputsDisabled}
               canIncrease={
                 canIncreaseScreenHeight &&
                 resolution === "Custom" &&

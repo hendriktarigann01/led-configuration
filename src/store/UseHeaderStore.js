@@ -90,7 +90,6 @@ export const UseHeaderStore = create((set, get) => ({
 
   /**
    * Set resolution mode and update screen size accordingly
-   * FIXED: Properly handle Custom mode transition
    */
   setResolution: (resolution) => {
     set({ resolution });
@@ -139,7 +138,6 @@ export const UseHeaderStore = create((set, get) => ({
         screenHeight: actualScreenSize.height,
       });
 
-      // FIXED: Ensure canvas store is properly synced when switching to Custom mode
       canvasStore.setScreenSize(
         actualScreenSize.width,
         actualScreenSize.height
@@ -149,15 +147,19 @@ export const UseHeaderStore = create((set, get) => ({
 
   /**
    * Set screen height with validation
+   * FIXED: Improved precision handling
    */
   setScreenHeight: (height) => {
     const canvasStore = UseCanvasStore.getState();
     const { baseHeight } = canvasStore;
     const { wallHeight } = get();
 
-    // Validate against wall size
-    const maxHeight = Math.floor(wallHeight / baseHeight) * baseHeight;
-    const validatedHeight = Math.min(height, maxHeight);
+    // Calculate max cabinets that fit in wall
+    const maxCabinets = Math.floor(wallHeight / baseHeight);
+    const maxHeight = maxCabinets * baseHeight;
+
+    // Round to 3 decimal places to avoid floating point errors
+    const validatedHeight = Number(Math.min(height, maxHeight).toFixed(3));
 
     set({ screenHeight: validatedHeight });
     canvasStore.setScreenSize(get().screenWidth, validatedHeight);
@@ -171,9 +173,10 @@ export const UseHeaderStore = create((set, get) => ({
     const { baseWidth } = canvasStore;
     const { wallWidth } = get();
 
-    // Validate against wall size
-    const maxWidth = Math.floor(wallWidth / baseWidth) * baseWidth;
-    const validatedWidth = Math.min(width, maxWidth);
+    const maxCabinets = Math.floor(wallWidth / baseWidth);
+    const maxWidth = maxCabinets * baseWidth;
+
+    const validatedWidth = Number(Math.min(width, maxWidth).toFixed(3));
 
     set({ screenWidth: validatedWidth });
     canvasStore.setScreenSize(validatedWidth, get().screenHeight);
@@ -202,8 +205,7 @@ export const UseHeaderStore = create((set, get) => ({
     const canvasStore = UseCanvasStore.getState();
     const currentState = get();
     const actualScreenSize = canvasStore.getActualScreenSize();
-
-    // Wall can be reduced to screen size exactly, minimum 1m
+    // Minimum Wall 1m
     const minHeight = Math.max(1, actualScreenSize.height);
     const finalHeight = Math.max(minHeight, height);
 
@@ -223,6 +225,7 @@ export const UseHeaderStore = create((set, get) => ({
     if (baseHeight <= 0) return;
 
     const state = get();
+    // Round to 3 decimal places to prevent floating point errors
     const newHeight = Number((state.screenHeight + baseHeight).toFixed(3));
     state.setScreenHeight(newHeight);
   },
@@ -258,6 +261,7 @@ export const UseHeaderStore = create((set, get) => ({
     if (baseWidth <= 0) return;
 
     const state = get();
+    // Round to 3 decimal places to prevent floating point errors
     const newWidth = Number((state.screenWidth + baseWidth).toFixed(3));
     state.setScreenWidth(newWidth);
   },
@@ -440,5 +444,13 @@ export const UseHeaderStore = create((set, get) => ({
   isWallControlsEnabled: () => {
     const canvasStore = UseCanvasStore.getState();
     return canvasStore.isConfigured();
+  },
+
+  /**
+   * Get cabinet count (alias for canvas store method)
+   */
+  getCabinetCount: () => {
+    const canvasStore = UseCanvasStore.getState();
+    return canvasStore.getCabinetCount();
   },
 }));

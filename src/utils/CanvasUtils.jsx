@@ -17,6 +17,40 @@ export const CanvasUtils = {
     return dimensions[deviceType] || dimensions.desktop;
   },
 
+  // NEW: Centralized Dynamic Canvas Size Calculator
+  // Digunakan oleh Canvas.jsx dan ModelPage.jsx
+  getDynamicCanvasSize: (
+    wallWidth,
+    wallHeight,
+    maxWidth = 550,
+    maxHeight = 300
+  ) => {
+    const wallAspectRatio = wallWidth / wallHeight;
+
+    let canvasW, canvasH;
+
+    if (wallAspectRatio >= 1) {
+      canvasW = Math.min(maxWidth, maxWidth);
+      canvasH = canvasW / wallAspectRatio;
+      if (canvasH > maxHeight) {
+        canvasH = maxHeight;
+        canvasW = canvasH * wallAspectRatio;
+      }
+    } else {
+      canvasH = Math.min(maxHeight, maxHeight);
+      canvasW = canvasH * wallAspectRatio;
+      if (canvasW > maxWidth) {
+        canvasW = maxWidth;
+        canvasH = canvasW / wallAspectRatio;
+      }
+    }
+
+    return {
+      width: Math.round(canvasW),
+      height: Math.round(canvasH),
+    };
+  },
+
   getCanvasDimensions: (wallWidth, wallHeight) => {
     const { containerWidth, containerHeight } =
       CanvasUtils.getResponsiveContainerDimensions();
@@ -45,7 +79,7 @@ export const CanvasUtils = {
     const idealImageWidth = effectiveCanvasWidth * screenToWallRatioX;
     const idealImageHeight = effectiveCanvasHeight * screenToWallRatioY;
 
-    const safetyMargin = 0.95;
+    const safetyMargin = 10;
     const maxAllowedWidth = effectiveCanvasWidth * safetyMargin;
     const maxAllowedHeight = effectiveCanvasHeight * safetyMargin;
 
@@ -114,6 +148,34 @@ export const CanvasUtils = {
       Custom: customImageUrl || "/canvas/canvas-bg.png",
     };
     return sources[selectedContent] || sources["Default Image"];
+  },
+
+  // NEW: Calculate Dynamic Remaining Wall (used by both Canvas and PDF)
+  calculateDynamicRemainingWall: (
+    wallWidth,
+    wallHeight,
+    actualScreenSize,
+    screenPosition,
+    canvasWidth,
+    canvasHeight
+  ) => {
+    // Convert screen position (pixels) to meters based on canvas scale
+    const pixelToMeterRatioX = wallWidth / canvasWidth;
+    const pixelToMeterRatioY = wallHeight / canvasHeight;
+
+    const offsetX = screenPosition.x * pixelToMeterRatioX;
+    const offsetY = screenPosition.y * pixelToMeterRatioY;
+
+    // Base remaining space (when centered)
+    const baseRemainingWidth = (wallWidth - actualScreenSize.width) / 2;
+    const baseRemainingHeight = (wallHeight - actualScreenSize.height) / 2;
+
+    return {
+      left: baseRemainingWidth - offsetX,
+      right: baseRemainingWidth + offsetX,
+      top: baseRemainingHeight - offsetY,
+      bottom: baseRemainingHeight + offsetY,
+    };
   },
 
   renderMeasurementLines: (horizontalMeasureLength, verticalMeasureLength) => {

@@ -1,4 +1,3 @@
-// components/shared/SpecificationTable.jsx
 import React from "react";
 import { View, Text } from "@react-pdf/renderer";
 import { SharedStyles } from "../../styles/SharedStyles";

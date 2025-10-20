@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { UseCanvasStore } from "./UseCanvasStore";
 import { UseCalculatorStore } from "./UseCalculatorStore";
 import { UseNavbarStore } from "./UseNavbarStore";
+import { UseProcessorStore } from "./UseProcessorStore";
 import { model as allModels } from "../data/model";
 import { formatPhoneForStorage, isValidPhoneNumber } from "../utils/PhoneUtils";
 import {
@@ -360,6 +361,21 @@ export const UseExportStore = create((set, get) => ({
       screenArea
     );
 
+    const processorStore = UseProcessorStore.getState();
+    const processorData = {
+      processor: processorStore.selectedProcessor?.name || "N/A",
+      connectionType: processorStore.selectedConnectionType || "N/A",
+    };
+
+    // ========== CRITICAL: Export screen position for PDF ==========
+    const screenPosition = {
+      x: canvasStore.screenPosition?.x || 0,
+      y: canvasStore.screenPosition?.y || 0,
+    };
+
+    console.log("Export Store - Exporting screenPosition:", screenPosition);
+    // ================================================================
+
     return {
       // Form data
       pdfTitle: state.generatePdfTitle(),
@@ -388,6 +404,10 @@ export const UseExportStore = create((set, get) => ({
         width: canvasStore.wallWidth.toFixed(1),
         height: canvasStore.wallHeight.toFixed(1),
       },
+
+      // ========== ADD: Screen position for move feature ==========
+      screenPosition: screenPosition,
+      // ============================================================
 
       // Calculation results
       calculations: {
@@ -464,6 +484,7 @@ export const UseExportStore = create((set, get) => ({
       resolution: modelData.resolution || "N/A",
       contrastRatio: modelData.contrast_ratio || "N/A",
 
+      processor: processorData,
       roomImageUrl: null,
     };
   },

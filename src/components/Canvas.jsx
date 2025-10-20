@@ -76,42 +76,20 @@ export const Canvas = () => {
     }
   }, [selectedModel, updateModelData, syncWithCanvas, initializeDefaults]);
 
-  // FIXED: Improved Dynamic Canvas Size Calculator
-  const getDynamicCanvasSize = () => {
-    const maxWidth =
-      window.innerWidth < 768 ? 230 : window.innerWidth < 1024 ? 450 : 550;
-    const maxHeight =
-      window.innerWidth < 768 ? 138 : window.innerWidth < 1024 ? 250 : 300;
+ const getDynamicCanvasSize = () => {
+   const maxWidth =
+     window.innerWidth < 768 ? 230 : window.innerWidth < 1024 ? 450 : 550;
+   const maxHeight =
+     window.innerWidth < 768 ? 138 : window.innerWidth < 1024 ? 250 : 300;
 
-    // Calculate wall aspect ratio
-    const wallAspectRatio = wallWidth / wallHeight;
-
-    let canvasW, canvasH;
-
-    // Determine canvas size based on wall dimensions
-    if (wallAspectRatio >= 1) {
-      // Wall is wider than tall
-      canvasW = Math.min(maxWidth, maxWidth);
-      canvasH = canvasW / wallAspectRatio;
-      if (canvasH > maxHeight) {
-        canvasH = maxHeight;
-        canvasW = canvasH * wallAspectRatio;
-      }
-    } else {
-      // Wall is taller than wide
-      canvasH = Math.min(maxHeight, maxHeight);
-      canvasW = canvasH * wallAspectRatio;
-      if (canvasW > maxWidth) {
-        canvasW = maxWidth;
-        canvasH = canvasW / wallAspectRatio;
-      }
-    }
-
-    return {
-      width: Math.round(canvasW),
-      height: Math.round(canvasH),
-    };
-  };
+   // Use centralized function from CanvasUtils
+   return CanvasUtils.getDynamicCanvasSize(
+     wallWidth,
+     wallHeight,
+     maxWidth,
+     maxHeight
+   );
+ };
 
   const dynamicCanvas = getDynamicCanvasSize();
 
@@ -252,25 +230,17 @@ export const Canvas = () => {
     decrementScreenHeight();
   };
 
-  const calculateDynamicRemainingWall = () => {
-    // Convert screen position (pixels) to meters based on canvas scale
-    const pixelToMeterRatioX = wallWidth / dynamicCanvas.width;
-    const pixelToMeterRatioY = wallHeight / dynamicCanvas.height;
-
-    const offsetX = screenPosition.x * pixelToMeterRatioX;
-    const offsetY = screenPosition.y * pixelToMeterRatioY;
-
-    // Base remaining space (when centered)
-    const baseRemainingWidth = (wallWidth - actualScreenSize.width) / 2;
-    const baseRemainingHeight = (wallHeight - actualScreenSize.height) / 2;
-
-    return {
-      left: baseRemainingWidth - offsetX,
-      right: baseRemainingWidth + offsetX,
-      top: baseRemainingHeight - offsetY,
-      bottom: baseRemainingHeight + offsetY,
-    };
-  };
+ const calculateDynamicRemainingWall = () => {
+   // Use centralized function from CanvasUtils
+   return CanvasUtils.calculateDynamicRemainingWall(
+     wallWidth,
+     wallHeight,
+     actualScreenSize,
+     screenPosition,
+     dynamicCanvas.width,
+     dynamicCanvas.height
+   );
+ };
 
   const dynamicRemainingWall = calculateDynamicRemainingWall();
 

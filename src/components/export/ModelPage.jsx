@@ -23,6 +23,7 @@ import {
   calculateDynamicContainerSize,
   calculateImageSize,
   calculateHumanHeight,
+  calculateDynamicRemainingWall,
 } from "../../utils/PDFHelpers";
 import { CanvasUtils } from "../../utils/CanvasUtils";
 
@@ -98,55 +99,91 @@ const styles = StyleSheet.create({
     objectFit: "fill",
     zIndex: 99,
   },
-  contentWrapper: {
-    position: "relative",
-    maxWidth: "100%",
-    maxHeight: "100%",
-    zIndex: 99,
-  },
 });
 
 const CanvasRenderer = ({ canvasData, roomImageUrl }) => {
   const dynamicContainer = calculateDynamicContainerSize(canvasData);
   const { width: containerWidth, height: containerHeight } = dynamicContainer;
 
+  console.log("=== PDF CANVAS RENDERER DEBUG ===");
+  console.log("1. Canvas Data:", {
+    wallWidth: canvasData.wallWidth,
+    wallHeight: canvasData.wallHeight,
+    screenWidth: canvasData.screenWidth,
+    screenHeight: canvasData.screenHeight,
+    screenPosition: canvasData.screenPosition,
+  });
+  console.log("2. PDF Container Size:", { containerWidth, containerHeight });
+
   const imageSize = calculateImageSize(
     canvasData,
     containerWidth,
     containerHeight
   );
-  const {
-    width: imageWidth,
-    height: imageHeight,
-    screenToWallRatioX,
-    screenToWallRatioY,
-  } = imageSize;
+  const { width: imageWidth, height: imageHeight } = imageSize;
 
-  const { remainingWallHeight, remainingWallWidth } =
-    CanvasUtils.getMeasurementValues(
-      canvasData.actualScreenSize,
-      canvasData.wallWidth,
-      canvasData.wallHeight,
-      imageWidth,
-      imageHeight,
-      containerWidth,
-      containerHeight
-    );
+  console.log("3. PDF Image Size:", { imageWidth, imageHeight });
+
+  // CRITICAL FIX: Get Canvas reference size (the actual canvas size used in Canvas.jsx)
+  // This MUST match the getDynamicCanvasSize() calculation from Canvas.jsx
+  const canvasRefSize = CanvasUtils.getDynamicCanvasSize(
+    canvasData.wallWidth,
+    canvasData.wallHeight,
+    550, // Desktop max width (same as Canvas.jsx)
+    300 // Desktop max height (same as Canvas.jsx)
+  );
+
+  console.log("4. Canvas Reference Size (from Canvas.jsx):", canvasRefSize);
+
+  // CRITICAL FIX: Calculate proper screen offset with scaling
+  // Formula: (screenPosition / canvasRefSize) * containerSize
+  const scaleX = containerWidth / canvasRefSize.width;
+  const scaleY = containerHeight / canvasRefSize.height;
+
+  const screenOffsetX = canvasData.screenPosition.x * scaleX;
+  const screenOffsetY = canvasData.screenPosition.y * scaleY;
+
+  console.log("5. Scale Factors:", { scaleX, scaleY });
+  console.log("6. Screen Offset (scaled):", { screenOffsetX, screenOffsetY });
+
+  // Calculate final position for content wrapper
+  const contentLeft = (containerWidth - imageWidth) / 2 + screenOffsetX;
+  const contentTop = (containerHeight - imageHeight) / 2 + screenOffsetY;
+
+  console.log("7. Content Final Position:", { contentLeft, contentTop });
+
+  // CRITICAL FIX: Create scaled screen position for measurement calculations
+  const scaledScreenPosition = {
+    x: screenOffsetX,
+    y: screenOffsetY,
+  };
+
+  // Create modified canvas data with scaled screen position
+  const canvasDataForMeasurements = {
+    ...canvasData,
+    screenPosition: scaledScreenPosition,
+  };
+
+  // Use scaled screen position for wall measurements
+  const dynamicRemainingWall = calculateDynamicRemainingWall(
+    canvasDataForMeasurements,
+    containerWidth,
+    containerHeight
+  );
+
+  console.log(
+    "8. Dynamic Remaining Wall (with scaled position):",
+    dynamicRemainingWall
+  );
+  console.log("=== END PDF DEBUG ===\n");
 
   const humanHeight = calculateHumanHeight(canvasData, containerHeight);
   const wrapperPadding = 100;
   const wrapperWidth = containerWidth + wrapperPadding;
   const wrapperHeight = containerHeight + wrapperPadding;
-  const measurementOffset = 45;
+  const measurementOffset = 35;
 
-  // Determine if we have room image
   const hasRoomImage = roomImageUrl && roomImageUrl !== null;
-
-  console.log("CanvasRenderer - roomImageUrl:", roomImageUrl?.substring(0, 50));
-  console.log(
-    "CanvasRenderer - hasRoomImage:",
-    roomImageUrl && roomImageUrl !== null
-  );
 
   return (
     <View
@@ -159,7 +196,7 @@ const CanvasRenderer = ({ canvasData, roomImageUrl }) => {
         justifyContent: "center",
       }}
     >
-      {/* Total Wall Measurements */}
+      {/* Total Wall Width Measurement */}
       <View
         style={{
           position: "absolute",
@@ -176,8 +213,8 @@ const CanvasRenderer = ({ canvasData, roomImageUrl }) => {
         style={{
           position: "absolute",
           top: wrapperPadding / 2 - measurementOffset - 13,
-          left: wrapperPadding / 2 + containerWidth / 2 - 8,
-          transform: [{ translateX: "-50%" }],
+          left: wrapperPadding / 2 + containerWidth / 2 + 45,
+          transform: "translateX(-50%)",
           fontSize: 9,
           color: "#3AAFA9",
           fontFamily: "Helvetica",
@@ -187,6 +224,7 @@ const CanvasRenderer = ({ canvasData, roomImageUrl }) => {
         {parseFloat(canvasData.wallWidth.toFixed(3))} m
       </Text>
 
+      {/* Total Wall Height Measurement */}
       <View
         style={{
           position: "absolute",
@@ -202,9 +240,9 @@ const CanvasRenderer = ({ canvasData, roomImageUrl }) => {
       <Text
         style={{
           position: "absolute",
-          top: wrapperPadding / 2 + containerHeight / 2 + 7,
+          top: wrapperPadding / 2 + containerHeight / 2 + 55,
           left: wrapperPadding / 2.6 - measurementOffset - 25,
-          transform: [{ translateY: "-50%" }, { rotate: "-90deg" }],
+          transform: "translateY(-50%) rotate(-90deg)",
           fontSize: 9,
           color: "#3AAFA9",
           fontFamily: "Helvetica",
@@ -233,13 +271,22 @@ const CanvasRenderer = ({ canvasData, roomImageUrl }) => {
             },
           ]}
         >
-          {/* Room Background Image - Only render if exists */}
+          {/* Room Background Image */}
           {hasRoomImage && (
             <Image src={roomImageUrl} style={styles.backgroundImage} />
           )}
 
-          {/* LED Screen Content - Always on top */}
-          <View style={styles.contentWrapper}>
+          {/* LED Screen Content - Positioned with absolute positioning */}
+          <View
+            style={{
+              position: "absolute",
+              left: contentLeft,
+              top: contentTop,
+              width: imageWidth,
+              height: imageHeight,
+              zIndex: 99,
+            }}
+          >
             <View
               style={{
                 position: "relative",
@@ -284,10 +331,13 @@ const CanvasRenderer = ({ canvasData, roomImageUrl }) => {
           containerHeight={containerHeight}
         />
         <WallMeasurements
-          remainingWallHeight={remainingWallHeight}
-          remainingWallWidth={remainingWallWidth}
-          screenToWallRatioX={screenToWallRatioX}
-          screenToWallRatioY={screenToWallRatioY}
+          dynamicRemainingWall={dynamicRemainingWall}
+          containerWidth={containerWidth}
+          containerHeight={containerHeight}
+          screenPosition={scaledScreenPosition}
+          wallWidth={canvasData.wallWidth}
+          wallHeight={canvasData.wallHeight}
+          actualScreenSize={canvasData.actualScreenSize}
         />
         <HumanElements humanHeight={humanHeight} />
       </View>
@@ -297,15 +347,6 @@ const CanvasRenderer = ({ canvasData, roomImageUrl }) => {
 
 export const ModelPage = ({ data }) => {
   const canvasData = calculateCanvasData(data);
-  console.log(
-    "ModelPage - data.roomImageUrl:",
-    data?.roomImageUrl?.substring(0, 50)
-  );
-  console.log(
-    "ModelPage - canvasData.roomImageUrl:",
-    canvasData?.roomImageUrl?.substring(0, 50)
-  );
-
   return (
     <BasePage>
       <PageHeader />

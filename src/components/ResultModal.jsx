@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { UseCanvasStore } from "../store/UseCanvasStore";
 import { UseCalculatorStore } from "../store/UseCalculatorStore";
 import { UseNavbarStore } from "../store/UseNavbarStore";
+import { UseProcessorStore } from "../store/UseProcessorStore";
 
 export const ResultModal = ({ isOpen, onClose }) => {
   const { baseWidth, baseHeight, isConfigured, screenWidth, screenHeight } =
@@ -10,6 +11,8 @@ export const ResultModal = ({ isOpen, onClose }) => {
 
   const calculator = UseCalculatorStore();
   const { selectedModel } = UseNavbarStore();
+  const processorStore = UseProcessorStore();
+  const { selectedProcessor, selectedConnectionType } = processorStore;
 
   // Early returns for invalid states
   if (!isOpen || !isConfigured() || !selectedModel) return null;
@@ -120,6 +123,16 @@ export const ResultModal = ({ isOpen, onClose }) => {
 
   const powerConsumption = calculatePowerConsumption();
 
+  // Format connection type
+  const formatConnectionType = (type) => {
+    if (!type) return "N/A";
+    if (type === "LAN") return "LAN";
+    if (type === "FIBER") return "Fiber";
+    if (type === "ENHANCED") return "Enhanced";
+    // Fallback for other types - capitalize first letter
+    return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+  };
+
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
       <div
@@ -130,7 +143,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
         <div className="p-6">
           {/* Header with close button */}
           <div className="flex justify-between items-start mb-6">
-            <h2 className="text-lg  text-gray-800 pr-4">{getModalTitle()}</h2>
+            <h2 className="text-lg text-gray-800 pr-4">{getModalTitle()}</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer flex-shrink-0"
@@ -142,7 +155,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
           {/* Content - Table Format with Rowspan */}
           <div className="space-y-0">
             {/* Product Section */}
-            <div className="grid grid-cols-12 gap-x-4 text-sm">
+            <div className="grid grid-cols-12 gap-x-4 text-xs">
               {/* Product Label with Rowspan Effect */}
               <div className="col-span-6 text-gray-700 font-medium py-3 flex items-start">
                 Product
@@ -208,7 +221,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
 
             {/* Power Consumption - SHOW for ALL types including Video Wall */}
             {modelData.power_consumption && (
-              <div className="grid grid-cols-12 gap-x-4 text-sm border-t border-gray-100">
+              <div className="grid grid-cols-12 gap-x-4 text-xs border-t border-gray-100">
                 {/* Power Label with Rowspan Effect */}
                 <div className="col-span-6 text-gray-700 font-medium py-3 flex items-start">
                   Power Consumption
@@ -258,17 +271,26 @@ export const ResultModal = ({ isOpen, onClose }) => {
             )}
 
             {/* Material */}
-            <div className="grid grid-cols-12 gap-x-4 text-sm border-t border-gray-100">
+            <div className="grid grid-cols-12 gap-x-4 text-xs border-t border-gray-100">
               <div className="col-span-6 text-gray-700 font-medium py-3 flex items-start">
                 Material
               </div>
 
-              {/* Power Data - Vertical Layout */}
+              {/* Material Data - Vertical Layout */}
               <div className="col-span-6 py-3">
                 <div className="space-y-4">
                   <div className="mb-2">
                     <div className="text-gray-600 mb-1">Processor</div>
-                    <div className="text-gray-800">VX400</div>
+                    <div className="text-gray-800">
+                      {selectedProcessor?.name || "N/A"}
+                    </div>
+                  </div>
+
+                  <div className="mb-2">
+                    <div className="text-gray-600 mb-1">Connection Type</div>
+                    <div className="text-gray-800">
+                      {formatConnectionType(selectedConnectionType)}
+                    </div>
                   </div>
                 </div>
               </div>

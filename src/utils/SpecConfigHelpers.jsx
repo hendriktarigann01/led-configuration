@@ -6,9 +6,10 @@ export const buildProductSpecifications = (data, isVideoWall) => {
   const productItems = [
     {
       label: isVideoWall ? "Inch" : "Pixel Pitch",
-      value: processedValues.pixelPitchOrInch !== "N/A" 
-        ? processedValues.pixelPitchOrInch 
-        : null,
+      value:
+        processedValues.pixelPitchOrInch !== "N/A"
+          ? processedValues.pixelPitchOrInch
+          : null,
     },
     {
       label: "Resolution",
@@ -44,11 +45,14 @@ export const buildProductSpecifications = (data, isVideoWall) => {
     });
   }
 
-  return productItems.filter(item => item.value !== null);
+  return productItems.filter((item) => item.value !== null);
 };
 
 export const buildPowerSpecifications = (data, isVideoWall) => {
-  if (!data?.modelData?.power_consumption || !data?.calculations?.processedValues?.powerConsumption) {
+  if (
+    !data?.modelData?.power_consumption ||
+    !data?.calculations?.processedValues?.powerConsumption
+  ) {
     return null;
   }
 
@@ -69,7 +73,34 @@ export const buildPowerSpecifications = (data, isVideoWall) => {
     });
   }
 
-  return powerItems.filter(item => item.value !== null);
+  return powerItems.filter((item) => item.value !== null);
+};
+
+export const buildMaterialSpecifications = (data) => {
+  if (!data?.processor) return null;
+
+  const materialItems = [];
+
+  // Add Processor
+  if (data.processor.processor && data.processor.processor !== "N/A") {
+    materialItems.push({
+      label: "Processor",
+      value: data.processor.processor,
+    });
+  }
+
+  // Add Connection Type if available
+  if (
+    data.processor.connectionType &&
+    data.processor.connectionType !== "N/A"
+  ) {
+    materialItems.push({
+      label: "Connection Type",
+      value: data.processor.connectionType,
+    });
+  }
+
+  return materialItems.length > 0 ? materialItems : null;
 };
 
 export const buildConfigSpecifications = (data, isVideoWall) => {
@@ -88,6 +119,14 @@ export const buildConfigSpecifications = (data, isVideoWall) => {
     specifications.push({
       category: "Power Consumption",
       items: powerItems,
+    });
+  }
+
+  const materialItems = buildMaterialSpecifications(data);
+  if (materialItems && materialItems.length > 0) {
+    specifications.push({
+      category: "Material",
+      items: materialItems,
     });
   }
 

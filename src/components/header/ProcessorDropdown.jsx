@@ -56,7 +56,7 @@ export const ProcessorDropdown = ({ disabled = false }) => {
 
       {isOpen && !disabled && (
         <div
-          className="absolute z-10 w-40 bg-[#3AAFA9] rounded-b max-h-64 overflow-y-auto"
+          className="absolute z-10 w-40 bg-[#3AAFA9] rounded-b max-h-72 overflow-y-auto"
           style={{
             scrollbarWidth: "none",
             msOverflowStyle: "none",
@@ -67,10 +67,10 @@ export const ProcessorDropdown = ({ disabled = false }) => {
             <div
               key={proc.id}
               onClick={() => handleSelect(proc)}
-              className={`px-2 py-2 text-xs font-light cursor-pointer transition-colors ${
+              className={`px-2 py-2  h-8 text-xs font-light cursor-pointer transition-colors ${
                 selectedProcessor?.id === proc.id
-                  ? "bg-gray-200 text-[#3AAFA9] flex items-center gap-2 mx-2 my-1"
-                  : "text-white hover:border border-gray-200 mx-2 my-1"
+                  ? "bg-gray-200 text-[#3AAFA9] flex items-center gap-2 mx-2 my-2"
+                  : "text-white hover:border hover:border-gray-200 mx-2 my-2"
               }`}
             >
               {selectedProcessor?.id === proc.id && <Check size={16} />}

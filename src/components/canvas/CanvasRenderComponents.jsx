@@ -2,7 +2,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "@react-pdf/renderer";
 import { CANVAS_DEFAULTS, THEME_COLORS } from "../../constants/PDFConfig";
-import { formatMetric } from "../../utils/PDFHelpers";
+import { formatMetric, clampPercentage } from "../../utils/PDFHelpers";
 
 const styles = StyleSheet.create({
   measurementLine: {
@@ -47,7 +47,6 @@ const styles = StyleSheet.create({
   humanImage: {
     width: "auto",
     height: "auto",
-    objectFit: "contain",
   },
 });
 
@@ -102,37 +101,37 @@ export const MeasurementLines = ({ imageWidth, imageHeight }) => {
   const { verticalExtension, horizontalExtension } = CANVAS_DEFAULTS;
 
   const lines = [
-    { 
-      key: "v-right", 
-      top: -verticalExtension - 20, 
-      right: 0, 
-      width: 1, 
-      height: imageHeight + verticalExtension, 
-      border: "borderRightWidth" 
+    {
+      key: "v-right",
+      top: -verticalExtension - 20,
+      right: 0,
+      width: 1,
+      height: imageHeight + verticalExtension,
+      border: "borderRightWidth",
     },
-    { 
-      key: "v-left", 
-      top: -verticalExtension - 20, 
-      left: 0, 
-      width: 1, 
-      height: imageHeight + verticalExtension, 
-      border: "borderLeftWidth" 
+    {
+      key: "v-left",
+      top: -verticalExtension - 20,
+      left: 0,
+      width: 1,
+      height: imageHeight + verticalExtension,
+      border: "borderLeftWidth",
     },
-    { 
-      key: "h-top", 
-      top: 0, 
-      left: -horizontalExtension, 
-      height: 1, 
-      width: imageWidth + horizontalExtension, 
-      border: "borderTopWidth" 
+    {
+      key: "h-top",
+      top: 0,
+      left: -horizontalExtension,
+      height: 1,
+      width: imageWidth + horizontalExtension,
+      border: "borderTopWidth",
     },
-    { 
-      key: "h-bottom", 
-      bottom: 0, 
-      left: -horizontalExtension, 
-      height: 1, 
-      width: imageWidth + horizontalExtension, 
-      border: "borderBottomWidth" 
+    {
+      key: "h-bottom",
+      bottom: 0,
+      left: -horizontalExtension,
+      height: 1,
+      width: imageWidth + horizontalExtension,
+      border: "borderBottomWidth",
     },
   ];
 
@@ -141,58 +140,145 @@ export const MeasurementLines = ({ imageWidth, imageHeight }) => {
   ));
 };
 
-export const CanvasToWallMeasurements = ({ containerWidth, containerHeight }) => (
+export const CanvasToWallMeasurements = ({
+  containerWidth,
+  containerHeight,
+}) => (
   <>
     <View
       style={[
         styles.measurementLine,
-        { bottom: 43, left: 0, height: 1, borderTopWidth: 1, width: containerWidth },
+        {
+          bottom: 43,
+          left: 0,
+          height: 1,
+          borderTopWidth: 1,
+          width: containerWidth,
+        },
       ]}
     />
     <View
       style={[
         styles.measurementLine,
-        { top: 0, right: 50, width: 1, borderLeftWidth: 1, height: containerHeight },
+        {
+          top: 0,
+          right: 50,
+          width: 1,
+          borderLeftWidth: 1,
+          height: containerHeight,
+        },
       ]}
     />
   </>
 );
 
-export const WallMeasurements = ({ remainingWallHeight, remainingWallWidth, screenToWallRatioX, screenToWallRatioY }) => {
-  const remainingSpaceRatioX = (1 - screenToWallRatioX) / 2;
-  const remainingSpaceRatioY = (1 - screenToWallRatioY) / 2;
+export const WallMeasurements = ({
+  dynamicRemainingWall,
+  containerWidth,
+  containerHeight,
+  screenPosition,
+  wallWidth,
+  wallHeight,
+  actualScreenSize,
+}) => {
+  const textMarginHorizontal = 18;
+  const textMarginVertical = 13;
 
-  const textMarginHorizontal = 25;
-  const textMarginVertical = 18;
+  const screenOffsetXPercent = (screenPosition.x / containerWidth) * 100;
+  const screenOffsetYPercent = (screenPosition.y / containerHeight) * 100;
 
-  const clampPercentage = (value, min, max) => Math.max(min, Math.min(value, max));
+  const pixelToMeterRatioX = containerWidth / wallWidth;
+  const pixelToMeterRatioY = containerHeight / wallHeight;
 
-  const leftPercentage = clampPercentage(
-    (remainingSpaceRatioX / 2) * 100,
+  const screenWidthPercent =
+    ((actualScreenSize.width * pixelToMeterRatioX) / containerWidth) * 100;
+  const screenHeightPercent =
+    ((actualScreenSize.height * pixelToMeterRatioY) / containerHeight) * 100;
+
+  const leftScreenEdgeBase = 60 - screenWidthPercent / 2;
+  const leftTextPositionBase = leftScreenEdgeBase / 2;
+
+  const rightScreenEdgeBase = 40 + screenWidthPercent / 2;
+  const rightTextPositionBase = (rightScreenEdgeBase + 100) / 2;
+
+  const topScreenEdgeBase = 68 - screenHeightPercent / 2;
+  const topTextPositionBase = topScreenEdgeBase / 2;
+
+  const bottomScreenEdgeBase = 35 + screenHeightPercent / 2;
+  const bottomTextPositionBase = (bottomScreenEdgeBase + 100) / 2;
+
+  // ===== CONDITIONAL MOVEMENT LOGIC =====
+  let leftPos = leftTextPositionBase;
+  let rightPos = rightTextPositionBase;
+  let topPos = topTextPositionBase;
+  let bottomPos = bottomTextPositionBase;
+
+  if (screenOffsetXPercent < 0) {
+    const leftScreenEdge = leftScreenEdgeBase + screenOffsetXPercent;
+    leftPos = leftScreenEdge / 2;
+  } else if (screenOffsetXPercent > 0) {
+    const rightScreenEdge = rightScreenEdgeBase + screenOffsetXPercent;
+    rightPos = (rightScreenEdge + 100) / 2;
+  }
+
+  if (screenOffsetYPercent < 0) {
+    const topScreenEdge = topScreenEdgeBase + screenOffsetYPercent;
+    topPos = topScreenEdge / 2.5;
+  } else if (screenOffsetYPercent > 0) {
+    const bottomScreenEdge = bottomScreenEdgeBase + screenOffsetYPercent;
+    bottomPos = (bottomScreenEdge + 100) / 2.5;
+  }
+
+  leftPos = clampPercentage(
+    leftPos,
     textMarginVertical,
-    Math.max(textMarginVertical, remainingSpaceRatioX * 100 - textMarginVertical)
-  );
-  const rightPercentage = clampPercentage(
-    (1 - remainingSpaceRatioX / 2) * 100,
-    Math.min(100 - textMarginVertical, (1 - remainingSpaceRatioX) * 100 + textMarginVertical),
     100 - textMarginVertical
   );
-  const topPercentage = clampPercentage(
-    (remainingSpaceRatioY / 2) * 100,
-    textMarginHorizontal,
-    Math.max(textMarginHorizontal, remainingSpaceRatioY * 100 - textMarginHorizontal)
+  rightPos = clampPercentage(
+    rightPos,
+    textMarginVertical,
+    100 - textMarginVertical
   );
-  const bottomPercentage = clampPercentage(
-    (1 - remainingSpaceRatioY / 2) * 100,
-    Math.min(100 - textMarginHorizontal, (1 - remainingSpaceRatioY) * 100 + textMarginHorizontal),
+  topPos = clampPercentage(
+    topPos,
+    textMarginHorizontal,
+    100 - textMarginHorizontal
+  );
+  bottomPos = clampPercentage(
+    bottomPos,
+    textMarginHorizontal,
     100 - textMarginHorizontal
   );
 
   const measurements = [
-    { key: "left-top", left: 10, top: `${topPercentage - 5}%`, rotation: "-180deg", value: remainingWallHeight },
-    { key: "left-bottom", left: 10, top: `${bottomPercentage}%`, rotation: "-180deg", value: remainingWallHeight },
-    { key: "top-left", top: 15, left: `${leftPercentage - 3}%`, rotation: null, value: remainingWallWidth },
-    { key: "top-right", top: 15, left: `${rightPercentage - 4}%`, rotation: null, value: remainingWallWidth },
+    {
+      key: "left-top",
+      left: 10,
+      top: `${topPos}%`,
+      rotation: "-180deg",
+      value: dynamicRemainingWall.bottom,
+    },
+    {
+      key: "left-bottom",
+      left: 10,
+      top: `${bottomPos}%`,
+      rotation: "-180deg",
+      value: dynamicRemainingWall.top,
+    },
+    {
+      key: "top-left",
+      top: 15,
+      left: `${leftPos}%`,
+      rotation: null,
+      value: dynamicRemainingWall.right,
+    },
+    {
+      key: "top-right",
+      top: 15,
+      left: `${rightPos}%`,
+      rotation: null,
+      value: dynamicRemainingWall.left,
+    },
   ];
 
   return measurements.map(({ key, rotation, value, ...style }) => (
@@ -226,7 +312,11 @@ export const ScreenSizeControls = ({ screenWidth, screenHeight }) => (
     <Text
       style={[
         styles.screenControlText,
-        { left: "2.6%", top: "50%", transform: [{ translateY: "-50%" }, { rotate: "90deg" }] },
+        {
+          left: "2.6%",
+          top: "50%",
+          transform: [{ translateY: "-50%" }, { rotate: "90deg" }],
+        },
       ]}
     >
       {formatMetric(screenHeight)} m
@@ -234,20 +324,23 @@ export const ScreenSizeControls = ({ screenWidth, screenHeight }) => (
   </>
 );
 
-export const HumanElements = ({ humanHeight }) => {
+export const HumanElements = ({ humanHeight, wallHeight }) => {
   if (humanHeight === 0) return null;
 
   return (
     <>
-      <Text style={[styles.infoText, { bottom: 20, right: 7 }]}>
-        1,70 m
-      </Text>
+      <Text style={[styles.infoText, { bottom: 20, right: 7 }]}>1,70 m</Text>
       <View style={styles.humanContainer}>
         <Image
           src="/human.png"
           style={[
             styles.humanImage,
-            { height: Math.max(humanHeight, 35), position: "absolute", bottom: -5 },
+            {
+              height: Math.max(humanHeight, 35),
+              position: "absolute",
+              bottom: -5,
+              resizeMode: wallHeight < 3 ? "cover" : "contain",
+            },
           ]}
         />
       </View>

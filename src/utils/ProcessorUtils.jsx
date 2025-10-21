@@ -7,7 +7,7 @@ export const getConnectionTypes = (processor) => {
   if (!processor || !processor.maxResolution) return [];
 
   return Object.entries(processor.maxResolution).map(([type, capacity]) => ({
-    type: type.toUpperCase(),
+    type: type,
     capacity,
   }));
 };

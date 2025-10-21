@@ -289,7 +289,7 @@ export const Navbar = () => {
           onDragEnd={handleDragEnd}
         >
           <div
-            className="flex justify-center py-3 cursor-grab active:cursor-grabbing"
+            className="flex justify-center py-3 cursor-grab active:cursor-grabbing shadow-[0_-6px_6px_-6px_rgba(0,0,0,0.1)]"
             onPointerDown={(e) => dragControls.start(e)}
           >
             <div className="w-10 h-1 bg-gray-200 rounded-full" />

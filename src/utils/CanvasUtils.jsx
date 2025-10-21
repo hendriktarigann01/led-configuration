@@ -502,10 +502,10 @@ export const CanvasUtils = {
         <div
           className={`absolute ${bottom} ${left} flex flex-col h-5 justify-center z-50`}
         >
-          <span className="text-xs text-gray-700">
+          <span className="text-[10px] lg:text-xs text-gray-700">
             Resolution: {resolutionString}
           </span>
-          <span className="text-xs text-gray-700">
+          <span className="text-[10px] lg:text-xs text-gray-700">
             Aspect Ratio {aspectRatio}
           </span>
         </div>
@@ -514,7 +514,7 @@ export const CanvasUtils = {
         <div
           className={`absolute bottom-3 ${right} flex flex-col h-5 items-start justify-start z-50`}
         >
-          <span className="text-xs text-gray-700">{humanHeight}</span>
+          <span className="text-[10px] lg:text-xs text-gray-700">{humanHeight}</span>
         </div>
       </>
     );

@@ -152,10 +152,9 @@ export const DisplayControls = ({
     <div className="flex flex-col space-y-2">
       <h3 className="text-base font-medium text-gray-800">Display</h3>
 
-      <div className="flex justify-between lg:flex-row lg:items-end space-y-4 lg:space-y-0 gap-2 lg:space-x-6">
+      <div className="flex justify-between lg:flex-row lg:items-end space-y-4 lg:space-y-0 lg:space-x-6">
         <div className="flex flex-col space-y-1">
           <label className="text-xs text-gray-600">Screen Size</label>
-          {/* FIXED: Toggle buttons use toggleButtonsDisabled instead of controlsDisabled */}
           <ToggleButton
             options={["Area", "Column/Row"]}
             selected={screenSize}
@@ -170,7 +169,6 @@ export const DisplayControls = ({
           <div className="flex items-center space-x-2">
             <label className="text-xs text-gray-600">Resolution</label>
           </div>
-          {/* FIXED: Toggle buttons use toggleButtonsDisabled instead of controlsDisabled */}
           <ToggleButton
             options={["Custom", "FHD", "UHD"]}
             selected={resolution}
@@ -182,10 +180,9 @@ export const DisplayControls = ({
         </div>
       </div>
 
-      <div className="flex gap-5 lg:gap-0 lg:flex-row lg:items-end space-y-4 lg:space-y-0 space-x-3 lg:space-x-6">
+      <div className="flex gap-5 lg:gap-0 lg:flex-row lg:items-end space-y-4 lg:space-y-0 lg:space-x-6">
         {isCabinetMode ? (
           <>
-            {/* FIXED: Number inputs use numberInputsDisabled */}
             <NumberInput
               label="Column Count"
               value={cabinetCount.horizontal}
@@ -234,7 +231,6 @@ export const DisplayControls = ({
           </>
         ) : (
           <>
-            {/* FIXED: Number inputs use numberInputsDisabled */}
             <NumberInput
               label="Screen Width(m)"
               value={screenWidth}

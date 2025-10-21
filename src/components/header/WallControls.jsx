@@ -102,7 +102,7 @@ export const WallControls = ({
 
       <div className="flex flex-col lg:space-y-2">
         {/* Mobile: semua horizontal, Desktop: unit sendiri */}
-        <div className="flex space-x-8 lg:space-x-0 space-y-4 lg:space-y-0">
+        <div className="flex space-x-6 lg:space-x-0 space-y-4 lg:space-y-0">
           {/* Unit */}
           <div className="flex flex-col space-y-1">
             <label className="text-xs text-gray-600">Unit</label>
@@ -112,7 +112,7 @@ export const WallControls = ({
           </div>
 
           {/* Mobile: Height & Width ikut sejajar */}
-          <div className="flex flex-row space-x-8 lg:hidden">
+          <div className="flex flex-row space-x-6 lg:hidden">
             <NumberInput
               label="Wall Width(m)"
               value={wallWidth}

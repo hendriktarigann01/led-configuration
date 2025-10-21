@@ -21,7 +21,7 @@ export const ProcessorSection = ({ configured }) => {
             <label className="text-xs text-gray-600">Processor</label>
 
             {/* Processor Image & Info */}
-            <div className="flex w-32 h-w-24 justify-between lg:w-14 lg:h-14">
+            <div className="flex w-24 h-w-24 justify-between lg:w-14 lg:h-14">
               <img
                 src="/processor-1.png"
                 alt="Processor"

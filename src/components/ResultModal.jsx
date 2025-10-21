@@ -123,16 +123,6 @@ export const ResultModal = ({ isOpen, onClose }) => {
 
   const powerConsumption = calculatePowerConsumption();
 
-  // Format connection type
-  const formatConnectionType = (type) => {
-    if (!type) return "N/A";
-    if (type === "LAN") return "LAN";
-    if (type === "FIBER") return "Fiber";
-    if (type === "ENHANCED") return "Enhanced";
-    // Fallback for other types - capitalize first letter
-    return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
-  };
-
   return (
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
       <div
@@ -289,7 +279,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
                   <div className="mb-2">
                     <div className="text-gray-600 mb-1">Connection Type</div>
                     <div className="text-gray-800">
-                      {formatConnectionType(selectedConnectionType)}
+                      {selectedConnectionType ? selectedConnectionType : "N/A"}
                     </div>
                   </div>
                 </div>

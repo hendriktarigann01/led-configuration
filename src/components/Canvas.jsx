@@ -78,7 +78,7 @@ export const Canvas = () => {
 
  const getDynamicCanvasSize = () => {
    const maxWidth =
-     window.innerWidth < 768 ? 230 : window.innerWidth < 1024 ? 450 : 550;
+     window.innerWidth < 768 ? 254 : window.innerWidth < 1024 ? 450 : 550;
    const maxHeight =
      window.innerWidth < 768 ? 138 : window.innerWidth < 1024 ? 250 : 300;
 
@@ -629,7 +629,7 @@ export const Canvas = () => {
     const isVerySmallScreen = screenWidth <= 375; // iPhone SE
     const isSmallScreen = screenWidth <= 410; // Small phones
 
-    const containerPadding = isVerySmallScreen ? 90 : isSmallScreen ? 60 : 100;
+    const containerPadding = isVerySmallScreen ? 100 : isSmallScreen ? 60 : 100;
     const screenMargin = isVerySmallScreen ? 15 : isSmallScreen ? 20 : 40;
 
     return (

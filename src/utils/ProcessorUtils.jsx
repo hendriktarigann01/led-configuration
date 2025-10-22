@@ -107,14 +107,26 @@ export const getAvailableProcessors = (processors, currentResolution) => {
  * Auto-select: Smallest processor (by ID) where countResolution >= maxResolution
  * @param {Array} processors - Array of processor objects
  * @param {number} currentResolution - Current screen resolution
- * @returns {Object|null} Best processor or null
+ * @returns {Object|null|string} Best processor, null, or "no compatible processor"
  */
 export const getRecommendedProcessor = (processors, currentResolution) => {
   const available = getAvailableProcessors(processors, currentResolution);
 
+  // If no compatible processor found, check if resolution exceeds all specs
+  if (available.length === 0 && currentResolution > 0) {
+    const allIncompatible = processors.every(
+      (proc) => !isProcessorCompatible(proc, currentResolution)
+    );
+
+    if (allIncompatible) {
+      return "no compatible processor";
+    }
+  }
+
   // Return smallest (first by ID) compatible processor
   return available.length > 0 ? available[0] : null;
 };
+
 
 /**
  * Format capacity number with thousand separators

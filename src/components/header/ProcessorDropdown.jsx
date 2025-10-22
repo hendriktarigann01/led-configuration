@@ -34,17 +34,25 @@ export const ProcessorDropdown = ({ disabled = false }) => {
     <div className="relative z-40">
       <Tooltip text="Please configure a model first" show={disabled}>
         <button
-          onClick={() => !disabled && setIsOpen(!isOpen)}
-          disabled={disabled}
+          onClick={() =>
+            !disabled &&
+            selectedProcessor !== "no compatible processor" &&
+            setIsOpen(!isOpen)
+          }
+          disabled={disabled || selectedProcessor === "no compatible processor"}
           className={`w-40 h-8 px-3 py-2 flex items-center justify-between text-xs font-light ${
             isOpen ? "rounded-t" : "rounded"
           } ${
-            disabled
+            disabled || selectedProcessor === "no compatible processor"
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-[#3AAFA9] text-white cursor-pointer"
           }`}
         >
-          <span>{selectedProcessor?.name || "Select Processor"}</span>
+          <span>
+            {selectedProcessor === "no compatible processor"
+              ? "No Compatible"
+              : selectedProcessor?.name || "Select Processor"}
+          </span>
           <ChevronDown
             size={18}
             className={`transition-transform duration-200 ${

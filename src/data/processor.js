@@ -1,5 +1,5 @@
 export const processor = [
-  // VX Series 
+  // VX Series
   {
     id: 1,
     name: "VX400",
@@ -43,7 +43,7 @@ export const processor = [
     output: "HDMI x 1 + Loop x 1, DVI Loop x 1, SDI x 1 Loop, OPT x 2",
   },
 
-  // H Series 
+  // H Series
   {
     id: 4,
     name: "H2",
@@ -52,6 +52,8 @@ export const processor = [
       LAN: 26000000,
       Fiber: 41600000,
     },
+    maxInputChannels: 16,
+    minInputChannels: 8,
   },
   {
     id: 5,
@@ -61,6 +63,8 @@ export const processor = [
       LAN: 39000000,
       Fiber: 62400000,
     },
+    maxInputChannels: 40,
+    minInputChannels: 12,
   },
   {
     id: 6,
@@ -69,13 +73,25 @@ export const processor = [
     maxResolution: {
       LAN: 65000000,
       Fiber: 104000000,
-      enhanced: 208000000,
     },
+    maxInputChannels: 60,
+    minInputChannels: 20,
   },
-
-  // TB Series 
   {
     id: 7,
+    name: "H15",
+    series: "H",
+    maxResolution: {
+      LAN: 130000000,
+      Fiber: 208000000,
+    },
+    maxInputChannels: 120,
+    minInputChannels: 40,
+  },
+
+  // TB Series
+  {
+    id: 8,
     name: "TB30",
     series: "TB",
     maxResolution: {
@@ -88,7 +104,7 @@ export const processor = [
     os: "Android 11",
   },
   {
-    id: 8,
+    id: 9,
     name: "TB60",
     series: "TB",
     maxResolution: {

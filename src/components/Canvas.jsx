@@ -750,7 +750,7 @@ export const Canvas = () => {
                 >
                   {parseFloat(
                     (Math.floor(wallHeight * 1000) / 1000).toString()
-                  )}{" "}
+                  )}
                   m
                 </span>
               </div>

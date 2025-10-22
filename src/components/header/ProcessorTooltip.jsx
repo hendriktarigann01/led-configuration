@@ -4,6 +4,15 @@ import { Check } from "lucide-react";
 export const ProcessorTooltip = ({ processor, formattedConnections, show }) => {
   if (!show || !processor) return null;
 
+  if (processor === "no compatible processor") {
+    return (
+      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 bg-black/90 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 min-w-[180px]">
+        <p className="text-center">No information available</p>
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-black/90"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 bg-black/90 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 min-w-[180px]">
       <div className="space-y-0">
@@ -12,10 +21,7 @@ export const ProcessorTooltip = ({ processor, formattedConnections, show }) => {
           <>
             <p>Output Capacity</p>
             {formattedConnections.map((conn, index) => (
-              <div
-                key={index}
-                className="flex juitems-center gap-1"
-              >
+              <div key={index} className="flex juitems-center gap-1">
                 <span className="text-left">{conn.capacity}</span>
                 <span className="flex gap-2 text-left">
                   <span>({conn.type})</span>
@@ -75,6 +81,20 @@ export const ProcessorTooltip = ({ processor, formattedConnections, show }) => {
           <div className="mt-1 font-light">
             <p>Output</p>
             <p>{processor.output}</p>
+          </div>
+        )}
+
+        {processor.maxInputChannels && (
+          <div className="mt-1 font-light">
+            <p>Max Input Channels</p>
+            <p>{processor.maxInputChannels}</p>
+          </div>
+        )}
+
+        {processor.minInputChannels && (
+          <div className="mt-1 font-light">
+            <p>Max Input Channels</p>
+            <p>{processor.minInputChannels}</p>
           </div>
         )}
       </div>

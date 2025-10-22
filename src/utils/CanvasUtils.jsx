@@ -170,11 +170,16 @@ export const CanvasUtils = {
     const baseRemainingWidth = (wallWidth - actualScreenSize.width) / 2;
     const baseRemainingHeight = (wallHeight - actualScreenSize.height) / 2;
 
+    const fixNegativeZero = (value) => {
+      const rounded = Math.max(0, value); 
+      return rounded === 0 ? 0 : rounded;   
+    };
+
     return {
-      left: baseRemainingWidth - offsetX,
-      right: baseRemainingWidth + offsetX,
-      top: baseRemainingHeight - offsetY,
-      bottom: baseRemainingHeight + offsetY,
+      left: fixNegativeZero(baseRemainingWidth - offsetX),
+      right: fixNegativeZero(baseRemainingWidth + offsetX),
+      top: fixNegativeZero(baseRemainingHeight - offsetY),
+      bottom: fixNegativeZero(baseRemainingHeight + offsetY),
     };
   },
 
@@ -514,7 +519,9 @@ export const CanvasUtils = {
         <div
           className={`absolute bottom-3 ${right} flex flex-col h-5 items-start justify-start z-50`}
         >
-          <span className="text-[10px] lg:text-xs text-gray-700">{humanHeight}</span>
+          <span className="text-[10px] lg:text-xs text-gray-700">
+            {humanHeight}
+          </span>
         </div>
       </>
     );

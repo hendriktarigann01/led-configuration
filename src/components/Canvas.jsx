@@ -76,20 +76,20 @@ export const Canvas = () => {
     }
   }, [selectedModel, updateModelData, syncWithCanvas, initializeDefaults]);
 
- const getDynamicCanvasSize = () => {
-   const maxWidth =
-     window.innerWidth < 768 ? 254 : window.innerWidth < 1024 ? 450 : 550;
-   const maxHeight =
-     window.innerWidth < 768 ? 138 : window.innerWidth < 1024 ? 250 : 300;
+  const getDynamicCanvasSize = () => {
+    const maxWidth =
+      window.innerWidth < 768 ? 254 : window.innerWidth < 1024 ? 450 : 550;
+    const maxHeight =
+      window.innerWidth < 768 ? 138 : window.innerWidth < 1024 ? 250 : 300;
 
-   // Use centralized function from CanvasUtils
-   return CanvasUtils.getDynamicCanvasSize(
-     wallWidth,
-     wallHeight,
-     maxWidth,
-     maxHeight
-   );
- };
+    // Use centralized function from CanvasUtils
+    return CanvasUtils.getDynamicCanvasSize(
+      wallWidth,
+      wallHeight,
+      maxWidth,
+      maxHeight
+    );
+  };
 
   const dynamicCanvas = getDynamicCanvasSize();
 
@@ -230,17 +230,17 @@ export const Canvas = () => {
     decrementScreenHeight();
   };
 
- const calculateDynamicRemainingWall = () => {
-   // Use centralized function from CanvasUtils
-   return CanvasUtils.calculateDynamicRemainingWall(
-     wallWidth,
-     wallHeight,
-     actualScreenSize,
-     screenPosition,
-     dynamicCanvas.width,
-     dynamicCanvas.height
-   );
- };
+  const calculateDynamicRemainingWall = () => {
+    // Use centralized function from CanvasUtils
+    return CanvasUtils.calculateDynamicRemainingWall(
+      wallWidth,
+      wallHeight,
+      actualScreenSize,
+      screenPosition,
+      dynamicCanvas.width,
+      dynamicCanvas.height
+    );
+  };
 
   const dynamicRemainingWall = calculateDynamicRemainingWall();
 
@@ -305,8 +305,8 @@ export const Canvas = () => {
   const screenToWallRatioY = actualScreenSize.height / wallHeight;
 
   // Calculate screen image size with proper constraints
-  const maxScreenWidth = dynamicCanvas.width * 0.9; // 90% of canvas width max
-  const maxScreenHeight = dynamicCanvas.height * 0.9; // 90% of canvas height max
+  const maxScreenWidth = dynamicCanvas.width;
+  const maxScreenHeight = dynamicCanvas.height;
 
   const idealScreenWidth = dynamicCanvas.width * screenToWallRatioX;
   const idealScreenHeight = dynamicCanvas.height * screenToWallRatioY;

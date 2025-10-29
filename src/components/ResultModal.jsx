@@ -127,8 +127,8 @@ export const ResultModal = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 backdrop-brightness-50 flex items-center justify-center z-99 overflow-hidden">
       <div
         className={`bg-white rounded-xl shadow-2xl w-[380px] lg:w-full ${
-          isVideoWall ? "max-w-xl" : "max-w-2xl"
-        }  overflow-hidden`}
+          isVideoWall ? "max-w-xl" : "max-w-3xl"
+        } overflow-hidden`}
       >
         <div className="p-6">
           {/* Header with close button */}
@@ -142,17 +142,17 @@ export const ResultModal = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* Content - Table Format with Rowspan */}
+          {/* Content - 3 Column Layout */}
           <div className="space-y-0">
             {/* Product Section */}
             <div className="grid grid-cols-12 gap-x-4 text-xs">
-              {/* Product Label with Rowspan Effect */}
-              <div className="col-span-6 text-gray-700 font-medium py-3 flex items-start">
+              {/* Section Label */}
+              <div className="col-span-3 text-gray-700 font-medium py-3 flex items-start">
                 Product
               </div>
 
-              {/* Product Data - Vertical Layout */}
-              <div className="col-span-6 py-3">
+              {/* Left Column Data */}
+              <div className="col-span-4 py-3">
                 <div className="space-y-4">
                   <div className="mb-2">
                     <div className="text-gray-600 mb-1">
@@ -174,7 +174,12 @@ export const ResultModal = ({ isOpen, onClose }) => {
                       {getUnitConfiguration()}
                     </div>
                   </div>
+                </div>
+              </div>
 
+              {/* Right Column Data */}
+              <div className="col-span-5 py-3">
+                <div className="space-y-4">
                   {/* SQM - HIDDEN for Video Wall */}
                   {!isVideoWall && (
                     <div className="mb-2">
@@ -212,13 +217,13 @@ export const ResultModal = ({ isOpen, onClose }) => {
             {/* Power Consumption - SHOW for ALL types including Video Wall */}
             {modelData.power_consumption && (
               <div className="grid grid-cols-12 gap-x-4 text-xs border-t border-gray-100">
-                {/* Power Label with Rowspan Effect */}
-                <div className="col-span-6 text-gray-700 font-medium py-3 flex items-start">
+                {/* Section Label */}
+                <div className="col-span-3 text-gray-700 font-medium py-3 flex items-start">
                   Power Consumption
                 </div>
 
-                {/* Power Data - Vertical Layout */}
-                <div className="col-span-6 py-3">
+                {/* Left Column Data */}
+                <div className="col-span-4 py-3">
                   <div className="space-y-4">
                     <div className="mb-2">
                       <div className="text-gray-600 mb-1">Max Power</div>
@@ -238,7 +243,12 @@ export const ResultModal = ({ isOpen, onClose }) => {
                           : "N/A"}
                       </div>
                     </div>
+                  </div>
+                </div>
 
+                {/* Right Column Data */}
+                <div className="col-span-5 py-3">
+                  <div className="space-y-4">
                     <div className="mb-2">
                       <div className="text-gray-600 mb-1">Average Power</div>
                       <div className="text-gray-800">
@@ -262,26 +272,139 @@ export const ResultModal = ({ isOpen, onClose }) => {
 
             {/* Material */}
             <div className="grid grid-cols-12 gap-x-4 text-xs border-t border-gray-100">
-              <div className="col-span-6 text-gray-700 font-medium py-3 flex items-start">
+              {/* Section Label */}
+              <div className="col-span-3 text-gray-700 font-medium py-3 flex items-start">
                 Material
               </div>
 
-              {/* Material Data - Vertical Layout */}
-              <div className="col-span-6 py-3">
+              {/* Left Column Data */}
+              <div className="col-span-4 py-1">
                 <div className="space-y-4">
                   <div className="mb-2">
                     <div className="text-gray-600 mb-1">Processor</div>
                     <div className="text-gray-800">
-                      {selectedProcessor?.name || "N/A"}
+                      {selectedProcessor?.name || "No Compatible Processor"}
                     </div>
                   </div>
 
                   <div className="mb-2">
                     <div className="text-gray-600 mb-1">Connection Type</div>
                     <div className="text-gray-800">
-                      {selectedConnectionType ? selectedConnectionType : "N/A"}
+                      {selectedConnectionType
+                        ? selectedConnectionType
+                        : "No Compatible Processor"}
                     </div>
                   </div>
+
+                  {selectedProcessor?.maxResolution && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">Load Capacity</div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.maxResolution[
+                          selectedConnectionType
+                        ]?.toLocaleString("id-ID") || "N/A"}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProcessor?.maxWidth && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">Max Width</div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.maxWidth}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProcessor?.maxHeight && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">Max Height</div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.maxHeight}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProcessor?.storage && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">Storage</div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.storage}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProcessor?.os && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">OS</div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.os}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProcessor?.maxInputChannels && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">
+                        Max Input Channels
+                      </div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.maxInputChannels}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProcessor?.minInputChannels && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">
+                        Min Input Channels
+                      </div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.minInputChannels}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column Data */}
+              <div className="col-span-5 py-1">
+                <div className="space-y-4">
+                  {selectedProcessor?.LAN && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">Lan</div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.LAN}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProcessor?.layers && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">Layers</div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.layers}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProcessor?.input && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">Input</div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.input}
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedProcessor?.output && (
+                    <div className="mb-2">
+                      <div className="text-gray-600 mb-1">Output</div>
+                      <div className="text-gray-800">
+                        {selectedProcessor.output}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

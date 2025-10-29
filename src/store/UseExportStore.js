@@ -362,9 +362,24 @@ export const UseExportStore = create((set, get) => ({
     );
 
     const processorStore = UseProcessorStore.getState();
+    const selectedProc = processorStore.selectedProcessor;
+
     const processorData = {
-      processor: processorStore.selectedProcessor?.name || "N/A",
+      processor: selectedProc?.name || "N/A",
       connectionType: processorStore.selectedConnectionType || "N/A",
+      loadCapacity:
+        selectedProc?.maxResolution?.[processorStore.selectedConnectionType] ||
+        null,
+      maxWidth: selectedProc?.maxWidth || null,
+      maxHeight: selectedProc?.maxHeight || null,
+      lan: selectedProc?.LAN || null,
+      layers: selectedProc?.layers || null,
+      storage: selectedProc?.storage || null,
+      os: selectedProc?.os || null,
+      input: selectedProc?.input || null,
+      output: selectedProc?.output || null,
+      maxInputChannels: selectedProc?.maxInputChannels || null,
+      minInputChannels: selectedProc?.minInputChannels || null,
     };
 
     // ========== CRITICAL: Export screen position for PDF ==========

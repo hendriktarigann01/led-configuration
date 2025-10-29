@@ -80,23 +80,91 @@ export const buildMaterialSpecifications = (data) => {
   if (!data?.processor) return null;
 
   const materialItems = [];
+  const proc = data.processor;
 
-  // Add Processor
-  if (data.processor.processor && data.processor.processor !== "N/A") {
+  // Column 1 items (left)
+  if (proc.processor && proc.processor !== "N/A") {
     materialItems.push({
       label: "Processor",
-      value: data.processor.processor,
+      value: proc.processor,
     });
   }
 
-  // Add Connection Type if available
-  if (
-    data.processor.connectionType &&
-    data.processor.connectionType !== "N/A"
-  ) {
+  if (proc.loadCapacity) {
     materialItems.push({
-      label: "Connection Type",
-      value: data.processor.connectionType,
+      label: "Load Capacity",
+      value: proc.loadCapacity.toLocaleString("id-ID"),
+    });
+  }
+
+  if (proc.maxWidth) {
+    materialItems.push({
+      label: "Max Width",
+      value: proc.maxWidth.toString(),
+    });
+  }
+
+  if (proc.maxHeight) {
+    materialItems.push({
+      label: "Max Height",
+      value: proc.maxHeight.toString(),
+    });
+  }
+
+  if (proc.storage) {
+    materialItems.push({
+      label: "Storage",
+      value: proc.storage,
+    });
+  }
+
+  if (proc.os) {
+    materialItems.push({
+      label: "OS",
+      value: proc.os,
+    });
+  }
+
+  if (proc.maxInputChannels) {
+    materialItems.push({
+      label: "Max Input Channels",
+      value: proc.maxInputChannels.toString(),
+    });
+  }
+
+  if (proc.minInputChannels) {
+    materialItems.push({
+      label: "Min Input Channels",
+      value: proc.minInputChannels.toString(),
+    });
+  }
+
+  // Column 2 items (right)
+  if (proc.connectionType && proc.connectionType !== "N/A") {
+    materialItems.push({
+      label: "Lan",
+      value: proc.lan || proc.connectionType,
+    });
+  }
+
+  if (proc.layers) {
+    materialItems.push({
+      label: "Layers",
+      value: proc.layers,
+    });
+  }
+
+  if (proc.input) {
+    materialItems.push({
+      label: "Input",
+      value: proc.input,
+    });
+  }
+
+  if (proc.output) {
+    materialItems.push({
+      label: "Output",
+      value: proc.output,
     });
   }
 

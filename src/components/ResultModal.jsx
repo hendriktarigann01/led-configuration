@@ -372,7 +372,7 @@ export const ResultModal = ({ isOpen, onClose }) => {
                 <div className="space-y-4">
                   {selectedProcessor?.LAN && (
                     <div className="mb-2">
-                      <div className="text-gray-600 mb-1">Lan</div>
+                      <div className="text-gray-600 mb-1">LAN</div>
                       <div className="text-gray-800">
                         {selectedProcessor.LAN}
                       </div>

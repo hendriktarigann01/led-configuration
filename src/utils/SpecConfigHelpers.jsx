@@ -90,6 +90,16 @@ export const buildMaterialSpecifications = (data) => {
     });
   }
 
+  if (
+    data.processor.connectionType &&
+    data.processor.connectionType !== "No Compatible Processor"
+  ) {
+    materialItems.push({
+      label: "Connection Type",
+      value: data.processor.connectionType,
+    });
+  }
+
   if (proc.loadCapacity) {
     materialItems.push({
       label: "Load Capacity",
@@ -142,7 +152,7 @@ export const buildMaterialSpecifications = (data) => {
   // Column 2 items (right)
   if (proc.connectionType && proc.connectionType !== "N/A") {
     materialItems.push({
-      label: "Lan",
+      label: "LAN",
       value: proc.lan || proc.connectionType,
     });
   }
